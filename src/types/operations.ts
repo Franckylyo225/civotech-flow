@@ -1,4 +1,4 @@
-export type OperationStatut = "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ARCHIVEE";
+export type OperationStatut = "DEMANDE" | "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ARCHIVEE";
 export type CategorieDepense = "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE";
 
 export interface Camion {
