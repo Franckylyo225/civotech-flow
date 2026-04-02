@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, MapPin, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useOperationsStore } from "@/hooks/use-operations-store";
