@@ -34,7 +34,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/devis/*" element={<DevisModule />} />
-        <Route path="/operations" element={<PlaceholderPage title="Opérations & Missions" description="Planifiez et suivez les missions de transport." />} />
+        <Route path="/operations" element={<OperationsModule />} />
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
         <Route path="/achats" element={<PlaceholderPage title="Demandes d'achat" description="Créez et validez les demandes d'achat." />} />
         <Route path="/parc-auto" element={<PlaceholderPage title="Parc Automobile" description="Gérez vos camions et leur maintenance." />} />
