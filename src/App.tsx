@@ -8,6 +8,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
+import DevisModule from "@/pages/devis/DevisModule";
+import DevisCreatePage from "@/pages/devis/DevisCreatePage";
+import { useDevisStore } from "@/hooks/use-devis-store";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
