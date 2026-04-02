@@ -65,6 +65,7 @@ export interface TimelineEvent {
 }
 
 export const OPERATION_STATUT_CONFIG: Record<OperationStatut, { label: string; color: string; bgColor: string }> = {
+  DEMANDE: { label: "Demande", color: "text-orange-600", bgColor: "bg-orange-50" },
   PLANIFIEE: { label: "Planifiée", color: "text-warning", bgColor: "bg-warning/10" },
   EN_COURS: { label: "En transit", color: "text-info", bgColor: "bg-info/10" },
   TERMINEE: { label: "Livrée", color: "text-success", bgColor: "bg-success/10" },
