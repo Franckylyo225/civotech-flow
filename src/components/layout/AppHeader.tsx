@@ -1,46 +1,34 @@
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-interface AppHeaderProps {
-  title?: string;
-}
-
-export function AppHeader({ title }: AppHeaderProps) {
+export function AppHeader() {
   const { user } = useAuth();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bonjour";
+    if (hour < 18) return "Bon après-midi";
+    return "Bonsoir";
+  };
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
-      <div className="flex items-center gap-4">
-        {title && <h2 className="text-lg font-semibold text-foreground">{title}</h2>}
+      <div className="flex items-center gap-2">
+        <span className="text-lg">👋</span>
+        <span className="text-base text-foreground">
+          {getGreeting()}, <span className="font-semibold">{user?.prenom} {user?.nom}</span> !
+        </span>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher..."
-            className="w-64 pl-9 bg-secondary border-0"
-          />
-        </div>
-
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" className="relative rounded-full">
           <Bell className="h-5 w-5 text-muted-foreground" />
-          <Badge className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive p-0 text-[10px] text-destructive-foreground">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
             3
-          </Badge>
+          </span>
         </Button>
-
-        {/* Avatar */}
-        {user && (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            {user.prenom[0]}{user.nom[0]}
-          </div>
-        )}
       </div>
     </header>
   );
