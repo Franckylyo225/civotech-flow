@@ -36,7 +36,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/devis" element={<DevisModule />} />
+        <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/devis/nouveau" element={<DevisCreatePage clients={clients} onSave={addDevis} />} />
         <Route path="/operations" element={<PlaceholderPage title="Opérations & Missions" description="Planifiez et suivez les missions de transport." />} />
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
