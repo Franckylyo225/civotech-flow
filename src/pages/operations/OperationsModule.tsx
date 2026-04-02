@@ -11,8 +11,9 @@ import OperationDetail from "./OperationDetail";
 
 const TABS: { label: string; statut: OperationStatut | "ALL"; count?: (ops: Operation[]) => number }[] = [
   { label: "Toutes", statut: "ALL" },
-  { label: "En transit", statut: "EN_COURS" },
+  { label: "Demandes", statut: "DEMANDE" },
   { label: "Planifiées", statut: "PLANIFIEE" },
+  { label: "En transit", statut: "EN_COURS" },
   { label: "Livrées", statut: "TERMINEE" },
 ];
 
