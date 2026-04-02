@@ -1,10 +1,17 @@
-import { Bell } from "lucide-react";
+import { Bell, Search, LogOut, User, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AppHeader() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -22,13 +29,52 @@ export function AppHeader() {
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {/* Search */}
+        <div className="relative hidden md:block">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher..."
+            className="w-64 pl-9 bg-muted border-0"
+          />
+        </div>
+
+        {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative rounded-full">
           <Bell className="h-5 w-5 text-muted-foreground" />
           <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
             3
           </span>
         </Button>
+
+        {/* User avatar + dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+              {user?.prenom[0]}{user?.nom[0]}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <div className="px-3 py-2">
+              <p className="text-sm font-medium text-foreground">{user?.prenom} {user?.nom}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <User className="h-4 w-4" />
+              Mon profil
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <Settings className="h-4 w-4" />
+              Paramètres
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive" onClick={logout}>
+              <LogOut className="h-4 w-4" />
+              Déconnexion
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
