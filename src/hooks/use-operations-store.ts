@@ -63,14 +63,14 @@ const MOCK_OPERATIONS: Operation[] = [
     clientNom: "Cargill CI",
     lieuEmbarquement: "San Pedro, Zone Portuaire", lieuLivraison: "Abidjan, Entrepôt Vridi",
     dateLivraisonEstimee: "2025-04-05T16:00:00Z",
-    dureeEstimeeHeures: 10, statut: "PLANIFIEE", montantDevis: 6000000,
+    dureeEstimeeHeures: 10, statut: "DEMANDE", montantDevis: 6000000,
     poidsKg: 30000, nombreColis: 1,
     depenses: [],
     createdAt: "2025-03-18T16:00:00Z", updatedAt: "2025-03-18T16:00:00Z",
     timeline: [
-      { id: "t11", date: "18 Mar 2025", heure: "16:00", titre: "Opération créée", description: "Depuis le devis DEV-2025-004", statut: "done" },
-      { id: "t12", date: "—", heure: "—", titre: "Affectation camion", description: "En attente d'affectation", statut: "pending" },
-      { id: "t13", date: "—", heure: "—", titre: "Départ", description: "En attente", statut: "pending" },
+      { id: "t11", date: "18 Mar 2025", heure: "16:00", titre: "Demande créée", description: "Demande du service commercial", statut: "done" },
+      { id: "t12", date: "—", heure: "—", titre: "Validation logistique", description: "En attente de traitement", statut: "pending" },
+      { id: "t13", date: "—", heure: "—", titre: "Affectation camion", description: "En attente", statut: "pending" },
     ],
   },
   {
