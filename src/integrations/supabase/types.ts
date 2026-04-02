@@ -14,16 +14,429 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      camions: {
+        Row: {
+          annee: number
+          capacite_tonnes: number
+          created_at: string
+          id: string
+          immatriculation: string
+          marque: string
+          modele: string
+          statut: Database["public"]["Enums"]["statut_camion"]
+          updated_at: string
+        }
+        Insert: {
+          annee?: number
+          capacite_tonnes?: number
+          created_at?: string
+          id?: string
+          immatriculation: string
+          marque: string
+          modele: string
+          statut?: Database["public"]["Enums"]["statut_camion"]
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          capacite_tonnes?: number
+          created_at?: string
+          id?: string
+          immatriculation?: string
+          marque?: string
+          modele?: string
+          statut?: Database["public"]["Enums"]["statut_camion"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chauffeurs: {
+        Row: {
+          created_at: string
+          disponible: boolean
+          id: string
+          nom: string
+          numero_permis: string | null
+          prenom: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disponible?: boolean
+          id?: string
+          nom: string
+          numero_permis?: string | null
+          prenom: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disponible?: boolean
+          id?: string
+          nom?: string
+          numero_permis?: string | null
+          prenom?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          adresse: string | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          nom: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          adresse?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          nom: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          nom?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      depenses: {
+        Row: {
+          categorie: Database["public"]["Enums"]["categorie_depense"]
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string
+          id: string
+          montant: number
+          operation_id: string
+        }
+        Insert: {
+          categorie?: Database["public"]["Enums"]["categorie_depense"]
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string
+          id?: string
+          montant?: number
+          operation_id: string
+        }
+        Update: {
+          categorie?: Database["public"]["Enums"]["categorie_depense"]
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string
+          id?: string
+          montant?: number
+          operation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depenses_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis: {
+        Row: {
+          client_id: string | null
+          commercial_id: string | null
+          created_at: string
+          date_validite: string | null
+          description: string | null
+          id: string
+          montant: number
+          reference: string
+          statut: Database["public"]["Enums"]["statut_devis"]
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          commercial_id?: string | null
+          created_at?: string
+          date_validite?: string | null
+          description?: string | null
+          id?: string
+          montant?: number
+          reference: string
+          statut?: Database["public"]["Enums"]["statut_devis"]
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          commercial_id?: string | null
+          created_at?: string
+          date_validite?: string | null
+          description?: string | null
+          id?: string
+          montant?: number
+          reference?: string
+          statut?: Database["public"]["Enums"]["statut_devis"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operations: {
+        Row: {
+          bon_livraison_url: string | null
+          camion_id: string | null
+          chauffeur_id: string | null
+          client_id: string | null
+          client_nom: string
+          created_at: string
+          created_by: string | null
+          date_depart: string | null
+          date_livraison_estimee: string | null
+          date_livraison_reelle: string | null
+          devis_id: string | null
+          devis_reference: string | null
+          duree_estimee_heures: number | null
+          id: string
+          lieu_embarquement: string
+          lieu_livraison: string
+          montant_devis: number
+          nombre_colis: number | null
+          poids_kg: number | null
+          reference: string
+          statut: Database["public"]["Enums"]["statut_operation"]
+          updated_at: string
+        }
+        Insert: {
+          bon_livraison_url?: string | null
+          camion_id?: string | null
+          chauffeur_id?: string | null
+          client_id?: string | null
+          client_nom?: string
+          created_at?: string
+          created_by?: string | null
+          date_depart?: string | null
+          date_livraison_estimee?: string | null
+          date_livraison_reelle?: string | null
+          devis_id?: string | null
+          devis_reference?: string | null
+          duree_estimee_heures?: number | null
+          id?: string
+          lieu_embarquement?: string
+          lieu_livraison?: string
+          montant_devis?: number
+          nombre_colis?: number | null
+          poids_kg?: number | null
+          reference: string
+          statut?: Database["public"]["Enums"]["statut_operation"]
+          updated_at?: string
+        }
+        Update: {
+          bon_livraison_url?: string | null
+          camion_id?: string | null
+          chauffeur_id?: string | null
+          client_id?: string | null
+          client_nom?: string
+          created_at?: string
+          created_by?: string | null
+          date_depart?: string | null
+          date_livraison_estimee?: string | null
+          date_livraison_reelle?: string | null
+          devis_id?: string | null
+          devis_reference?: string | null
+          duree_estimee_heures?: number | null
+          id?: string
+          lieu_embarquement?: string
+          lieu_livraison?: string
+          montant_devis?: number
+          nombre_colis?: number | null
+          poids_kg?: number | null
+          reference?: string
+          statut?: Database["public"]["Enums"]["statut_operation"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_camion_id_fkey"
+            columns: ["camion_id"]
+            isOneToOne: false
+            referencedRelation: "camions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_chauffeur_id_fkey"
+            columns: ["chauffeur_id"]
+            isOneToOne: false
+            referencedRelation: "chauffeurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          nom: string
+          prenom: string
+          telephone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          nom?: string
+          prenom?: string
+          telephone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          nom?: string
+          prenom?: string
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      timeline_events: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          heure: string
+          id: string
+          operation_id: string
+          statut: string
+          titre: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          description?: string
+          heure?: string
+          id?: string
+          operation_id: string
+          statut?: string
+          titre?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          heure?: string
+          id?: string
+          operation_id?: string
+          statut?: string
+          titre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "DG"
+        | "COMMERCIAL"
+        | "LOGISTIQUE"
+        | "FINANCE"
+        | "ACHATS"
+        | "ASSISTANTE"
+      categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
+      statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
+      statut_devis: "BROUILLON" | "EN_ATTENTE" | "VALIDE" | "REJETE" | "FACTURE"
+      statut_operation:
+        | "DEMANDE"
+        | "PLANIFIEE"
+        | "EN_COURS"
+        | "TERMINEE"
+        | "ARCHIVEE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +563,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "DG",
+        "COMMERCIAL",
+        "LOGISTIQUE",
+        "FINANCE",
+        "ACHATS",
+        "ASSISTANTE",
+      ],
+      categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
+      statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
+      statut_devis: ["BROUILLON", "EN_ATTENTE", "VALIDE", "REJETE", "FACTURE"],
+      statut_operation: [
+        "DEMANDE",
+        "PLANIFIEE",
+        "EN_COURS",
+        "TERMINEE",
+        "ARCHIVEE",
+      ],
+    },
   },
 } as const

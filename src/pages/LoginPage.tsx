@@ -1,20 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Truck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { seedDatabase } from "@/lib/seed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
+const TEST_ACCOUNTS = [
+  { label: "DG", email: "dg@civotech.ci", role: "DG", nom: "Koné", prenom: "Amadou" },
+  { label: "Commercial", email: "commercial@civotech.ci", role: "COMMERCIAL", nom: "Diallo", prenom: "Fatou" },
+  { label: "Logistique", email: "logistique@civotech.ci", role: "LOGISTIQUE", nom: "Touré", prenom: "Ibrahim" },
+  { label: "Finance", email: "finance@civotech.ci", role: "FINANCE", nom: "Bamba", prenom: "Aïcha" },
+  { label: "Achats", email: "achats@civotech.ci", role: "ACHATS", nom: "Coulibaly", prenom: "Moussa" },
+  { label: "Assistante", email: "assistante@civotech.ci", role: "ASSISTANTE", nom: "Yao", prenom: "Marie" },
+];
+
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+
+  // Seed database + create test users on first load
+  useEffect(() => {
+    let cancelled = false;
+    async function init() {
+      setSeeding(true);
+      try {
+        await seedDatabase();
+        // Try creating test accounts (will fail silently if they exist)
+        for (const acc of TEST_ACCOUNTS) {
+          try {
+            await signup(acc.email, "admin123", acc.nom, acc.prenom, acc.role as any);
+          } catch {
+            // Account already exists, ignore
+          }
+        }
+      } catch (e) {
+        console.log("Seed/setup error:", e);
+      }
+      if (!cancelled) setSeeding(false);
+    }
+    init();
+    return () => { cancelled = true; };
+  }, [signup]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +57,21 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async (testEmail: string) => {
+    setEmail(testEmail);
+    setPassword("admin123");
+    setError("");
+    setLoading(true);
+    try {
+      await login(testEmail, "admin123");
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -68,12 +118,8 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="email">Adresse e-mail</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre.email@civotech.ci"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  id="email" type="email" placeholder="votre.email@civotech.ci"
+                  value={email} onChange={(e) => setEmail(e.target.value)} required
                 />
               </div>
 
@@ -81,43 +127,38 @@ export default function LoginPage() {
                 <Label htmlFor="password">Mot de passe</Label>
                 <div className="relative">
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                    value={password} onChange={(e) => setPassword(e.target.value)} required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
-              {error && (
-                <p className="text-sm text-destructive font-medium">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive font-medium">{error}</p>}
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Connexion en cours..." : "Se connecter"}
+              <Button type="submit" className="w-full" disabled={loading || seeding}>
+                {loading ? "Connexion en cours..." : seeding ? "Initialisation..." : "Se connecter"}
               </Button>
             </form>
 
             <div className="mt-6 rounded-lg bg-secondary p-4">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Comptes de test :</p>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p><span className="font-medium text-foreground">DG</span> — dg@civotech.ci</p>
-                <p><span className="font-medium text-foreground">Commercial</span> — commercial@civotech.ci</p>
-                <p><span className="font-medium text-foreground">Logistique</span> — logistique@civotech.ci</p>
-                <p><span className="font-medium text-foreground">Finance</span> — finance@civotech.ci</p>
-                <p><span className="font-medium text-foreground">Achats</span> — achats@civotech.ci</p>
-                <p><span className="font-medium text-foreground">Assistante</span> — assistante@civotech.ci</p>
-                <p className="mt-1">Mot de passe : <span className="font-mono font-medium text-foreground">admin123</span></p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Connexion rapide :</p>
+              <div className="grid grid-cols-3 gap-2">
+                {TEST_ACCOUNTS.map((acc) => (
+                  <button
+                    key={acc.email}
+                    onClick={() => handleQuickLogin(acc.email)}
+                    disabled={loading || seeding}
+                    className="text-xs px-2 py-1.5 rounded-md bg-muted hover:bg-primary/10 hover:text-primary text-foreground font-medium transition-colors disabled:opacity-50"
+                  >
+                    {acc.label}
+                  </button>
+                ))}
               </div>
+              <p className="mt-2 text-xs text-muted-foreground">Mot de passe : <span className="font-mono font-medium text-foreground">admin123</span></p>
             </div>
           </CardContent>
         </Card>
