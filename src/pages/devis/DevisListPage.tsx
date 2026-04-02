@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Plus, LayoutGrid, List, Search, Filter } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import type { Devis, DevisStatut } from "@/types/devis";
+import type { Devis } from "@/types/devis";
 import { DEVIS_STATUT_CONFIG, formatMontant, formatDate } from "@/types/devis";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { DevisPipeline } from "@/components/devis/DevisPipeline";
@@ -15,10 +14,10 @@ import { Card, CardContent } from "@/components/ui/card";
 interface DevisListPageProps {
   devisList: Devis[];
   onSelectDevis: (id: string) => void;
+  onNewDevis: () => void;
 }
 
-export default function DevisListPage({ devisList, onSelectDevis }: DevisListPageProps) {
-  const navigate = useNavigate();
+export default function DevisListPage({ devisList, onSelectDevis, onNewDevis }: DevisListPageProps) {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<"pipeline" | "table">("pipeline");
   const [search, setSearch] = useState("");
@@ -37,7 +36,6 @@ export default function DevisListPage({ devisList, onSelectDevis }: DevisListPag
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Gestion des Devis</h1>
@@ -46,13 +44,12 @@ export default function DevisListPage({ devisList, onSelectDevis }: DevisListPag
           </p>
         </div>
         {isCommercialOrDG && (
-          <Button onClick={() => navigate("/devis/nouveau")}>
+          <Button onClick={onNewDevis}>
             <Plus className="mr-2 h-4 w-4" /> Nouveau devis
           </Button>
         )}
       </div>
 
-      {/* Filters bar */}
       <Card>
         <CardContent className="flex flex-wrap items-center gap-3 p-4">
           <div className="relative flex-1 min-w-[200px]">
@@ -97,7 +94,6 @@ export default function DevisListPage({ devisList, onSelectDevis }: DevisListPag
         </CardContent>
       </Card>
 
-      {/* Content */}
       {viewMode === "pipeline" ? (
         <DevisPipeline devisList={filtered} onSelectDevis={onSelectDevis} />
       ) : (
@@ -115,11 +111,7 @@ export default function DevisListPage({ devisList, onSelectDevis }: DevisListPag
             </TableHeader>
             <TableBody>
               {filtered.map((devis) => (
-                <TableRow
-                  key={devis.id}
-                  className="cursor-pointer"
-                  onClick={() => onSelectDevis(devis.id)}
-                >
+                <TableRow key={devis.id} className="cursor-pointer" onClick={() => onSelectDevis(devis.id)}>
                   <TableCell className="font-mono text-sm">{devis.reference}</TableCell>
                   <TableCell className="font-medium">{devis.client.nom}</TableCell>
                   <TableCell className="font-semibold text-primary">{formatMontant(devis.montantTotal)}</TableCell>

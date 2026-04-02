@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut } from "@/types/devis";
-import { formatMontant, formatDate, DEVIS_STATUT_CONFIG } from "@/types/devis";
+import { formatMontant, formatDate } from "@/types/devis";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +14,10 @@ import { toast } from "sonner";
 interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
+  onBack: () => void;
 }
 
-export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPageProps) {
-  const navigate = useNavigate();
+export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: DevisDetailPageProps) {
   const { user } = useAuth();
   const [showRefusDialog, setShowRefusDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
@@ -46,10 +45,9 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/devis")}>
+          <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -64,7 +62,6 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
         </div>
       </div>
 
-      {/* Refus comment */}
       {devis.commentaireRefus && (devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="flex items-start gap-3 p-4">
@@ -78,7 +75,6 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
       )}
 
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Client info */}
         <Card>
           <CardHeader><CardTitle className="text-base">Client</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
@@ -89,7 +85,6 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
           </CardContent>
         </Card>
 
-        {/* Montants */}
         <Card>
           <CardHeader><CardTitle className="text-base">Montant</CardTitle></CardHeader>
           <CardContent>
@@ -98,18 +93,15 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
           </CardContent>
         </Card>
 
-        {/* Actions */}
         <Card>
           <CardHeader><CardTitle className="text-base">Actions</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            {/* COMMERCIAL actions */}
             {(role === "COMMERCIAL" || role === "DG") && devis.statut === "BROUILLON" && (
               <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
                 <Send className="mr-2 h-4 w-4" /> Soumettre au DG
               </Button>
             )}
 
-            {/* DG validation */}
             {role === "DG" && devis.statut === "SOUMIS_DG" && (
               <>
                 <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("APPROUVE_DG", "Devis approuvé")}>
@@ -121,17 +113,15 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
               </>
             )}
 
-            {/* COMMERCIAL send to client */}
             {(role === "COMMERCIAL" || role === "DG") && devis.statut === "APPROUVE_DG" && (
               <Button className="w-full" onClick={() => handleAction("ENVOYE_CLIENT", "Devis envoyé au client")}>
                 <Mail className="mr-2 h-4 w-4" /> Envoyer au client
               </Button>
             )}
 
-            {/* COMMERCIAL mark client response */}
             {(role === "COMMERCIAL" || role === "DG") && devis.statut === "ENVOYE_CLIENT" && (
               <>
-                <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("VALIDE_CLIENT", "Client a validé le devis — opération créée")}>
+                <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("VALIDE_CLIENT", "Client a validé le devis")}>
                   <UserCheck className="mr-2 h-4 w-4" /> Client a validé
                 </Button>
                 <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => openRefusDialog("CLIENT")}>
@@ -150,7 +140,6 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
         </Card>
       </div>
 
-      {/* Lines table */}
       <Card>
         <CardHeader><CardTitle className="text-base">Lignes de prestation</CardTitle></CardHeader>
         <CardContent>
@@ -183,7 +172,6 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
         </CardContent>
       </Card>
 
-      {/* Refus dialog */}
       <Dialog open={showRefusDialog} onOpenChange={setShowRefusDialog}>
         <DialogContent>
           <DialogHeader>
@@ -191,14 +179,12 @@ export default function DevisDetailPage({ devis, onUpdateStatut }: DevisDetailPa
               {refusType === "DG" ? "Refuser le devis" : "Marquer comme refusé par le client"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
-            <Textarea
-              placeholder="Motif du refus (obligatoire)..."
-              value={commentaireRefus}
-              onChange={(e) => setCommentaireRefus(e.target.value)}
-              rows={4}
-            />
-          </div>
+          <Textarea
+            placeholder="Motif du refus (obligatoire)..."
+            value={commentaireRefus}
+            onChange={(e) => setCommentaireRefus(e.target.value)}
+            rows={4}
+          />
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRefusDialog(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleRefus} disabled={!commentaireRefus.trim()}>

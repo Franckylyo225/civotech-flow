@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
 import type { Client } from "@/types/devis";
 import { formatMontant } from "@/types/devis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,10 +19,10 @@ interface LigneForm {
 interface DevisCreatePageProps {
   clients: Client[];
   onSave: (data: { clientId: string; lignes: LigneForm[] }) => void;
+  onCancel: () => void;
 }
 
-export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProps) {
-  const navigate = useNavigate();
+export default function DevisCreatePage({ clients, onSave, onCancel }: DevisCreatePageProps) {
   const [clientId, setClientId] = useState("");
   const [lignes, setLignes] = useState<LigneForm[]>([
     { description: "", quantite: 1, prixUnitaire: 0 },
@@ -52,13 +50,12 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
     }
     onSave({ clientId, lignes });
     toast.success("Devis créé avec succès");
-    navigate("/devis");
   };
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/devis")}>
+        <Button variant="ghost" size="icon" onClick={onCancel}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
@@ -68,7 +65,6 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Client selection */}
         <Card>
           <CardHeader><CardTitle className="text-base">Informations client</CardTitle></CardHeader>
           <CardContent>
@@ -90,7 +86,6 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
           </CardContent>
         </Card>
 
-        {/* Lines */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Lignes de prestation</CardTitle>
@@ -121,18 +116,14 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
-                        min={1}
-                        value={ligne.quantite}
+                        type="number" min={1} value={ligne.quantite}
                         onChange={(e) => updateLigne(i, "quantite", parseInt(e.target.value) || 0)}
                         className="w-20"
                       />
                     </TableCell>
                     <TableCell>
                       <Input
-                        type="number"
-                        min={0}
-                        value={ligne.prixUnitaire}
+                        type="number" min={0} value={ligne.prixUnitaire}
                         onChange={(e) => updateLigne(i, "prixUnitaire", parseInt(e.target.value) || 0)}
                         className="w-32"
                       />
@@ -149,7 +140,6 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
                 ))}
               </TableBody>
             </Table>
-
             <div className="mt-4 flex justify-end border-t pt-4">
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Montant total</p>
@@ -159,9 +149,8 @@ export default function DevisCreatePage({ clients, onSave }: DevisCreatePageProp
           </CardContent>
         </Card>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => navigate("/devis")}>Annuler</Button>
+          <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
           <Button type="submit">
             <Save className="mr-2 h-4 w-4" /> Enregistrer le devis
           </Button>
