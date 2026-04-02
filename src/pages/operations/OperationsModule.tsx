@@ -23,6 +23,12 @@ export default function OperationsModule() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<OperationStatut | "ALL">("ALL");
 
+  useEffect(() => {
+    if (operations.length > 0 && !selectedId) setSelectedId(operations[0].id);
+  }, [operations, selectedId]);
+
+  if (loading) return <div className="flex items-center justify-center h-full text-muted-foreground">Chargement des opérations...</div>;
+
   const filtered = operations.filter((o) => {
     const matchSearch =
       o.reference.toLowerCase().includes(search.toLowerCase()) ||
