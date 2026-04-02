@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
+import DevisModule from "@/pages/devis/DevisModule";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +32,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/devis" element={<PlaceholderPage title="Gestion des Devis" description="Créez, soumettez et suivez vos devis clients." />} />
+        <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<PlaceholderPage title="Opérations & Missions" description="Planifiez et suivez les missions de transport." />} />
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
         <Route path="/achats" element={<PlaceholderPage title="Demandes d'achat" description="Créez et validez les demandes d'achat." />} />
