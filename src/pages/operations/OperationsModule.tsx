@@ -18,8 +18,8 @@ const TABS: { label: string; statut: OperationStatut | "ALL"; count?: (ops: Oper
 ];
 
 export default function OperationsModule() {
-  const { operations, camions, chauffeurs, updateStatut, affecterOperation, addDepense } = useOperationsStore();
-  const [selectedId, setSelectedId] = useState<string>(operations[0]?.id || "");
+  const { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense } = useOperationsStore();
+  const [selectedId, setSelectedId] = useState<string>("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<OperationStatut | "ALL">("ALL");
 
