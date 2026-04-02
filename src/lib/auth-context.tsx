@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { UserRole } from "./roles";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface User {
   id: string;
@@ -12,43 +14,95 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, nom: string, prenom: string, role: UserRole) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Mock users for now - will be replaced with Supabase auth
-const MOCK_USERS: (User & { password: string })[] = [
-  { id: "1", nom: "Koné", prenom: "Amadou", email: "dg@civotech.ci", password: "admin123", role: "DG" },
-  { id: "2", nom: "Diallo", prenom: "Fatou", email: "commercial@civotech.ci", password: "admin123", role: "COMMERCIAL" },
-  { id: "3", nom: "Touré", prenom: "Ibrahim", email: "logistique@civotech.ci", password: "admin123", role: "LOGISTIQUE" },
-  { id: "4", nom: "Bamba", prenom: "Aïcha", email: "finance@civotech.ci", password: "admin123", role: "FINANCE" },
-  { id: "5", nom: "Coulibaly", prenom: "Moussa", email: "achats@civotech.ci", password: "admin123", role: "ACHATS" },
-  { id: "6", nom: "Yao", prenom: "Marie", email: "assistante@civotech.ci", password: "admin123", role: "ASSISTANTE" },
-];
+async function buildUser(supabaseUser: SupabaseUser): Promise<User | null> {
+  // Get profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("nom, prenom")
+    .eq("user_id", supabaseUser.id)
+    .single();
+
+  // Get role
+  const { data: roleData } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", supabaseUser.id)
+    .single();
+
+  if (!roleData) return null;
+
+  return {
+    id: supabaseUser.id,
+    nom: profile?.nom || "",
+    prenom: profile?.prenom || "",
+    email: supabaseUser.email || "",
+    role: roleData.role as UserRole,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem("civotech_user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const found = MOCK_USERS.find((u) => u.email === email && u.password === password);
-    if (!found) throw new Error("Identifiants incorrects");
-    const { password: _, ...userData } = found;
-    setUser(userData);
-    localStorage.setItem("civotech_user", JSON.stringify(userData));
+  useEffect(() => {
+    // Listen for auth changes FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        // Use setTimeout to avoid Supabase client deadlock
+        setTimeout(async () => {
+          const appUser = await buildUser(session.user);
+          setUser(appUser);
+          setLoading(false);
+        }, 0);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    // Then check existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const appUser = await buildUser(session.user);
+        setUser(appUser);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const logout = useCallback(() => {
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message);
+  }, []);
+
+  const signup = useCallback(async (email: string, password: string, nom: string, prenom: string, role: UserRole) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nom, prenom, role },
+      },
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("civotech_user");
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
