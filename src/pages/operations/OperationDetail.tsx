@@ -72,6 +72,11 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
         </div>
         <div className="flex gap-2">
+          {canManage && op.statut === "DEMANDE" && (
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { onUpdateStatut(op.id, "PLANIFIEE"); toast.success("Demande validée et planifiée"); }}>
+              <CheckCircle2 className="mr-1.5 h-4 w-4" /> Valider la demande
+            </Button>
+          )}
           {canManage && op.statut === "PLANIFIEE" && !op.camionId && (
             <Button size="sm" onClick={() => setShowAffectDialog(true)}>
               <Truck className="mr-1.5 h-4 w-4" /> Affecter
