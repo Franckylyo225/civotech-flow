@@ -1,0 +1,420 @@
+import { useState } from "react";
+import {
+  Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
+  Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
+  Phone, CreditCard,
+} from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut } from "@/types/operations";
+import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface OperationDetailProps {
+  operation: Operation;
+  camions: Camion[];
+  chauffeurs: Chauffeur[];
+  onUpdateStatut: (opId: string, statut: OperationStatut) => void;
+  onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
+  onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
+}
+
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense }: OperationDetailProps) {
+  const { user } = useAuth();
+  const [showAffectDialog, setShowAffectDialog] = useState(false);
+  const [showDepenseDialog, setShowDepenseDialog] = useState(false);
+  const [selectedCamion, setSelectedCamion] = useState("");
+  const [selectedChauffeur, setSelectedChauffeur] = useState("");
+  const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
+    categorie: "CARBURANT", description: "", montant: 0,
+  });
+
+  const config = OPERATION_STATUT_CONFIG[op.statut];
+  const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
+  const marge = op.montantDevis - totalDepenses;
+
+  const handleAffecter = () => {
+    if (!selectedCamion || !selectedChauffeur) { toast.error("Sélectionnez un camion et un chauffeur"); return; }
+    onAffecter(op.id, selectedCamion, selectedChauffeur);
+    setShowAffectDialog(false);
+    toast.success("Camion et chauffeur affectés");
+  };
+
+  const handleAddDepense = () => {
+    if (!depForm.description || depForm.montant <= 0) { toast.error("Remplissez tous les champs"); return; }
+    onAddDepense(op.id, { ...depForm, date: new Date().toISOString() });
+    setShowDepenseDialog(false);
+    setDepForm({ categorie: "CARBURANT", description: "", montant: 0 });
+    toast.success("Dépense ajoutée");
+  };
+
+  const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold text-foreground">N° {op.reference}</h1>
+            <Badge variant="outline" className={cn("border-0 text-xs font-medium", config.bgColor, config.color)}>
+              {config.label}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
+        </div>
+        <div className="flex gap-2">
+          {canManage && op.statut === "PLANIFIEE" && !op.camionId && (
+            <Button size="sm" onClick={() => setShowAffectDialog(true)}>
+              <Truck className="mr-1.5 h-4 w-4" /> Affecter
+            </Button>
+          )}
+          {canManage && op.statut === "PLANIFIEE" && op.camionId && (
+            <Button size="sm" onClick={() => { onUpdateStatut(op.id, "EN_COURS"); toast.success("Mission démarrée"); }}>
+              <Play className="mr-1.5 h-4 w-4" /> Démarrer
+            </Button>
+          )}
+          {canManage && op.statut === "EN_COURS" && (
+            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => { onUpdateStatut(op.id, "TERMINEE"); toast.success("Mission terminée"); }}>
+              <CheckCircle2 className="mr-1.5 h-4 w-4" /> Terminer
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Route card */}
+      <Card className="border border-border shadow-none">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Départ</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full border-2 border-primary bg-primary/20" />
+                  <span className="text-sm font-medium text-foreground">{op.lieuEmbarquement}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 px-4">
+                <div className="h-[2px] w-16 bg-border" />
+                <Truck className="h-4 w-4 text-primary" />
+                <div className="h-[2px] w-16 bg-border" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Arrivée</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full border-2 border-success bg-success/20" />
+                  <span className="text-sm font-medium text-foreground">{op.lieuLivraison}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Info cards row */}
+      <div className="grid grid-cols-4 gap-3">
+        <Card className="border border-border shadow-none">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <Weight className="h-5 w-5 text-muted-foreground mb-2" />
+            <p className="text-xs text-muted-foreground">Poids total</p>
+            <p className="text-sm font-bold text-foreground">{op.poidsKg ? `${(op.poidsKg / 1000).toFixed(1)}T` : "—"}</p>
+          </CardContent>
+        </Card>
+        <Card className="border border-border shadow-none">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <Package className="h-5 w-5 text-muted-foreground mb-2" />
+            <p className="text-xs text-muted-foreground">Colis</p>
+            <p className="text-sm font-bold text-foreground">{op.nombreColis ?? "—"}</p>
+          </CardContent>
+        </Card>
+        <Card className="border border-border shadow-none">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <Clock className="h-5 w-5 text-muted-foreground mb-2" />
+            <p className="text-xs text-muted-foreground">Durée estimée</p>
+            <p className="text-sm font-bold text-foreground">{op.dureeEstimeeHeures ? `${op.dureeEstimeeHeures}h` : "—"}</p>
+          </CardContent>
+        </Card>
+        <Card className="border border-border shadow-none bg-primary text-primary-foreground">
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <CreditCard className="h-5 w-5 mb-2 opacity-80" />
+            <p className="text-xs opacity-80">Montant devis</p>
+            <p className="text-lg font-bold">{formatMontantOp(op.montantDevis)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Timeline + Vehicle/Driver */}
+      <div className="grid grid-cols-5 gap-4">
+        {/* Timeline */}
+        <Card className="col-span-3 border border-border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Suivi de livraison</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-0">
+              {op.timeline.map((event, i) => {
+                const isLast = i === op.timeline.length - 1;
+                return (
+                  <div key={event.id} className="flex gap-3">
+                    {/* Dot + line */}
+                    <div className="flex flex-col items-center">
+                      <div className={cn(
+                        "h-3 w-3 rounded-full mt-1.5 shrink-0",
+                        event.statut === "done" && "bg-success",
+                        event.statut === "current" && "bg-warning",
+                        event.statut === "pending" && "bg-border",
+                      )} />
+                      {!isLast && (
+                        <div className={cn(
+                          "w-0.5 flex-1 min-h-[32px]",
+                          event.statut === "done" ? "bg-success/30" : "bg-border",
+                        )} />
+                      )}
+                    </div>
+                    {/* Content */}
+                    <div className="pb-4 flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className={cn(
+                          "text-sm font-medium",
+                          event.statut === "pending" ? "text-muted-foreground" : "text-foreground"
+                        )}>
+                          {event.titre}
+                        </p>
+                        <span className="text-xs text-muted-foreground">{event.heure}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
+                      <p className="text-xs text-muted-foreground">{event.date}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Vehicle + Driver */}
+        <div className="col-span-2 space-y-4">
+          {/* Vehicle card */}
+          <Card className="border border-border shadow-none">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Véhicule</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {op.camion ? (
+                <div className="space-y-2">
+                  <p className="text-base font-semibold text-foreground">{op.camion.marque} {op.camion.modele}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>Imm: <span className="font-medium text-foreground">{op.camion.immatriculation}</span></span>
+                    <span>Cap: <span className="font-medium text-foreground">{op.camion.capaciteTonnes}T</span></span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Année : {op.camion.annee}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">Non affecté</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Driver card */}
+          <Card className="border border-border shadow-none">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Chauffeur</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {op.chauffeur ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
+                      {op.chauffeur.prenom[0]}{op.chauffeur.nom[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{op.chauffeur.prenom} {op.chauffeur.nom}</p>
+                      <p className="text-xs text-muted-foreground">Permis : {op.chauffeur.numeroPermis}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="text-xs gap-1.5 flex-1">
+                      <Phone className="h-3 w-3" /> Appeler
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">Non affecté</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Expenses */}
+      <Card className="border border-border shadow-none">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-base font-semibold">Dépenses de mission</CardTitle>
+          {canManage && (op.statut === "EN_COURS" || op.statut === "PLANIFIEE") && (
+            <Button variant="outline" size="sm" onClick={() => setShowDepenseDialog(true)}>
+              <Plus className="mr-1 h-4 w-4" /> Ajouter
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="pt-0">
+          {op.depenses.length > 0 ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Montant</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {op.depenses.map((dep) => (
+                    <TableRow key={dep.id}>
+                      <TableCell>
+                        <Badge variant="outline" className="border-0 bg-muted text-muted-foreground text-xs">
+                          {CATEGORIE_DEPENSE_CONFIG[dep.categorie].label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">{dep.description}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{formatDateShort(dep.date)}</TableCell>
+                      <TableCell className="text-right text-sm font-medium">{formatMontantOp(dep.montant)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <div className="mt-4 flex justify-end gap-8 border-t pt-3">
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total dépenses</p>
+                  <p className="text-sm font-semibold text-destructive">{formatMontantOp(totalDepenses)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Marge</p>
+                  <p className={cn("text-sm font-semibold", marge >= 0 ? "text-success" : "text-destructive")}>
+                    {formatMontantOp(marge)}
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune dépense enregistrée</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Bon de livraison */}
+      {(op.statut === "EN_COURS" || op.statut === "TERMINEE") && (
+        <Card className="border border-border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Bon de livraison</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {op.bonLivraisonUrl ? (
+              <div className="flex items-center gap-3 rounded-lg bg-success/5 border border-success/20 p-3">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">BL uploadé</p>
+                  <p className="text-xs text-muted-foreground">{op.bonLivraisonUrl}</p>
+                </div>
+                <Button variant="outline" size="sm">Télécharger</Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground mb-3">Aucun bon de livraison uploadé</p>
+                {canManage && (
+                  <Button variant="outline" size="sm">
+                    <Upload className="mr-1.5 h-4 w-4" /> Uploader le BL
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Affectation dialog */}
+      <Dialog open={showAffectDialog} onOpenChange={setShowAffectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Affecter un camion et chauffeur</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Camion</Label>
+              <Select value={selectedCamion} onValueChange={setSelectedCamion}>
+                <SelectTrigger><SelectValue placeholder="Choisir un camion..." /></SelectTrigger>
+                <SelectContent>
+                  {camions.filter((c) => c.statut === "DISPONIBLE").map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Chauffeur</Label>
+              <Select value={selectedChauffeur} onValueChange={setSelectedChauffeur}>
+                <SelectTrigger><SelectValue placeholder="Choisir un chauffeur..." /></SelectTrigger>
+                <SelectContent>
+                  {chauffeurs.filter((c) => c.disponible).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.prenom} {c.nom} — {c.numeroPermis}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAffectDialog(false)}>Annuler</Button>
+            <Button onClick={handleAffecter}>Confirmer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dépense dialog */}
+      <Dialog open={showDepenseDialog} onOpenChange={setShowDepenseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter une dépense</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Catégorie</Label>
+              <Select value={depForm.categorie} onValueChange={(v) => setDepForm((p) => ({ ...p, categorie: v as CategorieDepense }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CATEGORIE_DEPENSE_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input value={depForm.description} onChange={(e) => setDepForm((p) => ({ ...p, description: e.target.value }))} placeholder="Ex: Plein diesel Station Total" />
+            </div>
+            <div className="space-y-2">
+              <Label>Montant (FCFA)</Label>
+              <Input type="number" value={depForm.montant} onChange={(e) => setDepForm((p) => ({ ...p, montant: parseInt(e.target.value) || 0 }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDepenseDialog(false)}>Annuler</Button>
+            <Button onClick={handleAddDepense}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
