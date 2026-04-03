@@ -64,7 +64,18 @@ export function useDecaissementsStore() {
     if (error) throw error;
     await fetchDecaissements();
   }, [fetchDecaissements]);
+
+  const stats = {
     total: decaissements.length,
+    enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
+    approuve: decaissements.filter(d => d.statut === "APPROUVE").length,
+    paye: decaissements.filter(d => d.statut === "PAYE").length,
+    montantTotal: decaissements.filter(d => d.statut === "PAYE").reduce((s, d) => s + d.montant, 0),
+    montantEnAttente: decaissements.filter(d => d.statut === "EN_ATTENTE" || d.statut === "APPROUVE").reduce((s, d) => s + d.montant, 0),
+  };
+
+  return { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement, refetch: fetchDecaissements };
+}
     enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
     approuve: decaissements.filter(d => d.statut === "APPROUVE").length,
     paye: decaissements.filter(d => d.statut === "PAYE").length,
