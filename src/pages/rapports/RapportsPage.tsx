@@ -95,6 +95,9 @@ export default function RapportsPage() {
   const tauxConversion = devis.length > 0 ? Math.round((devisValides / devis.length) * 100) : 0;
   const facturesImpayees = factures.filter(f => f.statut === "ENVOYEE" || f.statut === "PARTIELLEMENT_PAYEE");
   const montantImpaye = facturesImpayees.reduce((s, f) => s + (f.montant_ttc - f.montant_paye), 0);
+  const totalFacture = factures.filter(f => f.statut !== "ANNULEE" && f.statut !== "BROUILLON").reduce((s, f) => s + (f.montant_ttc || 0), 0);
+  const totalPaye = factures.filter(f => f.statut !== "ANNULEE" && f.statut !== "BROUILLON").reduce((s, f) => s + (f.montant_paye || 0), 0);
+  const tauxRecouvrement = totalFacture > 0 ? Math.round((totalPaye / totalFacture) * 100) : 0;
 
   // --- Monthly chart data ---
   const monthlyData = useMemo(() => months.map(m => {
