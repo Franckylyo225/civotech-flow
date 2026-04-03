@@ -991,6 +991,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          lien: string | null
+          lue: boolean
+          message: string
+          titre: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lien?: string | null
+          lue?: boolean
+          message?: string
+          titre: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lien?: string | null
+          lue?: boolean
+          message?: string
+          titre?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       operations: {
         Row: {
           bon_livraison_url: string | null
@@ -1270,6 +1303,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      notify_role: {
+        Args: {
+          _lien?: string
+          _message: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _titre: string
+          _type?: string
+        }
+        Returns: undefined
       }
       recalculate_camion_statut: {
         Args: { p_camion_id: string }
