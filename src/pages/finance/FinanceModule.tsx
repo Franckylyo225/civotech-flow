@@ -34,7 +34,3 @@ export default function FinanceModule() {
       </Tabs>
     </div>
   );
-}
-    </div>
-  );
-}
