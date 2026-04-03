@@ -100,7 +100,6 @@ export default function MaintenanceTab({ canManage }: Props) {
       setShowDialog(false);
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
-  };
 
   const handleDelete = async (id: string) => {
     try { await deleteMaintenance(id); toast.success("Maintenance supprimée"); setDeleteConfirm(null); }
