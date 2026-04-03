@@ -610,6 +610,51 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Incident dialog */}
+      <Dialog open={showIncidentDialog} onOpenChange={setShowIncidentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Signaler un incident</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type d'incident</Label>
+              <Select value={incidentForm.type} onValueChange={(v) => setIncidentForm((p) => ({ ...p, type: v as TypeIncident }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(TYPE_INCIDENT_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.icon} {cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Gravité</Label>
+              <Select value={incidentForm.gravite} onValueChange={(v) => setIncidentForm((p) => ({ ...p, gravite: v as GraviteIncident }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(GRAVITE_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                value={incidentForm.description}
+                onChange={(e) => setIncidentForm((p) => ({ ...p, description: e.target.value }))}
+                placeholder="Décrivez l'incident..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIncidentDialog(false)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleAddIncident}>Signaler</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
