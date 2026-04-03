@@ -188,6 +188,15 @@ export default function FacturesTab({ canManage }: Props) {
                       <span className="font-mono text-sm font-medium">{op.reference}</span>
                       <span className="text-muted-foreground text-sm ml-2">— {op.clientNom}</span>
                     </div>
+                    {op.bonLivraisonUrl ? (
+                      <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-success hover:underline">
+                        <Paperclip className="h-3 w-3" />BL joint
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs text-destructive">
+                        <Paperclip className="h-3 w-3" />BL manquant
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold">{op.montantDevis.toLocaleString()} F</span>
