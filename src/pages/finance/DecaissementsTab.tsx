@@ -29,6 +29,7 @@ interface Props { canManage: boolean; isDG: boolean; }
 export default function DecaissementsTab({ canManage, isDG }: Props) {
   const { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
+  const [operations, setOperations] = useState<{ id: string; reference: string; client_nom: string; lieu_embarquement: string; lieu_livraison: string }[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
@@ -40,9 +41,18 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [editDialog, setEditDialog] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
+  const [detailDialog, setDetailDialog] = useState<DecaissementRow | null>(null);
+
+  useEffect(() => {
+    supabase.from("operations").select("id, reference, client_nom, lieu_embarquement, lieu_livraison").then(({ data }) => {
+      setOperations(data || []);
+    });
+  }, []);
 
   const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
+  const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
+  const getOp = (id: string | null) => id ? operations.find(o => o.id === id) : null;
 
   const filtered = decaissements.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
