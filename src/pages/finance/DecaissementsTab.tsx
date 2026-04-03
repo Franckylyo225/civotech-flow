@@ -259,7 +259,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                     <TableCell className="text-sm text-muted-foreground">
                       {d.date_paiement ? format(new Date(d.date_paiement), "dd/MM/yyyy") : format(new Date(d.created_at), "dd/MM/yyyy")}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         {isDG && d.statut === "EN_ATTENTE" && (
                           <>
@@ -271,7 +271,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                             </Button>
                           </>
                         )}
-                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
+                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && !d.operation_id && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size="sm" variant="outline" className="h-7 w-7 p-0">
