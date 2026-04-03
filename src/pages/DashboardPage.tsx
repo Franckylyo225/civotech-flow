@@ -1,15 +1,18 @@
 import { useAuth } from "@/lib/auth-context";
 import { roleLabels } from "@/lib/roles";
+import { useApprobationsStore } from "@/hooks/use-approbations-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   FileText, Truck, Receipt, ShoppingCart, TrendingUp, TrendingDown,
-  ArrowRight, CheckCircle2, XCircle, Clock, Eye,
+  ArrowRight, CheckCircle2, XCircle, Clock, Eye, ClipboardCheck, Wallet,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
+import { format } from "date-fns";
 
 // --- Mock data ---
 const overviewData = [
@@ -19,13 +22,6 @@ const overviewData = [
   { mois: "Avr", entrees: 6200000, sorties: 2800000 },
   { mois: "Mai", entrees: 5800000, sorties: 3100000 },
   { mois: "Jun", entrees: 7100000, sorties: 2600000 },
-];
-
-const validationRequests = [
-  { id: 1, type: "devis" as const, reference: "DEV-2025-002", titre: "Transport conteneur 40' — Bolloré", montant: 1750000, date: "01/04/2025" },
-  { id: 2, type: "devis" as const, reference: "DEV-2025-008", titre: "Transport transformateurs — CIE Énergie", montant: 2200000, date: "01/04/2025" },
-  { id: 3, type: "achat" as const, reference: "ACH-2025-003", titre: "Achat pneus — Camion AB-5678-CI", montant: 480000, date: "31/03/2025" },
-  { id: 4, type: "achat" as const, reference: "ACH-2025-004", titre: "Carburant mensuel — Station Total", montant: 1200000, date: "30/03/2025" },
 ];
 
 const operationsEnCours = [
@@ -38,7 +34,7 @@ const statCards = [
   { label: "Devis en cours", value: "12", icon: FileText, trend: "+15%", trendUp: true, link: "Voir détails" },
   { label: "Missions actives", value: "5", icon: Truck, trend: "+10%", trendUp: true, link: "Voir détails" },
   { label: "CA du mois", value: "7 100 000", unit: "FCFA", icon: Receipt, trend: "+28%", trendUp: true, link: "Voir détails" },
-  { label: "Validations", value: "4", icon: ShoppingCart, trend: "en attente", trendUp: false, link: "Voir détails" },
+  { label: "Validations", value: "—", icon: ShoppingCart, trend: "en attente", trendUp: false, link: "Voir détails" },
 ];
 
 function formatK(value: number) {
@@ -46,6 +42,12 @@ function formatK(value: number) {
   if (value >= 1000) return (value / 1000).toFixed(0) + "K";
   return value.toString();
 }
+
+const TYPE_CONFIG: Record<string, { label: string; icon: typeof FileText; color: string; bg: string }> = {
+  devis: { label: "Devis", icon: FileText, color: "text-primary", bg: "bg-primary/10" },
+  demande_achat: { label: "Achat", icon: ShoppingCart, color: "text-warning", bg: "bg-warning/10" },
+  decaissement: { label: "Décaissement", icon: Wallet, color: "text-info", bg: "bg-info/10" },
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
@@ -63,7 +65,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { items: approbations, counts: appCounts } = useApprobationsStore();
 
+  // Override validations stat card with real count
+  const dynamicStatCards = statCards.map(s =>
+    s.label === "Validations" ? { ...s, value: String(appCounts.total), trend: appCounts.total > 0 ? "en attente" : "à jour", trendUp: appCounts.total === 0 } : s
+  );
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -78,7 +85,7 @@ export default function DashboardPage() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
+        {dynamicStatCards.map((stat) => (
           <Card key={stat.label} className="border border-border shadow-none">
             <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
@@ -140,43 +147,51 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Validation requests */}
         <Card className="lg:col-span-2 border border-border shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Demandes de validation</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-primary" />
+              Approbations
+              {appCounts.total > 0 && (
+                <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-xs ml-1">
+                  {appCounts.total}
+                </Badge>
+              )}
+            </CardTitle>
+            <Button variant="ghost" size="sm" className="text-primary text-xs gap-1" asChild>
+              <Link to="/approbations">Voir tout <ArrowRight className="h-3 w-3" /></Link>
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            {validationRequests.map((req) => (
-              <div key={req.id} className="flex items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
-                <div className={`mt-0.5 rounded-lg p-2 ${req.type === "devis" ? "bg-accent" : "bg-warning/10"}`}>
-                  {req.type === "devis" ? (
-                    <FileText className={`h-4 w-4 ${req.type === "devis" ? "text-primary" : "text-warning"}`} />
-                  ) : (
-                    <ShoppingCart className="h-4 w-4 text-warning" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-muted-foreground">{req.reference}</span>
-                    <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px]">
-                      En attente
-                    </Badge>
-                  </div>
-                  <p className="text-sm font-medium text-foreground mt-0.5 truncate">{req.titre}</p>
-                  <p className="text-sm font-semibold text-primary mt-0.5">
-                    {req.montant.toLocaleString("fr-FR")} FCFA
-                  </p>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  <button className="rounded-lg p-1.5 text-success hover:bg-success/10 transition-colors" title="Approuver">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </button>
-                  <button className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10 transition-colors" title="Refuser">
-                    <XCircle className="h-4 w-4" />
-                  </button>
-                </div>
+            {approbations.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <CheckCircle2 className="mx-auto h-8 w-8 text-success/40 mb-2" />
+                <p className="text-sm">Aucune demande en attente</p>
               </div>
-            ))}
+            ) : (
+              approbations.slice(0, 4).map((item) => {
+                const cfg = TYPE_CONFIG[item.type] || TYPE_CONFIG.devis;
+                return (
+                  <Link key={item.id} to="/approbations" className="flex items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
+                    <div className={`mt-0.5 rounded-lg p-2 ${cfg.bg}`}>
+                      <cfg.icon className={`h-4 w-4 ${cfg.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted-foreground">{item.reference}</span>
+                        <Badge variant="outline" className={`border-0 text-[10px] font-medium ${cfg.bg} ${cfg.color}`}>
+                          {cfg.label}
+                        </Badge>
+                      </div>
+                      <p className="text-sm font-medium text-foreground mt-0.5 truncate">{item.titre}</p>
+                      <p className="text-sm font-semibold text-primary mt-0.5">
+                        {item.montant.toLocaleString("fr-FR")} FCFA
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </CardContent>
         </Card>
       </div>
