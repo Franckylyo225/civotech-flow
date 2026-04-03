@@ -10,6 +10,7 @@ import {
   Wrench,
   BarChart3,
   Bell,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,7 +37,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Devis", path: "/devis", icon: FileText },
     { label: "Opérations", path: "/operations", icon: Truck },
     { label: "Clients", path: "/clients", icon: Users },
-    { label: "Factures", path: "/factures", icon: Receipt },
+    { label: "Finance & Comptabilité", path: "/factures", icon: Wallet },
     { label: "Achats", path: "/achats", icon: ShoppingCart },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package },
     { label: "Calendrier", path: "/calendrier", icon: Calendar },
@@ -56,7 +57,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   FINANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Factures", path: "/factures", icon: Receipt },
+    { label: "Finance & Comptabilité", path: "/factures", icon: Wallet },
     { label: "Paiements", path: "/paiements", icon: BarChart3 },
     { label: "Fournisseurs", path: "/fournisseurs", icon: Users },
   ],
