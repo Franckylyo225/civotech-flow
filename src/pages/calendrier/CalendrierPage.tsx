@@ -177,148 +177,233 @@ export default function CalendrierPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar grid */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <CardTitle className="text-lg capitalize">
-              {format(currentMonth, "MMMM yyyy", { locale: fr })}
-            </CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-              {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((d) => (
-                <div key={d} className="bg-muted p-2 text-center text-xs font-medium text-muted-foreground">
-                  {d}
-                </div>
-              ))}
-              {days.map((day) => {
-                const key = format(day, "yyyy-MM-dd");
-                const dayEvents = eventsByDate[key] || [];
-                const isToday = isSameDay(day, new Date());
-                const isSelected = selectedDate && isSameDay(day, selectedDate);
-                const isCurrentMonth = isSameMonth(day, currentMonth);
-
-                return (
-                  <div
-                    key={key}
-                    onClick={() => setSelectedDate(day)}
-                    onDoubleClick={() => canManage && openCreateDialog(day)}
-                    className={`bg-background p-1 min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
-                      !isCurrentMonth ? "opacity-40" : ""
-                    } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
-                  >
-                    <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                      isToday ? "bg-primary text-primary-foreground" : "text-foreground"
-                    }`}>
-                      {format(day, "d")}
-                    </div>
-                    <div className="space-y-0.5">
-                      {dayEvents.slice(0, 3).map((ev) => (
-                        <div
-                          key={ev.id}
-                          onClick={(e) => { e.stopPropagation(); setDetailEvent(ev); }}
-                          className="text-[10px] leading-tight px-1 py-0.5 rounded truncate cursor-pointer text-white"
-                          style={{ backgroundColor: ev.couleur || TYPE_COLORS[ev.type_evenement] }}
-                          title={ev.titre}
-                        >
-                          {ev.titre}
-                        </div>
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <div className="text-[10px] text-muted-foreground px-1">+{dayEvents.length - 3}</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Side panel */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">
-                {selectedDate
-                  ? format(selectedDate, "EEEE d MMMM yyyy", { locale: fr })
-                  : "Sélectionnez un jour"}
+      {viewMode === "mois" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar grid */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <CardTitle className="text-lg capitalize">
+                {format(currentMonth, "MMMM yyyy", { locale: fr })}
               </CardTitle>
+              <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+                <ChevronRight className="h-5 w-5" />
+              </Button>
             </CardHeader>
             <CardContent>
-              {selectedDateEvents.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aucun événement</p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedDateEvents.map((ev) => (
+              <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
+                {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((d) => (
+                  <div key={d} className="bg-muted p-2 text-center text-xs font-medium text-muted-foreground">
+                    {d}
+                  </div>
+                ))}
+                {days.map((day) => {
+                  const key = format(day, "yyyy-MM-dd");
+                  const dayEvents = eventsByDate[key] || [];
+                  const isToday = isSameDay(day, new Date());
+                  const isSelected = selectedDate && isSameDay(day, selectedDate);
+                  const isCurrentMonth = isSameMonth(day, currentMonth);
+
+                  return (
+                    <div
+                      key={key}
+                      onClick={() => setSelectedDate(day)}
+                      onDoubleClick={() => canManage && openCreateDialog(day)}
+                      className={`bg-background p-1 min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
+                        !isCurrentMonth ? "opacity-40" : ""
+                      } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
+                    >
+                      <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
+                        isToday ? "bg-primary text-primary-foreground" : "text-foreground"
+                      }`}>
+                        {format(day, "d")}
+                      </div>
+                      <div className="space-y-0.5">
+                        {dayEvents.slice(0, 3).map((ev) => (
+                          <div
+                            key={ev.id}
+                            onClick={(e) => { e.stopPropagation(); setDetailEvent(ev); }}
+                            className="text-[10px] leading-tight px-1 py-0.5 rounded truncate cursor-pointer text-white"
+                            style={{ backgroundColor: ev.couleur || TYPE_COLORS[ev.type_evenement] }}
+                            title={ev.titre}
+                          >
+                            {ev.titre}
+                          </div>
+                        ))}
+                        {dayEvents.length > 3 && (
+                          <div className="text-[10px] text-muted-foreground px-1">+{dayEvents.length - 3}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Side panel */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">
+                  {selectedDate
+                    ? format(selectedDate, "EEEE d MMMM yyyy", { locale: fr })
+                    : "Sélectionnez un jour"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedDateEvents.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucun événement</p>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedDateEvents.map((ev) => (
+                      <div
+                        key={ev.id}
+                        onClick={() => setDetailEvent(ev)}
+                        className="p-2 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ev.couleur }} />
+                          <span className="text-sm font-medium truncate">{ev.titre}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {ev.toute_journee
+                            ? "Toute la journée"
+                            : `${format(parseISO(ev.date_debut), "HH:mm")} - ${format(parseISO(ev.date_fin), "HH:mm")}`}
+                        </div>
+                        {ev.lieu && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3" /> {ev.lieu}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Upcoming events */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Prochains événements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {evenements
+                  .filter((ev) => new Date(ev.date_debut) >= new Date())
+                  .slice(0, 5)
+                  .map((ev) => (
                     <div
                       key={ev.id}
                       onClick={() => setDetailEvent(ev)}
-                      className="p-2 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors"
+                      className="flex items-start gap-2 py-2 border-b last:border-0 cursor-pointer hover:bg-accent/30 rounded px-1"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: ev.couleur }} />
-                        <span className="text-sm font-medium truncate">{ev.titre}</span>
+                      <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: ev.couleur }} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{ev.titre}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(parseISO(ev.date_debut), "dd/MM à HH:mm", { locale: fr })}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {ev.toute_journee
-                          ? "Toute la journée"
-                          : `${format(parseISO(ev.date_debut), "HH:mm")} - ${format(parseISO(ev.date_fin), "HH:mm")}`}
-                      </div>
-                      {ev.lieu && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <MapPin className="h-3 w-3" /> {ev.lieu}
-                        </div>
-                      )}
+                      <Badge variant="outline" className="ml-auto text-[10px] flex-shrink-0">
+                        {TYPE_LABELS[ev.type_evenement]}
+                      </Badge>
                     </div>
                   ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Upcoming events */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Prochains événements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {evenements
-                .filter((ev) => new Date(ev.date_debut) >= new Date())
-                .slice(0, 5)
-                .map((ev) => (
-                  <div
-                    key={ev.id}
-                    onClick={() => setDetailEvent(ev)}
-                    className="flex items-start gap-2 py-2 border-b last:border-0 cursor-pointer hover:bg-accent/30 rounded px-1"
-                  >
-                    <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: ev.couleur }} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{ev.titre}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(parseISO(ev.date_debut), "dd/MM à HH:mm", { locale: fr })}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="ml-auto text-[10px] flex-shrink-0">
-                      {TYPE_LABELS[ev.type_evenement]}
-                    </Badge>
-                  </div>
-                ))}
-              {evenements.filter((ev) => new Date(ev.date_debut) >= new Date()).length === 0 && (
-                <p className="text-sm text-muted-foreground">Aucun événement à venir</p>
-              )}
-            </CardContent>
-          </Card>
+                {evenements.filter((ev) => new Date(ev.date_debut) >= new Date()).length === 0 && (
+                  <p className="text-sm text-muted-foreground">Aucun événement à venir</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Agenda view */
+        <Card>
+          <CardContent className="pt-6">
+            {Object.keys(agendaGroups).length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                <p>Aucun événement à venir</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(agendaGroups).map(([dateKey, evts]) => {
+                  const date = parseISO(dateKey);
+                  const today = isDateToday(date);
+                  return (
+                    <div key={dateKey}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl flex-shrink-0 ${
+                          today ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                        }`}>
+                          <span className="text-lg font-bold leading-none">{format(date, "dd")}</span>
+                          <span className="text-[10px] uppercase">{format(date, "EEE", { locale: fr })}</span>
+                        </div>
+                        <div>
+                          <p className="font-medium capitalize text-foreground">
+                            {format(date, "EEEE d MMMM", { locale: fr })}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{evts.length} événement{evts.length > 1 ? "s" : ""}</p>
+                        </div>
+                        {today && <Badge className="ml-auto bg-primary text-primary-foreground">Aujourd'hui</Badge>}
+                      </div>
+                      <div className="ml-7 border-l-2 border-border pl-6 space-y-3">
+                        {evts.map((ev) => (
+                          <div
+                            key={ev.id}
+                            onClick={() => setDetailEvent(ev)}
+                            className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors group"
+                          >
+                            <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ backgroundColor: ev.couleur }} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-foreground">{ev.titre}</span>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {TYPE_LABELS[ev.type_evenement]}
+                                </Badge>
+                              </div>
+                              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {ev.toute_journee
+                                    ? "Toute la journée"
+                                    : `${format(parseISO(ev.date_debut), "HH:mm")} - ${format(parseISO(ev.date_fin), "HH:mm")}`}
+                                </span>
+                                {ev.lieu && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" /> {ev.lieu}
+                                  </span>
+                                )}
+                              </div>
+                              {ev.description && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ev.description}</p>
+                              )}
+                            </div>
+                            {canManage && (
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openEditDialog(ev); }}>
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Detail dialog */}
       <Dialog open={!!detailEvent} onOpenChange={(o) => !o && setDetailEvent(null)}>
