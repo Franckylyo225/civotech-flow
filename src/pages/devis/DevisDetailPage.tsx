@@ -19,7 +19,15 @@ interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
   onUpdateDevis?: (devisId: string, data: { lignes: { id?: string; description: string; quantite: number; prixUnitaire: number }[]; tauxTva: number; typeRemise: TypeRemise; valeurRemise: number }) => Promise<void>;
-  onCreateOperation?: (devis: Devis) => Promise<boolean>;
+  onCreateOperation?: (devis: Devis, extras?: {
+    lieu_embarquement?: string;
+    lieu_livraison?: string;
+    poids_kg?: number | null;
+    nombre_colis?: number | null;
+    nature_marchandise?: string;
+    precautions?: string;
+    commentaires?: string;
+  }) => Promise<boolean>;
   onBack: () => void;
 }
 
