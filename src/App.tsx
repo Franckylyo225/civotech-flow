@@ -52,8 +52,9 @@ function AppRoutes() {
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
         <Route path="/paiements" element={<Navigate to="/factures" replace />} />
-        <Route path="/utilisateurs" element={<PlaceholderPage title="Utilisateurs" description="Gérez les comptes utilisateurs et les rôles." />} />
+        <Route path="/utilisateurs" element={<Navigate to="/parametres" replace />} />
         <Route path="/rapports" element={<RapportsPage />} />
+        <Route path="/parametres" element={<ParametresModule />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
