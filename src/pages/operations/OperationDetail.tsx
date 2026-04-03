@@ -40,6 +40,9 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [selectedCamion, setSelectedCamion] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showPlanifDialog, setShowPlanifDialog] = useState(false);
+  const [planifLieu, setPlanifLieu] = useState(op.lieuEmbarquement || "");
+  const [planifDate, setPlanifDate] = useState<Date | undefined>(op.dateDepart ? new Date(op.dateDepart) : undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
