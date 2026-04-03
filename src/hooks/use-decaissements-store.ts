@@ -6,7 +6,7 @@ export type StatutDecaissement = "EN_ATTENTE" | "APPROUVE" | "PAYE" | "REJETE";
 export interface DecaissementRow {
   id: string;
   reference: string;
-  demande_achat_id: string;
+  demande_achat_id: string | null;
   devis_fournisseur_id: string | null;
   montant: number;
   statut: StatutDecaissement;
