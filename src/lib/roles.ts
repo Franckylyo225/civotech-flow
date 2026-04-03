@@ -38,6 +38,7 @@ export const roleLabels: Record<UserRole, string> = {
 export const roleNavItems: Record<UserRole, NavItem[]> = {
   DG: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Approbations", path: "/approbations", icon: ClipboardCheck },
     { label: "Devis", path: "/devis", icon: FileText },
     { label: "Opérations", path: "/operations", icon: Truck },
     { label: "Clients", path: "/clients", icon: Users },

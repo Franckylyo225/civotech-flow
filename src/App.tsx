@@ -43,6 +43,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/approbations" element={<ApprobationsPage />} />
         <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<OperationsModule />} />
         <Route path="/factures" element={<FinanceModule />} />
