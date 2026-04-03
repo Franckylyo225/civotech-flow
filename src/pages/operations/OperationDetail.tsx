@@ -102,6 +102,16 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     }
   };
 
+  const handleAddIncident = () => {
+    if (!incidentForm.description.trim()) { toast.error("Veuillez décrire l'incident"); return; }
+    if (onAddIncident) {
+      onAddIncident(op.id, incidentForm);
+    }
+    setShowIncidentDialog(false);
+    setIncidentForm({ type: "AUTRE", description: "", gravite: "MOYENNE" });
+    toast.success("Incident signalé");
+  };
+
   const handleTerminer = () => {
     if (!op.bonLivraisonUrl) {
       toast.error("Veuillez uploader le bon de livraison avant de terminer la mission");
