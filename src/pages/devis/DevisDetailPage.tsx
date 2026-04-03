@@ -113,6 +113,9 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
             </p>
           </div>
         </div>
+        <Button variant="outline" size="sm" onClick={() => generateDevisPdf(devis)}>
+          <Download className="mr-2 h-4 w-4" /> Télécharger PDF
+        </Button>
       </div>
 
       {devis.commentaireRefus && (devis.statut === "BROUILLON" || devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
