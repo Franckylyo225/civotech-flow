@@ -277,7 +277,7 @@ export default function FacturesTab({ canManage }: Props) {
                 <SelectContent>
                   {availableOps.map(op => (
                     <SelectItem key={op.id} value={op.id}>
-                      {op.reference} — {op.client_nom} — {op.montant_devis.toLocaleString()} F
+                      {op.reference} — {op.clientNom} — {op.montantDevis.toLocaleString()} F
                     </SelectItem>
                   ))}
                 </SelectContent>
