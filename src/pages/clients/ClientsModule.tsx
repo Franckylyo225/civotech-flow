@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User, TrendingUp, UserCheck, UserX } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User, TrendingUp, UserPlus, DollarSign, AlertTriangle, CalendarDays } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useClientsStore, type CreateClientData } from "@/hooks/use-clients-store";
 import type { Client } from "@/types/devis";
@@ -10,7 +10,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+
+function formatFCFA(n: number) {
+  return new Intl.NumberFormat("fr-FR", { style: "decimal", maximumFractionDigits: 0 }).format(n) + " FCFA";
+}
 
 function ClientFormDialog({
   open, onOpenChange, initialData, onSave,
@@ -80,6 +85,35 @@ function ClientFormDialog({
   );
 }
 
+type PeriodFilter = "this_month" | "last_month" | "this_quarter" | "this_year" | "all";
+
+function getPeriodRange(period: PeriodFilter): { start: Date | null; end: Date } {
+  const now = new Date();
+  const end = now;
+  switch (period) {
+    case "this_month":
+      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end };
+    case "last_month":
+      return { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end: new Date(now.getFullYear(), now.getMonth(), 0) };
+    case "this_quarter": {
+      const q = Math.floor(now.getMonth() / 3);
+      return { start: new Date(now.getFullYear(), q * 3, 1), end };
+    }
+    case "this_year":
+      return { start: new Date(now.getFullYear(), 0, 1), end };
+    case "all":
+      return { start: null, end };
+  }
+}
+
+const periodLabels: Record<PeriodFilter, string> = {
+  this_month: "Ce mois-ci",
+  last_month: "Mois dernier",
+  this_quarter: "Ce trimestre",
+  this_year: "Cette année",
+  all: "Tout",
+};
+
 export default function ClientsModule() {
   const { user } = useAuth();
   const { clients, loading, addClient, updateClient, deleteClient } = useClientsStore();
@@ -87,21 +121,42 @@ export default function ClientsModule() {
   const [showCreate, setShowCreate] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [stats, setStats] = useState({ totalDevis: 0, totalOperations: 0, caTotal: 0 });
+  const [period, setPeriod] = useState<PeriodFilter>("this_month");
+  const [stats, setStats] = useState({ caTotal: 0, impayes: 0 });
 
   const canManage = user?.role === "DG" || user?.role === "COMMERCIAL";
+
+  const { start: periodStart } = getPeriodRange(period);
+
+  // New clients count for selected period
+  const newClientsCount = useMemo(() => {
+    if (!periodStart) return clients.length;
+    return clients.filter((c) => {
+      const created = new Date((c as any).created_at || 0);
+      return created >= periodStart;
+    }).length;
+  }, [clients, periodStart]);
 
   useEffect(() => {
     async function fetchStats() {
       const { supabase } = await import("@/integrations/supabase/client");
-      const [devisRes, opsRes] = await Promise.all([
-        supabase.from("devis").select("id, montant, client_id"),
-        supabase.from("operations").select("id, client_id"),
-      ]);
-      const devisList = devisRes.data || [];
-      const opsList = opsRes.data || [];
-      const caTotal = devisList.reduce((s, d) => s + Number(d.montant || 0), 0);
-      setStats({ totalDevis: devisList.length, totalOperations: opsList.length, caTotal });
+      
+      // CA = montant des devis VALIDE_CLIENT
+      const { data: devisValides } = await supabase
+        .from("devis")
+        .select("montant")
+        .eq("statut", "VALIDE_CLIENT");
+
+      // Impayés = devis ENVOYE_CLIENT (envoyé mais pas encore validé/payé)
+      const { data: devisEnvoyes } = await supabase
+        .from("devis")
+        .select("montant")
+        .eq("statut", "ENVOYE_CLIENT");
+
+      const caTotal = (devisValides || []).reduce((s, d) => s + Number(d.montant || 0), 0);
+      const impayes = (devisEnvoyes || []).reduce((s, d) => s + Number(d.montant || 0), 0);
+      
+      setStats({ caTotal, impayes });
     }
     if (!loading) fetchStats();
   }, [loading]);
@@ -111,9 +166,6 @@ export default function ClientsModule() {
     (c.contact || "").toLowerCase().includes(search.toLowerCase()) ||
     (c.email || "").toLowerCase().includes(search.toLowerCase())
   );
-
-  const clientsWithEmail = clients.filter((c) => c.email).length;
-  const clientsWithPhone = clients.filter((c) => c.telephone).length;
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -126,11 +178,26 @@ export default function ClientsModule() {
           <h1 className="text-2xl font-bold text-foreground">Gestion des Clients</h1>
           <p className="text-muted-foreground">{clients.length} client(s) enregistré(s)</p>
         </div>
-        {canManage && (
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nouveau client
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <Select value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(periodLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {canManage && (
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Nouveau client
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -148,34 +215,34 @@ export default function ClientsModule() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+              <UserPlus className="h-5 w-5 text-info" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{newClientsCount}</p>
+              <p className="text-xs text-muted-foreground">Nouveaux clients</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
               <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stats.totalDevis}</p>
-              <p className="text-xs text-muted-foreground">Devis générés</p>
+              <p className="text-2xl font-bold text-foreground">{formatFCFA(stats.caTotal)}</p>
+              <p className="text-xs text-muted-foreground">Chiffre d'affaires</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-              <UserCheck className="h-5 w-5 text-warning" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{clientsWithEmail}</p>
-              <p className="text-xs text-muted-foreground">Avec email</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
-              <Phone className="h-5 w-5 text-info" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{clientsWithPhone}</p>
-              <p className="text-xs text-muted-foreground">Avec téléphone</p>
+              <p className="text-2xl font-bold text-foreground">{formatFCFA(stats.impayes)}</p>
+              <p className="text-xs text-muted-foreground">Impayés</p>
             </div>
           </CardContent>
         </Card>
