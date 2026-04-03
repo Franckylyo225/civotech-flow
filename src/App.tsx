@@ -41,7 +41,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<OperationsModule />} />
-        <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
+        <Route path="/factures" element={<FinanceModule />} />
         <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
