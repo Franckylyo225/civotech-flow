@@ -358,17 +358,31 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 <CheckCircle2 className="h-5 w-5 text-success" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">BL uploadé</p>
-                  <p className="text-xs text-muted-foreground">{op.bonLivraisonUrl}</p>
+                  <p className="text-xs text-muted-foreground truncate max-w-md">{op.bonLivraisonUrl.split("/").pop()}</p>
                 </div>
-                <Button variant="outline" size="sm">Télécharger</Button>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer">Télécharger</a>
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
                 <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">Aucun bon de livraison uploadé</p>
+                <p className="text-sm text-muted-foreground mb-1">Aucun bon de livraison uploadé</p>
+                <p className="text-xs text-destructive mb-3">Requis pour terminer la mission</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUploadBL(file);
+                  }}
+                />
                 {canManage && (
-                  <Button variant="outline" size="sm">
-                    <Upload className="mr-1.5 h-4 w-4" /> Uploader le BL
+                  <Button variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                    {uploading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
+                    {uploading ? "Upload en cours..." : "Uploader le BL"}
                   </Button>
                 )}
               </div>
