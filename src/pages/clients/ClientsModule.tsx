@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User, TrendingUp, UserCheck, UserX } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useClientsStore, type CreateClientData } from "@/hooks/use-clients-store";
 import type { Client } from "@/types/devis";
