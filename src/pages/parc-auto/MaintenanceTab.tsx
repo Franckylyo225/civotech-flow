@@ -40,6 +40,20 @@ export default function MaintenanceTab({ canManage }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [daByMaintenance, setDaByMaintenance] = useState<Record<string, { reference: string; statut: StatutDemandeAchat }>>({});
+
+  // Fetch linked demandes_achat
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("demandes_achat")
+        .select("maintenance_id, reference, statut")
+        .not("maintenance_id", "is", null);
+      const map: Record<string, { reference: string; statut: StatutDemandeAchat }> = {};
+      (data || []).forEach((d: any) => { if (d.maintenance_id) map[d.maintenance_id] = { reference: d.reference, statut: d.statut }; });
+      setDaByMaintenance(map);
+    })();
+  }, [maintenances]);
 
   const getCamionLabel = (id: string) => {
     const c = camions.find(c => c.id === id);
