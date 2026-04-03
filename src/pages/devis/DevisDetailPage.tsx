@@ -35,11 +35,11 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
   };
 
   const handleRefus = () => {
-    const statut: DevisStatut = refusType === "DG" ? "REFUSE_DG" : "REFUSE_CLIENT";
+    const statut: DevisStatut = refusType === "DG" ? "BROUILLON" : "REFUSE_CLIENT";
     onUpdateStatut(devis.id, statut, commentaireRefus);
     setShowRefusDialog(false);
     setCommentaireRefus("");
-    toast.success(refusType === "DG" ? "Devis refusé" : "Devis marqué comme refusé par le client");
+    toast.success(refusType === "DG" ? "Devis renvoyé en brouillon pour révision" : "Devis marqué comme refusé par le client");
   };
 
   const openRefusDialog = (type: "DG" | "CLIENT") => {
