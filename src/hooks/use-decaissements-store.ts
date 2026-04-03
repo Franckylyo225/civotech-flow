@@ -6,7 +6,7 @@ export type StatutDecaissement = "EN_ATTENTE" | "APPROUVE" | "PAYE" | "REJETE";
 export interface DecaissementRow {
   id: string;
   reference: string;
-  demande_achat_id: string;
+  demande_achat_id: string | null;
   devis_fournisseur_id: string | null;
   montant: number;
   statut: StatutDecaissement;
@@ -48,6 +48,17 @@ export function useDecaissementsStore() {
     await fetchDecaissements();
   }, [fetchDecaissements]);
 
+  const addDecaissement = useCallback(async (data: { montant: number; motif: string; commentaire?: string }) => {
+    const { error } = await supabase.from("decaissements").insert({
+      montant: data.montant,
+      motif: data.motif,
+      commentaire: data.commentaire || "",
+      statut: "EN_ATTENTE",
+    } as any);
+    if (error) throw error;
+    await fetchDecaissements();
+  }, [fetchDecaissements]);
+
   const stats = {
     total: decaissements.length,
     enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
@@ -57,5 +68,5 @@ export function useDecaissementsStore() {
     montantEnAttente: decaissements.filter(d => d.statut === "EN_ATTENTE" || d.statut === "APPROUVE").reduce((s, d) => s + d.montant, 0),
   };
 
-  return { decaissements, loading, stats, updateDecaissement, refetch: fetchDecaissements };
+  return { decaissements, loading, stats, updateDecaissement, addDecaissement, refetch: fetchDecaissements };
 }
