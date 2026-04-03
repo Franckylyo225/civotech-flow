@@ -52,9 +52,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   LOGISTIQUE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Opérations", path: "/operations", icon: Truck },
-    { label: "Parc Auto", path: "/parc-auto", icon: Package },
-    { label: "Maintenance", path: "/maintenance", icon: Wrench },
-    { label: "Chauffeurs", path: "/chauffeurs", icon: Users },
+    { label: "Gestion du Parc", path: "/parc-auto", icon: Package },
   ],
   FINANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
