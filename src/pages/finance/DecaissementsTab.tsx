@@ -340,6 +340,31 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={!!editDialog} onOpenChange={() => setEditDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Modifier la demande de décaissement</DialogTitle></DialogHeader>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label>Motif *</Label>
+              <Input value={editForm.motif} onChange={e => setEditForm(f => ({ ...f, motif: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Montant (F) *</Label>
+              <Input type="number" value={editForm.montant} onChange={e => setEditForm(f => ({ ...f, montant: Number(e.target.value) }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaire</Label>
+              <Textarea value={editForm.commentaire} onChange={e => setEditForm(f => ({ ...f, commentaire: e.target.value }))} rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialog(null)}>Annuler</Button>
+            <Button onClick={handleEdit}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
