@@ -64,16 +64,6 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [incidentForm, setIncidentForm] = useState<{ type: TypeIncident; description: string; gravite: GraviteIncident }>({
     type: "AUTRE", description: "", gravite: "MOYENNE",
   });
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editForm, setEditForm] = useState({
-    lieu_embarquement: "",
-    lieu_livraison: "",
-    poids_kg: "",
-    nombre_colis: "",
-    nature_marchandise: "",
-    precautions: "",
-    commentaires: "",
-  });
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
   const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
