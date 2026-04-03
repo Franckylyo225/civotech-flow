@@ -19,7 +19,6 @@ import { toast } from "sonner";
 const EMPTY_FORM = {
   immatriculation: "", marque: "", modele: "", type_vehicule: "Porteur",
   capacite_tonnes: 0, annee: new Date().getFullYear(), km_actuel: 0,
-  statut: "DISPONIBLE" as StatutCamion,
 };
 
 interface Props { canManage: boolean; }
