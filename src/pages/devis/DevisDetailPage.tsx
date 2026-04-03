@@ -77,12 +77,14 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
         </div>
       </div>
 
-      {devis.commentaireRefus && (devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
-        <Card className="border-destructive/30 bg-destructive/5">
+      {devis.commentaireRefus && (devis.statut === "BROUILLON" || devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
+        <Card className="border-warning/30 bg-warning/5">
           <CardContent className="flex items-start gap-3 p-4">
-            <MessageSquare className="h-5 w-5 text-destructive mt-0.5" />
+            <MessageSquare className="h-5 w-5 text-warning mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-destructive">Motif du refus</p>
+              <p className="text-sm font-medium text-warning">
+                {devis.statut === "BROUILLON" ? "Retour DG — À corriger" : "Motif du refus"}
+              </p>
               <p className="text-sm text-foreground mt-1">{devis.commentaireRefus}</p>
             </div>
           </CardContent>
