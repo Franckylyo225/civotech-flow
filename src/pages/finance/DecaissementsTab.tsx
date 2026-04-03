@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -256,17 +257,24 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                           </>
                         )}
                         {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
-                          <>
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
-                              setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
-                              setEditDialog(d.id);
-                            }}>
-                              <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => setCancelDialog(d.id)}>
-                              <Trash2 className="mr-1 h-3.5 w-3.5" /> Annuler
-                            </Button>
-                          </>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline" className="h-7 w-7 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
+                                setEditDialog(d.id);
+                              }}>
+                                <Pencil className="mr-2 h-4 w-4" /> Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelDialog(d.id)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Annuler
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                         {canManage && d.statut === "APPROUVE" && (
                           <Button size="sm" className="h-7 text-xs" onClick={() => {
