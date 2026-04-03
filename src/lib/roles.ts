@@ -35,6 +35,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Devis", path: "/devis", icon: FileText },
     { label: "Opérations", path: "/operations", icon: Truck },
+    { label: "Clients", path: "/clients", icon: Users },
     { label: "Factures", path: "/factures", icon: Receipt },
     { label: "Achats", path: "/achats", icon: ShoppingCart },
     { label: "Parc Auto", path: "/parc-auto", icon: Package },
