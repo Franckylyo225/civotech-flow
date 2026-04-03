@@ -6,7 +6,7 @@ import DevisDetailPage from "./DevisDetailPage";
 import { Loader2 } from "lucide-react";
 
 export default function DevisModule() {
-  const { devisList, clients, loading, addDevis, updateStatut, createOperationFromDevis } = useDevisStore();
+  const { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis } = useDevisStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -25,6 +25,7 @@ export default function DevisModule() {
       <DevisDetailPage
         devis={selectedDevis}
         onUpdateStatut={updateStatut}
+        onUpdateDevis={updateDevis}
         onCreateOperation={createOperationFromDevis}
         onBack={() => setSelectedId(null)}
       />

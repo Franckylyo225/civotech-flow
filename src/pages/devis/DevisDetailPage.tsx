@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import type { Devis, DevisStatut } from "@/types/devis";
+import type { Devis, DevisStatut, TypeRemise } from "@/types/devis";
 import { formatMontant, formatDate } from "@/types/devis";
+import DevisEditDialog from "./DevisEditDialog";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,14 +16,16 @@ import { toast } from "sonner";
 interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
+  onUpdateDevis?: (devisId: string, data: { lignes: { id?: string; description: string; quantite: number; prixUnitaire: number }[]; tauxTva: number; typeRemise: TypeRemise; valeurRemise: number }) => Promise<void>;
   onCreateOperation?: (devis: Devis) => Promise<boolean>;
   onBack: () => void;
 }
 
-export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperation, onBack }: DevisDetailPageProps) {
+export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, onCreateOperation, onBack }: DevisDetailPageProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showRefusDialog, setShowRefusDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
   const [creatingOp, setCreatingOp] = useState(false);
@@ -77,12 +80,14 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
         </div>
       </div>
 
-      {devis.commentaireRefus && (devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
-        <Card className="border-destructive/30 bg-destructive/5">
+      {devis.commentaireRefus && (devis.statut === "BROUILLON" || devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
+        <Card className="border-warning/30 bg-warning/5">
           <CardContent className="flex items-start gap-3 p-4">
-            <MessageSquare className="h-5 w-5 text-destructive mt-0.5" />
+            <MessageSquare className="h-5 w-5 text-warning mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-destructive">Motif du refus</p>
+              <p className="text-sm font-medium text-warning">
+                {devis.statut === "BROUILLON" ? "Retour DG — À corriger" : "Motif du refus"}
+              </p>
               <p className="text-sm text-foreground mt-1">{devis.commentaireRefus}</p>
             </div>
           </CardContent>
@@ -122,9 +127,14 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
           <CardHeader><CardTitle className="text-base">Actions</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {(role === "COMMERCIAL" || role === "DG") && devis.statut === "BROUILLON" && (
-              <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
-                <Send className="mr-2 h-4 w-4" /> Soumettre au DG
-              </Button>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full" onClick={() => setShowEditDialog(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Modifier le devis
+                </Button>
+                <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
+                  <Send className="mr-2 h-4 w-4" /> Soumettre au DG
+                </Button>
+              </div>
             )}
 
             {role === "DG" && devis.statut === "SOUMIS_DG" && (
@@ -209,6 +219,18 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
           </div>
         </CardContent>
       </Card>
+
+      {onUpdateDevis && (
+        <DevisEditDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          devis={devis}
+          onSave={async (data) => {
+            await onUpdateDevis(devis.id, data);
+            toast.success("Devis modifié avec succès");
+          }}
+        />
+      )}
 
       <Dialog open={showRefusDialog} onOpenChange={setShowRefusDialog}>
         <DialogContent>
