@@ -1,15 +1,18 @@
 import { useAuth } from "@/lib/auth-context";
 import { roleLabels } from "@/lib/roles";
+import { useApprobationsStore } from "@/hooks/use-approbations-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   FileText, Truck, Receipt, ShoppingCart, TrendingUp, TrendingDown,
-  ArrowRight, CheckCircle2, XCircle, Clock, Eye,
+  ArrowRight, CheckCircle2, XCircle, Clock, Eye, ClipboardCheck, Wallet,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
+import { format } from "date-fns";
 
 // --- Mock data ---
 const overviewData = [
@@ -19,13 +22,6 @@ const overviewData = [
   { mois: "Avr", entrees: 6200000, sorties: 2800000 },
   { mois: "Mai", entrees: 5800000, sorties: 3100000 },
   { mois: "Jun", entrees: 7100000, sorties: 2600000 },
-];
-
-const validationRequests = [
-  { id: 1, type: "devis" as const, reference: "DEV-2025-002", titre: "Transport conteneur 40' — Bolloré", montant: 1750000, date: "01/04/2025" },
-  { id: 2, type: "devis" as const, reference: "DEV-2025-008", titre: "Transport transformateurs — CIE Énergie", montant: 2200000, date: "01/04/2025" },
-  { id: 3, type: "achat" as const, reference: "ACH-2025-003", titre: "Achat pneus — Camion AB-5678-CI", montant: 480000, date: "31/03/2025" },
-  { id: 4, type: "achat" as const, reference: "ACH-2025-004", titre: "Carburant mensuel — Station Total", montant: 1200000, date: "30/03/2025" },
 ];
 
 const operationsEnCours = [
@@ -38,7 +34,7 @@ const statCards = [
   { label: "Devis en cours", value: "12", icon: FileText, trend: "+15%", trendUp: true, link: "Voir détails" },
   { label: "Missions actives", value: "5", icon: Truck, trend: "+10%", trendUp: true, link: "Voir détails" },
   { label: "CA du mois", value: "7 100 000", unit: "FCFA", icon: Receipt, trend: "+28%", trendUp: true, link: "Voir détails" },
-  { label: "Validations", value: "4", icon: ShoppingCart, trend: "en attente", trendUp: false, link: "Voir détails" },
+  { label: "Validations", value: "—", icon: ShoppingCart, trend: "en attente", trendUp: false, link: "Voir détails" },
 ];
 
 function formatK(value: number) {
@@ -46,6 +42,12 @@ function formatK(value: number) {
   if (value >= 1000) return (value / 1000).toFixed(0) + "K";
   return value.toString();
 }
+
+const TYPE_CONFIG: Record<string, { label: string; icon: typeof FileText; color: string; bg: string }> = {
+  devis: { label: "Devis", icon: FileText, color: "text-primary", bg: "bg-primary/10" },
+  demande_achat: { label: "Achat", icon: ShoppingCart, color: "text-warning", bg: "bg-warning/10" },
+  decaissement: { label: "Décaissement", icon: Wallet, color: "text-info", bg: "bg-info/10" },
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
