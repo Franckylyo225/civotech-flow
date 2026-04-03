@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, ListChecks } from "lucide-react";
 import type { Client, CreateDevisData, TypeRemise } from "@/types/devis";
 import { formatMontant, calculeDevisTotaux } from "@/types/devis";
+import type { Tarif } from "@/hooks/use-grille-tarifaire-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
@@ -21,10 +23,11 @@ interface DevisCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clients: Client[];
+  tarifs?: Tarif[];
   onSave: (data: CreateDevisData) => Promise<any>;
 }
 
-export default function DevisCreateDialog({ open, onOpenChange, clients, onSave }: DevisCreateDialogProps) {
+export default function DevisCreateDialog({ open, onOpenChange, clients, tarifs = [], onSave }: DevisCreateDialogProps) {
   const [clientId, setClientId] = useState("");
   const [lignes, setLignes] = useState<LigneForm[]>([
     { description: "", quantite: 1, prixUnitaire: 0 },
@@ -33,6 +36,7 @@ export default function DevisCreateDialog({ open, onOpenChange, clients, onSave 
   const [typeRemise, setTypeRemise] = useState<TypeRemise>("POURCENTAGE");
   const [valeurRemise, setValeurRemise] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [tarifSearch, setTarifSearch] = useState("");
 
   const addLigne = () => setLignes((prev) => [...prev, { description: "", quantite: 1, prixUnitaire: 0 }]);
 
@@ -43,6 +47,16 @@ export default function DevisCreateDialog({ open, onOpenChange, clients, onSave 
 
   const updateLigne = (index: number, field: keyof LigneForm, value: string | number) => {
     setLignes((prev) => prev.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
+  };
+
+  const applyTarif = (index: number, tarif: Tarif) => {
+    setLignes((prev) =>
+      prev.map((l, i) =>
+        i === index
+          ? { ...l, description: tarif.designation, prixUnitaire: tarif.prixUnitaire }
+          : l
+      )
+    );
   };
 
   const totaux = calculeDevisTotaux(lignes, tauxTva, typeRemise, valeurRemise);
@@ -69,6 +83,11 @@ export default function DevisCreateDialog({ open, onOpenChange, clients, onSave 
     resetForm();
     onOpenChange(false);
   };
+
+  const filteredTarifs = tarifs.filter((t) =>
+    t.designation.toLowerCase().includes(tarifSearch.toLowerCase()) ||
+    t.categorie.toLowerCase().includes(tarifSearch.toLowerCase())
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -116,11 +135,52 @@ export default function DevisCreateDialog({ open, onOpenChange, clients, onSave 
                   {lignes.map((ligne, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Input
-                          placeholder="Ex: Transport Abidjan → Bouaké"
-                          value={ligne.description}
-                          onChange={(e) => updateLigne(i, "description", e.target.value)}
-                        />
+                        <div className="flex gap-1">
+                          <Input
+                            placeholder="Ex: Transport Abidjan → Bouaké"
+                            value={ligne.description}
+                            onChange={(e) => updateLigne(i, "description", e.target.value)}
+                            className="flex-1"
+                          />
+                          {tarifs.length > 0 && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button type="button" variant="ghost" size="icon" className="shrink-0" title="Sélectionner un tarif">
+                                  <ListChecks className="h-4 w-4 text-primary" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80 p-2" align="start">
+                                <Input
+                                  placeholder="Rechercher un tarif..."
+                                  value={tarifSearch}
+                                  onChange={(e) => setTarifSearch(e.target.value)}
+                                  className="mb-2"
+                                />
+                                <div className="max-h-48 overflow-y-auto space-y-0.5">
+                                  {filteredTarifs.length === 0 && (
+                                    <p className="text-sm text-muted-foreground p-2 text-center">Aucun tarif trouvé</p>
+                                  )}
+                                  {filteredTarifs.map((t) => (
+                                    <button
+                                      key={t.id}
+                                      type="button"
+                                      className="w-full text-left px-2 py-1.5 rounded text-sm hover:bg-accent transition-colors"
+                                      onClick={() => {
+                                        applyTarif(i, t);
+                                        setTarifSearch("");
+                                      }}
+                                    >
+                                      <div className="font-medium">{t.designation}</div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {t.categorie} · {formatMontant(t.prixUnitaire)} / {t.unite}
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Input
