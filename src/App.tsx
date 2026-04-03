@@ -14,6 +14,7 @@ import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import ClientsModule from "@/pages/clients/ClientsModule";
 import AchatsModule from "@/pages/achats/AchatsModule";
 import FinanceModule from "@/pages/finance/FinanceModule";
+import RapportsPage from "@/pages/rapports/RapportsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,7 +52,7 @@ function AppRoutes() {
         <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
         <Route path="/paiements" element={<Navigate to="/factures" replace />} />
         <Route path="/utilisateurs" element={<PlaceholderPage title="Utilisateurs" description="Gérez les comptes utilisateurs et les rôles." />} />
-        <Route path="/rapports" element={<PlaceholderPage title="Rapports & Statistiques" description="Consultez les rapports de performance." />} />
+        <Route path="/rapports" element={<RapportsPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
