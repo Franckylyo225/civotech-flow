@@ -30,7 +30,7 @@ interface OperationDetailProps {
   onUpdateStatut: (opId: string, statut: OperationStatut) => void;
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
-  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
+  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
   onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
 }
