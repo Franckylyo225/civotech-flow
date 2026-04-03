@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Wrench, Plus, Search, Pencil, Trash2, Clock,
-  CheckCircle2, AlertTriangle, Ban, Calendar,
+  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart,
 } from "lucide-react";
 import { useMaintenancesStore, STATUT_MAINTENANCE_CONFIG, TYPE_MAINTENANCE_CONFIG, type MaintenanceRow, type TypeMaintenance, type StatutMaintenance } from "@/hooks/use-maintenances-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { supabase } from "@/integrations/supabase/client";
+import { STATUT_DA_CONFIG, type StatutDemandeAchat } from "@/hooks/use-demandes-achat-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,20 @@ export default function MaintenanceTab({ canManage }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [daByMaintenance, setDaByMaintenance] = useState<Record<string, { reference: string; statut: StatutDemandeAchat }>>({});
+
+  // Fetch linked demandes_achat
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("demandes_achat")
+        .select("maintenance_id, reference, statut")
+        .not("maintenance_id", "is", null);
+      const map: Record<string, { reference: string; statut: StatutDemandeAchat }> = {};
+      (data || []).forEach((d: any) => { if (d.maintenance_id) map[d.maintenance_id] = { reference: d.reference, statut: d.statut }; });
+      setDaByMaintenance(map);
+    })();
+  }, [maintenances]);
 
   const getCamionLabel = (id: string) => {
     const c = camions.find(c => c.id === id);
@@ -167,6 +182,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 <TableHead>Date prévue</TableHead>
                 <TableHead>Coût</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead>Demande d'achat</TableHead>
                 {canManage && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -184,6 +200,19 @@ export default function MaintenanceTab({ canManage }: Props) {
                     </TableCell>
                     <TableCell className="text-sm font-medium">{(m.cout_reel || m.cout_estime).toLocaleString()} F</TableCell>
                     <TableCell><Badge variant="outline" className={cn("border-0 text-xs font-medium", statutCfg.bgColor, statutCfg.color)}>{statutCfg.label}</Badge></TableCell>
+                    <TableCell>
+                      {daByMaintenance[m.id] ? (() => {
+                        const da = daByMaintenance[m.id];
+                        const daCfg = STATUT_DA_CONFIG[da.statut];
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <ShoppingCart className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs font-mono">{da.reference}</span>
+                            <Badge variant="outline" className={cn("border-0 text-[10px] font-medium", daCfg.bgColor, daCfg.color)}>{daCfg.label}</Badge>
+                          </div>
+                        );
+                      })() : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
                     {canManage && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
@@ -196,7 +225,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={canManage ? 7 : 6} className="text-center py-8 text-muted-foreground">Aucune maintenance trouvée</TableCell></TableRow>
+                <TableRow><TableCell colSpan={canManage ? 8 : 7} className="text-center py-8 text-muted-foreground">Aucune maintenance trouvée</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
