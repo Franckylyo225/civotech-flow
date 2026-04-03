@@ -32,6 +32,8 @@ export default function FacturesTab({ canManage }: Props) {
   const { clients } = useClientsStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutFacture | "ALL">("ALL");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [showCreate, setShowCreate] = useState(false);
   const [showPay, setShowPay] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState<string | null>(null);
