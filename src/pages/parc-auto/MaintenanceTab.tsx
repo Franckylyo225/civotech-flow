@@ -225,7 +225,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={canManage ? 7 : 6} className="text-center py-8 text-muted-foreground">Aucune maintenance trouvée</TableCell></TableRow>
+                <TableRow><TableCell colSpan={canManage ? 8 : 7} className="text-center py-8 text-muted-foreground">Aucune maintenance trouvée</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
