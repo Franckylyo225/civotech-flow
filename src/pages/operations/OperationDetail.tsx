@@ -49,6 +49,10 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
   });
+  const [showIncidentDialog, setShowIncidentDialog] = useState(false);
+  const [incidentForm, setIncidentForm] = useState<{ type: TypeIncident; description: string; gravite: GraviteIncident }>({
+    type: "AUTRE", description: "", gravite: "MOYENNE",
+  });
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
   const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
