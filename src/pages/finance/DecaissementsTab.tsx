@@ -402,6 +402,91 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Detail dialog */}
+      <Dialog open={!!detailDialog} onOpenChange={() => setDetailDialog(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="font-mono">{detailDialog?.reference}</span>
+              {detailDialog && (
+                <Badge variant="outline" className={cn("border-0 text-xs font-medium", STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].bgColor, STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].color)}>
+                  {STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].label}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {detailDialog && (() => {
+            const op = getOp(detailDialog.operation_id);
+            const da = detailDialog.demande_achat_id ? demandes.find(d => d.id === detailDialog.demande_achat_id) : null;
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Montant</p>
+                    <p className="text-lg font-bold">{detailDialog.montant.toLocaleString()} F</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date de création</p>
+                    <p className="text-sm font-medium">{format(new Date(detailDialog.created_at), "dd/MM/yyyy à HH:mm")}</p>
+                  </div>
+                </div>
+
+                {detailDialog.motif && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Motif</p>
+                    <p className="text-sm">{detailDialog.motif}</p>
+                  </div>
+                )}
+
+                {detailDialog.commentaire && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Commentaire</p>
+                    <p className="text-sm">{detailDialog.commentaire}</p>
+                  </div>
+                )}
+
+                {/* Linked entity */}
+                {op && (
+                  <Card className="border border-border shadow-none">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">Opération liée</p>
+                      <p className="font-mono text-sm font-medium">{op.reference}</p>
+                      <p className="text-xs text-muted-foreground">Client : {op.client_nom}</p>
+                      <p className="text-xs text-muted-foreground">Trajet : {op.lieu_embarquement} → {op.lieu_livraison}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {da && (
+                  <Card className="border border-border shadow-none">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">Demande d'achat liée</p>
+                      <p className="font-mono text-sm font-medium">{da.reference}</p>
+                      <p className="text-xs text-muted-foreground">{da.designation}</p>
+                      <p className="text-xs text-muted-foreground">Montant estimé : {da.montant_estime?.toLocaleString()} F</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Payment info */}
+                {detailDialog.statut === "PAYE" && (
+                  <Card className="border border-border shadow-none bg-success/5">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-success">Paiement effectué</p>
+                      {detailDialog.reference_paiement && <p className="text-sm">Réf : {detailDialog.reference_paiement}</p>}
+                      {detailDialog.date_paiement && <p className="text-xs text-muted-foreground">Le {format(new Date(detailDialog.date_paiement), "dd/MM/yyyy")}</p>}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailDialog(null)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
