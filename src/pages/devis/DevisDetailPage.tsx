@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut, TypeRemise } from "@/types/devis";
 import { formatMontant, formatDate } from "@/types/devis";
 import DevisEditDialog from "./DevisEditDialog";
+import { generateDevisPdf } from "@/lib/generate-devis-pdf";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
