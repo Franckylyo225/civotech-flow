@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent } from "@/types/operations";
+import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent, Incident, TypeIncident, GraviteIncident } from "@/types/operations";
 
 // Map DB row to app type
 function mapCamion(row: any): Camion {
