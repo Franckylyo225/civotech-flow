@@ -146,6 +146,26 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     toast.success("Mission terminée");
   };
 
+  const handleEditOperation = () => {
+    if (!editForm.lieu_embarquement.trim() || !editForm.lieu_livraison.trim()) {
+      toast.error("Les lieux sont obligatoires");
+      return;
+    }
+    if (onUpdateOperation) {
+      onUpdateOperation(op.id, {
+        lieu_embarquement: editForm.lieu_embarquement.trim(),
+        lieu_livraison: editForm.lieu_livraison.trim(),
+        poids_kg: editForm.poids_kg ? Number(editForm.poids_kg) : null,
+        nombre_colis: editForm.nombre_colis ? Number(editForm.nombre_colis) : null,
+        nature_marchandise: editForm.nature_marchandise,
+        precautions: editForm.precautions,
+        commentaires: editForm.commentaires,
+      });
+    }
+    setShowEditDialog(false);
+    toast.success("Opération mise à jour");
+  };
+
   const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
 
   return (
