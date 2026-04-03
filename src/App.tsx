@@ -47,7 +47,7 @@ function AppRoutes() {
         <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
         <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
-        <Route path="/fournisseurs" element={<PlaceholderPage title="Fournisseurs" description="Gérez le référentiel fournisseurs." />} />
+        <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
         <Route path="/paiements" element={<PlaceholderPage title="Paiements" description="Suivez les paiements clients et fournisseurs." />} />
         <Route path="/utilisateurs" element={<PlaceholderPage title="Utilisateurs" description="Gérez les comptes utilisateurs et les rôles." />} />
         <Route path="/rapports" element={<PlaceholderPage title="Rapports & Statistiques" description="Consultez les rapports de performance." />} />
