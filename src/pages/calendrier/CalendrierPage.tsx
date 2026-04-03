@@ -71,6 +71,20 @@ export default function CalendrierPage() {
     return map;
   }, [evenements]);
 
+  const agendaGroups = useMemo(() => {
+    const now = new Date();
+    const upcoming = evenements
+      .filter((ev) => new Date(ev.date_debut) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+      .sort((a, b) => new Date(a.date_debut).getTime() - new Date(b.date_debut).getTime());
+    const groups: Record<string, EvenementCalendrier[]> = {};
+    upcoming.forEach((ev) => {
+      const key = format(parseISO(ev.date_debut), "yyyy-MM-dd");
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(ev);
+    });
+    return groups;
+  }, [evenements]);
+
   const selectedDateEvents = useMemo(() => {
     if (!selectedDate) return [];
     const key = format(selectedDate, "yyyy-MM-dd");
