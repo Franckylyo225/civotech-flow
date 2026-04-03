@@ -63,6 +63,26 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
       if (newStatut === "REFUSEE_DG") updates.commentaire_dg = commentaireDG;
       if (newStatut === "VALIDEE_DG") updates.commentaire_dg = commentaireDG;
       await onUpdate(demande.id, updates);
+
+      // Auto-generate décaissement when DG validates
+      if (newStatut === "VALIDEE_DG" && devisRetenu) {
+        const { error: decError } = await supabase.from("decaissements").insert({
+          reference: "",
+          demande_achat_id: demande.id,
+          devis_fournisseur_id: devisRetenu.id,
+          montant: devisRetenu.montant,
+          statut: "EN_ATTENTE",
+          motif: `Achat pièces — ${demande.designation}`,
+        } as any);
+        if (decError) {
+          toast.error("Validation OK mais erreur génération décaissement");
+        } else {
+          // Also transition demande to DECAISSEMENT
+          await onUpdate(demande.id, { statut: "DECAISSEMENT" as any });
+          toast.success("Décaissement généré automatiquement", { description: "Consultez le module Finance" });
+        }
+      }
+
       toast.success(msg);
       onClose();
     } catch (err: any) { toast.error(err.message || "Erreur"); }
