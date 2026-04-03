@@ -159,6 +159,22 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </div>
         <div className="flex gap-2">
           {canManage && op.statut === "DEMANDE" && (
+            <Button size="sm" variant="outline" onClick={() => {
+              setEditForm({
+                lieu_embarquement: op.lieuEmbarquement || "",
+                lieu_livraison: op.lieuLivraison || "",
+                poids_kg: op.poidsKg?.toString() || "",
+                nombre_colis: op.nombreColis?.toString() || "",
+                nature_marchandise: op.natureMarchandise || "",
+                precautions: op.precautions || "",
+                commentaires: op.commentaires || "",
+              });
+              setShowEditDialog(true);
+            }}>
+              Éditer la demande
+            </Button>
+          )}
+          {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
               <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
             </Button>
