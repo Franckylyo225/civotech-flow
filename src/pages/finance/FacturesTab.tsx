@@ -458,6 +458,27 @@ export default function FacturesTab({ canManage }: Props) {
                   </>
                 )}
                 {f.notes && <div className="text-sm p-2 rounded bg-muted/50 border"><span className="text-muted-foreground text-xs">Notes :</span><p className="mt-0.5">{f.notes}</p></div>}
+                {/* Bon de livraison */}
+                {(() => {
+                  const blUrl = getOpBL(f.operation_id);
+                  return blUrl ? (
+                    <>
+                      <Separator />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-success/5 border border-success/20">
+                        <Paperclip className="h-4 w-4 text-success" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">Bon de livraison</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-xs">{blUrl.split("/").pop()}</p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={blUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5 mr-1" />Télécharger
+                          </a>
+                        </Button>
+                      </div>
+                    </>
+                  ) : null;
+                })()}
               </>
             );
           })()}
