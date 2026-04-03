@@ -31,6 +31,17 @@ export interface LigneDepense {
   date: string;
 }
 
+export interface Incident {
+  id: string;
+  operationId: string;
+  type: TypeIncident;
+  description: string;
+  gravite: GraviteIncident;
+  dateIncident: string;
+  resolu: boolean;
+  createdAt: string;
+}
+
 export interface Operation {
   id: string;
   reference: string;
