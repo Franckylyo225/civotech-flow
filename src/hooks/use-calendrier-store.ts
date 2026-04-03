@@ -57,7 +57,11 @@ export function useCalendrierStore() {
   };
 
   const updateEvenement = async (id: string, input: Partial<EvenementInput>) => {
-    const { error } = await supabase.from("evenements_calendrier").update(input as any).eq("id", id);
+    const updateData: any = { ...input };
+    if (input.date_debut || input.rappel_minutes !== undefined) {
+      updateData.rappel_envoye = false;
+    }
+    const { error } = await supabase.from("evenements_calendrier").update(updateData).eq("id", id);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return false;

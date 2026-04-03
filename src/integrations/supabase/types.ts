@@ -698,6 +698,7 @@ export type Database = {
           description: string | null
           id: string
           lieu: string | null
+          rappel_envoye: boolean
           rappel_minutes: number | null
           titre: string
           toute_journee: boolean
@@ -713,6 +714,7 @@ export type Database = {
           description?: string | null
           id?: string
           lieu?: string | null
+          rappel_envoye?: boolean
           rappel_minutes?: number | null
           titre: string
           toute_journee?: boolean
@@ -728,6 +730,7 @@ export type Database = {
           description?: string | null
           id?: string
           lieu?: string | null
+          rappel_envoye?: boolean
           rappel_minutes?: number | null
           titre?: string
           toute_journee?: boolean
