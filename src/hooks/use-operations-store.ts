@@ -254,6 +254,11 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
+  const toggleIncidentResolu = useCallback(async (incidentId: string, resolu: boolean) => {
+    await supabase.from("incidents").update({ resolu }).eq("id", incidentId);
+    await fetchAll();
+  }, [fetchAll]);
+
   const updateOperation = useCallback(async (opId: string, data: {
     lieu_embarquement?: string;
     lieu_livraison?: string;
