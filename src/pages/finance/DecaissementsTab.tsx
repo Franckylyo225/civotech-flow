@@ -102,6 +102,25 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
+  const handleEdit = async () => {
+    if (!editDialog) return;
+    if (editForm.montant <= 0) { toast.error("Le montant doit être supérieur à 0"); return; }
+    if (!editForm.motif.trim()) { toast.error("Le motif est obligatoire"); return; }
+    try {
+      await updateDecaissement(editDialog, { montant: editForm.montant, motif: editForm.motif, commentaire: editForm.commentaire || null } as any);
+      toast.success("Décaissement modifié");
+      setEditDialog(null);
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
+  const handleAnnuler = async (id: string) => {
+    if (!confirm("Annuler cette demande de décaissement ?")) return;
+    try {
+      await deleteDecaissement(id);
+      toast.success("Demande de décaissement annulée");
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
   return (
