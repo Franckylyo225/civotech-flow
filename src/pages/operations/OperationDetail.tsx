@@ -119,7 +119,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             </Button>
           )}
           {canManage && op.statut === "EN_COURS" && (
-            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => { onUpdateStatut(op.id, "TERMINEE"); toast.success("Mission terminée"); }}>
+            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={handleTerminer}>
               <CheckCircle2 className="mr-1.5 h-4 w-4" /> Terminer
             </Button>
           )}
