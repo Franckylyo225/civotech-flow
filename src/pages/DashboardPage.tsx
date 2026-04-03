@@ -65,7 +65,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { items: approbations, counts: appCounts } = useApprobationsStore();
 
+  // Override validations stat card with real count
+  const dynamicStatCards = statCards.map(s =>
+    s.label === "Validations" ? { ...s, value: String(appCounts.total), trend: appCounts.total > 0 ? "en attente" : "à jour", trendUp: appCounts.total === 0 } : s
+  );
   return (
     <div className="space-y-6">
       {/* Title */}
