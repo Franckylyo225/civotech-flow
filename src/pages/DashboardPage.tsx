@@ -85,7 +85,7 @@ export default function DashboardPage() {
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
+        {dynamicStatCards.map((stat) => (
           <Card key={stat.label} className="border border-border shadow-none">
             <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
