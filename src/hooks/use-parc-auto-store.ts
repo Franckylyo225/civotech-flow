@@ -50,7 +50,7 @@ export function useParcAutoStore() {
     enMaintenance: camions.filter(c => c.statut === "EN_MAINTENANCE").length,
   };
 
-  const addCamion = useCallback(async (camion: Omit<CamionRow, "id" | "created_at" | "updated_at">) => {
+  const addCamion = useCallback(async (camion: Omit<CamionRow, "id" | "created_at" | "updated_at" | "statut">) => {
     const { error } = await supabase.from("camions").insert({
       immatriculation: camion.immatriculation,
       marque: camion.marque,
@@ -59,7 +59,6 @@ export function useParcAutoStore() {
       capacite_tonnes: camion.capacite_tonnes,
       annee: camion.annee,
       km_actuel: camion.km_actuel,
-      statut: camion.statut as any,
     });
     if (error) throw error;
     await fetchCamions();
