@@ -4,7 +4,7 @@ import { fr } from "date-fns/locale";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard, Loader2, CalendarIcon,
+  Phone, CreditCard, Loader2, CalendarIcon, AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
