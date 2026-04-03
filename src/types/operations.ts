@@ -65,6 +65,7 @@ export interface Operation {
   nombreColis?: number;
   createdAt: string;
   updatedAt: string;
+  incidents: Incident[];
   timeline: TimelineEvent[];
 }
 
