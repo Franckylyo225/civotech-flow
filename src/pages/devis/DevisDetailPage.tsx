@@ -127,9 +127,14 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
           <CardHeader><CardTitle className="text-base">Actions</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {(role === "COMMERCIAL" || role === "DG") && devis.statut === "BROUILLON" && (
-              <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
-                <Send className="mr-2 h-4 w-4" /> Soumettre au DG
-              </Button>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full" onClick={() => setShowEditDialog(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Modifier le devis
+                </Button>
+                <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
+                  <Send className="mr-2 h-4 w-4" /> Soumettre au DG
+                </Button>
+              </div>
             )}
 
             {role === "DG" && devis.statut === "SOUMIS_DG" && (
