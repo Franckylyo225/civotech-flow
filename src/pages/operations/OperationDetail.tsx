@@ -34,6 +34,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
   const [selectedCamion, setSelectedCamion] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
   });
