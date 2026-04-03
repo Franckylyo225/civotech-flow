@@ -114,11 +114,12 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
-  const handleAnnuler = async (id: string) => {
-    if (!confirm("Annuler cette demande de décaissement ?")) return;
+  const handleAnnuler = async () => {
+    if (!cancelDialog) return;
     try {
-      await deleteDecaissement(id);
+      await deleteDecaissement(cancelDialog);
       toast.success("Demande de décaissement annulée");
+      setCancelDialog(null);
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
