@@ -719,6 +719,103 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit DEMANDE dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Éditer la demande d'opération</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Lieu de récupération</Label>
+                <Input
+                  value={editForm.lieu_embarquement}
+                  onChange={(e) => setEditForm((p) => ({ ...p, lieu_embarquement: e.target.value }))}
+                  placeholder="Ex: Port de Douala"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lieu de livraison</Label>
+                <Input
+                  value={editForm.lieu_livraison}
+                  onChange={(e) => setEditForm((p) => ({ ...p, lieu_livraison: e.target.value }))}
+                  placeholder="Ex: Yaoundé Centre"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Poids (kg)</Label>
+                <Input
+                  type="number"
+                  value={editForm.poids_kg}
+                  onChange={(e) => setEditForm((p) => ({ ...p, poids_kg: e.target.value }))}
+                  placeholder="Ex: 5000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nombre de colis</Label>
+                <Input
+                  type="number"
+                  value={editForm.nombre_colis}
+                  onChange={(e) => setEditForm((p) => ({ ...p, nombre_colis: e.target.value }))}
+                  placeholder="Ex: 120"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Nature de la marchandise</Label>
+              <Input
+                value={editForm.nature_marchandise}
+                onChange={(e) => setEditForm((p) => ({ ...p, nature_marchandise: e.target.value }))}
+                placeholder="Ex: Matériaux de construction, denrées alimentaires..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Précautions particulières</Label>
+              <Textarea
+                value={editForm.precautions}
+                onChange={(e) => setEditForm((p) => ({ ...p, precautions: e.target.value }))}
+                placeholder="Ex: Fragile, maintenir au frais, ne pas empiler..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaires</Label>
+              <Textarea
+                value={editForm.commentaires}
+                onChange={(e) => setEditForm((p) => ({ ...p, commentaires: e.target.value }))}
+                placeholder="Informations complémentaires..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Annuler</Button>
+            <Button onClick={async () => {
+              if (!editForm.lieu_embarquement.trim() || !editForm.lieu_livraison.trim()) {
+                toast.error("Les lieux de récupération et de livraison sont obligatoires");
+                return;
+              }
+              if (onUpdateOperation) {
+                await onUpdateOperation(op.id, {
+                  lieu_embarquement: editForm.lieu_embarquement.trim(),
+                  lieu_livraison: editForm.lieu_livraison.trim(),
+                  poids_kg: editForm.poids_kg ? Number(editForm.poids_kg) : null,
+                  nombre_colis: editForm.nombre_colis ? Number(editForm.nombre_colis) : null,
+                  nature_marchandise: editForm.nature_marchandise.trim(),
+                  precautions: editForm.precautions.trim(),
+                  commentaires: editForm.commentaires.trim(),
+                });
+              }
+              setShowEditDialog(false);
+              toast.success("Demande mise à jour");
+            }}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
