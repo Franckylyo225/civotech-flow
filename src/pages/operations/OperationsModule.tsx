@@ -1,15 +1,41 @@
-import { useState, useEffect } from "react";
-import { Search, Filter, MapPin, ArrowRight } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Search, Filter, MapPin, ArrowRight, CalendarIcon, X } from "lucide-react";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear } from "date-fns";
+import { fr } from "date-fns/locale";
 import { useAuth } from "@/lib/auth-context";
 import { useOperationsStore } from "@/hooks/use-operations-store";
 import type { Operation, OperationStatut } from "@/types/operations";
 import { OPERATION_STATUT_CONFIG } from "@/types/operations";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import OperationDetail from "./OperationDetail";
 
-const TABS: { label: string; statut: OperationStatut | "ALL"; count?: (ops: Operation[]) => number }[] = [
+type PeriodFilter = "ALL" | "TODAY" | "WEEK" | "MONTH" | "QUARTER" | "YEAR";
+
+const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
+  { value: "ALL", label: "Toute période" },
+  { value: "TODAY", label: "Aujourd'hui" },
+  { value: "WEEK", label: "Cette semaine" },
+  { value: "MONTH", label: "Ce mois" },
+  { value: "QUARTER", label: "Ce trimestre" },
+  { value: "YEAR", label: "Cette année" },
+];
+
+function getDateRange(period: PeriodFilter): { start: Date; end: Date } | null {
+  if (period === "ALL") return null;
+  const now = new Date();
+  switch (period) {
+    case "TODAY": return { start: startOfDay(now), end: endOfDay(now) };
+    case "WEEK": return { start: startOfWeek(now, { locale: fr }), end: endOfWeek(now, { locale: fr }) };
+    case "MONTH": return { start: startOfMonth(now), end: endOfMonth(now) };
+    case "QUARTER": return { start: startOfQuarter(now), end: endOfQuarter(now) };
+    case "YEAR": return { start: startOfYear(now), end: endOfYear(now) };
+  }
+}
+
+const TABS: { label: string; statut: OperationStatut | "ALL" }[] = [
   { label: "Toutes", statut: "ALL" },
   { label: "Demandes", statut: "DEMANDE" },
   { label: "Planifiées", statut: "PLANIFIEE" },
@@ -22,12 +48,15 @@ export default function OperationsModule() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<OperationStatut | "ALL">("ALL");
+  const [period, setPeriod] = useState<PeriodFilter>("ALL");
 
   useEffect(() => {
     if (operations.length > 0 && !selectedId) setSelectedId(operations[0].id);
   }, [operations, selectedId]);
 
   if (loading) return <div className="flex items-center justify-center h-full text-muted-foreground">Chargement des opérations...</div>;
+
+  const dateRange = getDateRange(period);
 
   const filtered = operations.filter((o) => {
     const matchSearch =
@@ -36,14 +65,15 @@ export default function OperationsModule() {
       o.lieuEmbarquement.toLowerCase().includes(search.toLowerCase()) ||
       o.lieuLivraison.toLowerCase().includes(search.toLowerCase());
     const matchTab = activeTab === "ALL" || o.statut === activeTab;
-    return matchSearch && matchTab;
+    const matchPeriod = !dateRange || (new Date(o.createdAt) >= dateRange.start && new Date(o.createdAt) <= dateRange.end);
+    return matchSearch && matchTab && matchPeriod;
   });
 
   const selectedOp = operations.find((o) => o.id === selectedId);
 
   const getCounts = (statut: OperationStatut | "ALL") => {
-    if (statut === "ALL") return operations.length;
-    return operations.filter((o) => o.statut === statut).length;
+    if (statut === "ALL") return filtered.length;
+    return filtered.filter((o) => o.statut === statut).length;
   };
 
   return (
