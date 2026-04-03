@@ -316,7 +316,7 @@ export default function FacturesTab({ canManage }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune facture</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune facture</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
