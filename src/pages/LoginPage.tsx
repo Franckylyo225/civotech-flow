@@ -55,7 +55,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Trigger mount animation
   useEffect(() => {
