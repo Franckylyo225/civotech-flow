@@ -200,6 +200,19 @@ export default function MaintenanceTab({ canManage }: Props) {
                     </TableCell>
                     <TableCell className="text-sm font-medium">{(m.cout_reel || m.cout_estime).toLocaleString()} F</TableCell>
                     <TableCell><Badge variant="outline" className={cn("border-0 text-xs font-medium", statutCfg.bgColor, statutCfg.color)}>{statutCfg.label}</Badge></TableCell>
+                    <TableCell>
+                      {daByMaintenance[m.id] ? (() => {
+                        const da = daByMaintenance[m.id];
+                        const daCfg = STATUT_DA_CONFIG[da.statut];
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <ShoppingCart className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs font-mono">{da.reference}</span>
+                            <Badge variant="outline" className={cn("border-0 text-[10px] font-medium", daCfg.bgColor, daCfg.color)}>{daCfg.label}</Badge>
+                          </div>
+                        );
+                      })() : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
                     {canManage && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
