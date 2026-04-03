@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut } from "@/types/devis";
 import { formatMontant, formatDate } from "@/types/devis";
@@ -14,14 +15,17 @@ import { toast } from "sonner";
 interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
+  onCreateOperation?: (devis: Devis) => Promise<boolean>;
   onBack: () => void;
 }
 
-export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: DevisDetailPageProps) {
+export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperation, onBack }: DevisDetailPageProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showRefusDialog, setShowRefusDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
+  const [creatingOp, setCreatingOp] = useState(false);
 
   const role = user?.role;
 
@@ -41,6 +45,17 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: Devis
   const openRefusDialog = (type: "DG" | "CLIENT") => {
     setRefusType(type);
     setShowRefusDialog(true);
+  };
+
+  const handleCreateOperation = async () => {
+    if (!onCreateOperation) return;
+    setCreatingOp(true);
+    const ok = await onCreateOperation(devis);
+    setCreatingOp(false);
+    if (ok) {
+      toast.success("Demande d'opération créée avec succès");
+      navigate("/operations");
+    }
   };
 
   return (
@@ -78,10 +93,16 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: Devis
         <Card>
           <CardHeader><CardTitle className="text-base">Client</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p className="font-semibold text-foreground">{devis.client.nom}</p>
-            <p className="text-muted-foreground">{devis.client.email}</p>
-            <p className="text-muted-foreground">{devis.client.telephone}</p>
-            <p className="text-muted-foreground">{devis.client.adresse}, {devis.client.ville}</p>
+            {devis.client ? (
+              <>
+                <p className="font-semibold text-foreground">{devis.client.nom}</p>
+                {devis.client.email && <p className="text-muted-foreground">{devis.client.email}</p>}
+                {devis.client.telephone && <p className="text-muted-foreground">{devis.client.telephone}</p>}
+                {devis.client.adresse && <p className="text-muted-foreground">{devis.client.adresse}</p>}
+              </>
+            ) : (
+              <p className="text-muted-foreground">Client non renseigné</p>
+            )}
           </CardContent>
         </Card>
 
@@ -131,7 +152,15 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: Devis
             )}
 
             {devis.statut === "VALIDE_CLIENT" && (
-              <p className="text-sm text-success font-medium text-center">✓ Devis validé — Opération planifiée</p>
+              <div className="space-y-2">
+                <p className="text-sm text-success font-medium text-center">✓ Devis validé par le client</p>
+                {(role === "COMMERCIAL" || role === "DG" || role === "LOGISTIQUE") && (
+                  <Button className="w-full" onClick={handleCreateOperation} disabled={creatingOp}>
+                    <Truck className="mr-2 h-4 w-4" />
+                    {creatingOp ? "Création..." : "Créer une demande d'opération"}
+                  </Button>
+                )}
+              </div>
             )}
             {(devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
               <p className="text-sm text-destructive font-medium text-center">✗ Devis refusé</p>
@@ -161,6 +190,11 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onBack }: Devis
                   <TableCell className="text-right font-semibold">{formatMontant(ligne.montant)}</TableCell>
                 </TableRow>
               ))}
+              {devis.lignes.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Aucune ligne</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
           <div className="mt-4 flex justify-end border-t pt-4">

@@ -18,7 +18,7 @@ interface LigneForm {
 
 interface DevisCreatePageProps {
   clients: Client[];
-  onSave: (data: { clientId: string; lignes: LigneForm[] }) => void;
+  onSave: (data: { clientId: string; lignes: LigneForm[] }) => void | Promise<void>;
   onCancel: () => void;
 }
 
@@ -27,6 +27,7 @@ export default function DevisCreatePage({ clients, onSave, onCancel }: DevisCrea
   const [lignes, setLignes] = useState<LigneForm[]>([
     { description: "", quantite: 1, prixUnitaire: 0 },
   ]);
+  const [saving, setSaving] = useState(false);
 
   const addLigne = () => setLignes((prev) => [...prev, { description: "", quantite: 1, prixUnitaire: 0 }]);
 
@@ -41,14 +42,16 @@ export default function DevisCreatePage({ clients, onSave, onCancel }: DevisCrea
 
   const total = lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientId) { toast.error("Veuillez sélectionner un client"); return; }
     if (lignes.some((l) => !l.description || l.prixUnitaire <= 0)) {
       toast.error("Veuillez remplir toutes les lignes correctement");
       return;
     }
-    onSave({ clientId, lignes });
+    setSaving(true);
+    await onSave({ clientId, lignes });
+    setSaving(false);
     toast.success("Devis créé avec succès");
   };
 
@@ -77,7 +80,7 @@ export default function DevisCreatePage({ clients, onSave, onCancel }: DevisCrea
                 <SelectContent>
                   {clients.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nom} — {c.ville}
+                      {c.nom}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -151,8 +154,8 @@ export default function DevisCreatePage({ clients, onSave, onCancel }: DevisCrea
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
-          <Button type="submit">
-            <Save className="mr-2 h-4 w-4" /> Enregistrer le devis
+          <Button type="submit" disabled={saving}>
+            <Save className="mr-2 h-4 w-4" /> {saving ? "Enregistrement..." : "Enregistrer le devis"}
           </Button>
         </div>
       </form>

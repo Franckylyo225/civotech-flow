@@ -1,27 +1,31 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useDevisStore } from "@/hooks/use-devis-store";
 import DevisListPage from "./DevisListPage";
 import DevisCreatePage from "./DevisCreatePage";
 import DevisDetailPage from "./DevisDetailPage";
+import { Loader2 } from "lucide-react";
 
 export default function DevisModule() {
-  const { devisList, clients, addDevis, updateStatut } = useDevisStore();
-  const location = useLocation();
-  const navigate = useNavigate();
-
+  const { devisList, clients, loading, addDevis, updateStatut, createOperationFromDevis } = useDevisStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+
   const selectedDevis = devisList.find((d) => d.id === selectedId);
 
-  // Show create form
-  const [showCreate, setShowCreate] = useState(false);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (showCreate) {
     return (
       <DevisCreatePage
         clients={clients}
-        onSave={(data) => {
-          addDevis(data);
+        onSave={async (data) => {
+          await addDevis(data);
           setShowCreate(false);
         }}
         onCancel={() => setShowCreate(false)}
@@ -34,6 +38,7 @@ export default function DevisModule() {
       <DevisDetailPage
         devis={selectedDevis}
         onUpdateStatut={updateStatut}
+        onCreateOperation={createOperationFromDevis}
         onBack={() => setSelectedId(null)}
       />
     );
