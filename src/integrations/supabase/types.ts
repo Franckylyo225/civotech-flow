@@ -56,6 +56,86 @@ export type Database = {
         }
         Relationships: []
       }
+      charges_fixes: {
+        Row: {
+          actif: boolean
+          categorie: Database["public"]["Enums"]["categorie_charge"]
+          created_at: string
+          created_by: string | null
+          designation: string
+          id: string
+          montant: number
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          categorie?: Database["public"]["Enums"]["categorie_charge"]
+          created_at?: string
+          created_by?: string | null
+          designation: string
+          id?: string
+          montant?: number
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          categorie?: Database["public"]["Enums"]["categorie_charge"]
+          created_at?: string
+          created_by?: string | null
+          designation?: string
+          id?: string
+          montant?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      charges_mensuelles: {
+        Row: {
+          charge_fixe_id: string
+          created_at: string
+          created_by: string | null
+          date_paiement: string | null
+          id: string
+          mois: string
+          montant: number
+          notes: string | null
+          payee: boolean
+          updated_at: string
+        }
+        Insert: {
+          charge_fixe_id: string
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          id?: string
+          mois: string
+          montant?: number
+          notes?: string | null
+          payee?: boolean
+          updated_at?: string
+        }
+        Update: {
+          charge_fixe_id?: string
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          id?: string
+          mois?: string
+          montant?: number
+          notes?: string | null
+          payee?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charges_mensuelles_charge_fixe_id_fkey"
+            columns: ["charge_fixe_id"]
+            isOneToOne: false
+            referencedRelation: "charges_fixes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chauffeurs: {
         Row: {
           camion_assigne_id: string | null
@@ -977,6 +1057,12 @@ export type Database = {
         | "FINANCE"
         | "ACHATS"
         | "ASSISTANTE"
+      categorie_charge:
+        | "LOYER"
+        | "SALAIRES"
+        | "ASSURANCES_TAXES"
+        | "CARBURANT_ENTRETIEN"
+        | "AUTRE"
       categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
       categorie_fournisseur:
         | "PIECES_AUTO"
@@ -1160,6 +1246,13 @@ export const Constants = {
         "FINANCE",
         "ACHATS",
         "ASSISTANTE",
+      ],
+      categorie_charge: [
+        "LOYER",
+        "SALAIRES",
+        "ASSURANCES_TAXES",
+        "CARBURANT_ENTRETIEN",
+        "AUTRE",
       ],
       categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
       categorie_fournisseur: [
