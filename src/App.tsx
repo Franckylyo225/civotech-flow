@@ -11,6 +11,7 @@ import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
+import ClientsModule from "@/pages/clients/ClientsModule";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,7 +44,7 @@ function AppRoutes() {
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" description="Suivez les demandes de maintenance." />} />
         <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
-        <Route path="/clients" element={<PlaceholderPage title="Gestion des Clients" description="Consultez et gérez votre base clients." />} />
+        <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<PlaceholderPage title="Chauffeurs" description="Gérez les chauffeurs et leur disponibilité." />} />
         <Route path="/fournisseurs" element={<PlaceholderPage title="Fournisseurs" description="Gérez le référentiel fournisseurs." />} />
         <Route path="/paiements" element={<PlaceholderPage title="Paiements" description="Suivez les paiements clients et fournisseurs." />} />
