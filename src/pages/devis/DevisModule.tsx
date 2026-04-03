@@ -4,6 +4,8 @@ import DevisListPage from "./DevisListPage";
 import DevisCreateDialog from "./DevisCreateDialog";
 import DevisDetailPage from "./DevisDetailPage";
 import { Loader2 } from "lucide-react";
+import type { DevisStatut } from "@/types/devis";
+import { toast } from "sonner";
 
 export default function DevisModule() {
   const { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis } = useDevisStore();
@@ -11,6 +13,11 @@ export default function DevisModule() {
   const [showCreate, setShowCreate] = useState(false);
 
   const selectedDevis = devisList.find((d) => d.id === selectedId);
+
+  const handleQuickAction = (devisId: string, newStatut: DevisStatut) => {
+    updateStatut(devisId, newStatut);
+    toast.success("Statut mis à jour");
+  };
 
   if (loading) {
     return (
@@ -38,6 +45,7 @@ export default function DevisModule() {
         devisList={devisList}
         onSelectDevis={(id) => setSelectedId(id)}
         onNewDevis={() => setShowCreate(true)}
+        onQuickAction={handleQuickAction}
       />
       <DevisCreateDialog
         open={showCreate}
