@@ -7,6 +7,7 @@ import {
 } from "@/hooks/use-devis-fournisseurs-store";
 import { useFournisseursStore } from "@/hooks/use-fournisseurs-store";
 import { type DemandeAchatRow, STATUT_DA_CONFIG, type StatutDemandeAchat } from "@/hooks/use-demandes-achat-store";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
