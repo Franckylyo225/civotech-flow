@@ -67,6 +67,16 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     toast.success("Dépense ajoutée");
   };
 
+  const handlePlanifier = () => {
+    if (!planifLieu.trim()) { toast.error("Veuillez saisir le lieu de prise en charge"); return; }
+    if (!planifDate) { toast.error("Veuillez programmer la date de la mission"); return; }
+    if (onPlanifier) {
+      onPlanifier(op.id, planifLieu.trim(), planifDate.toISOString());
+    }
+    setShowPlanifDialog(false);
+    toast.success("Mission planifiée avec succès");
+  };
+
   const handleUploadBL = async (file: File) => {
     setUploading(true);
     try {
