@@ -25,6 +25,7 @@ export default function DevisModule() {
       <DevisDetailPage
         devis={selectedDevis}
         onUpdateStatut={updateStatut}
+        onUpdateDevis={updateDevis}
         onCreateOperation={createOperationFromDevis}
         onBack={() => setSelectedId(null)}
       />
