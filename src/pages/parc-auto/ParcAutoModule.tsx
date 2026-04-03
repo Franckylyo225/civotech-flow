@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import VehiculesTab from "./VehiculesTab";
 import MaintenanceTab from "./MaintenanceTab";
 import ChauffeursTab from "./ChauffeursTab";
+import ParcAlerts from "@/components/parc-auto/ParcAlerts";
 
 export default function ParcAutoModule() {
   const { user } = useAuth();
@@ -15,6 +16,8 @@ export default function ParcAutoModule() {
         <h1 className="text-2xl font-bold text-foreground">Gestion du Parc</h1>
         <p className="text-sm text-muted-foreground mt-1">Véhicules, maintenance et chauffeurs</p>
       </div>
+
+      <ParcAlerts />
 
       <Tabs defaultValue="vehicules" className="space-y-4">
         <TabsList>
