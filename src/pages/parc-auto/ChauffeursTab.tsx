@@ -51,7 +51,7 @@ export default function ChauffeursTab({ canManage }: Props) {
       numero_permis: c.numero_permis || "", type_permis: c.type_permis || "",
       date_expiration_permis: c.date_expiration_permis || "",
       experience_annees: c.experience_annees, disponible: c.disponible,
-      statut: c.statut, camion_assigne_id: c.camion_assigne_id || "",
+      camion_assigne_id: c.camion_assigne_id || "",
     });
     setShowDialog(true);
   };
