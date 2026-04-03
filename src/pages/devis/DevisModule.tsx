@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 export default function DevisModule() {
   const { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis } = useDevisStore();
+  const { tarifs } = useGrilleTarifaireStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [activeTab, setActiveTab] = useState<"devis" | "grille">("devis");
