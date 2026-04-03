@@ -136,6 +136,7 @@ export default function OperationsModule() {
             onUpdateStatut={updateStatut}
             onAffecter={affecterOperation}
             onAddDepense={addDepense}
+            onPlanifier={planifierOperation}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
