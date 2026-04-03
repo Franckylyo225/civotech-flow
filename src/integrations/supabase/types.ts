@@ -516,6 +516,48 @@ export type Database = {
           },
         ]
       }
+      employes: {
+        Row: {
+          actif: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          nom: string
+          poste: string
+          prenom: string
+          salaire_base: number
+          taux_cotisations: number
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom: string
+          poste?: string
+          prenom: string
+          salaire_base?: number
+          taux_cotisations?: number
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom?: string
+          poste?: string
+          prenom?: string
+          salaire_base?: number
+          taux_cotisations?: number
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       factures: {
         Row: {
           client_id: string | null
@@ -964,6 +1006,65 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      salaires_mensuels: {
+        Row: {
+          avances: number
+          cotisations: number
+          created_at: string
+          created_by: string | null
+          date_paiement: string | null
+          employe_id: string
+          id: string
+          mois: string
+          net_a_payer: number
+          notes: string | null
+          paye: boolean
+          primes: number
+          salaire_base: number
+          updated_at: string
+        }
+        Insert: {
+          avances?: number
+          cotisations?: number
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          employe_id: string
+          id?: string
+          mois: string
+          net_a_payer?: number
+          notes?: string | null
+          paye?: boolean
+          primes?: number
+          salaire_base?: number
+          updated_at?: string
+        }
+        Update: {
+          avances?: number
+          cotisations?: number
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          employe_id?: string
+          id?: string
+          mois?: string
+          net_a_payer?: number
+          notes?: string | null
+          paye?: boolean
+          primes?: number
+          salaire_base?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salaires_mensuels_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       timeline_events: {
         Row: {
