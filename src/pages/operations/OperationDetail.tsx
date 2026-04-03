@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard, Loader2,
+  Phone, CreditCard, Loader2, CalendarIcon,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -26,15 +30,19 @@ interface OperationDetailProps {
   onUpdateStatut: (opId: string, statut: OperationStatut) => void;
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
+  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
   const [selectedCamion, setSelectedCamion] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showPlanifDialog, setShowPlanifDialog] = useState(false);
+  const [planifLieu, setPlanifLieu] = useState(op.lieuEmbarquement || "");
+  const [planifDate, setPlanifDate] = useState<Date | undefined>(op.dateDepart ? new Date(op.dateDepart) : undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
@@ -57,6 +65,16 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     setShowDepenseDialog(false);
     setDepForm({ categorie: "CARBURANT", description: "", montant: 0 });
     toast.success("Dépense ajoutée");
+  };
+
+  const handlePlanifier = () => {
+    if (!planifLieu.trim()) { toast.error("Veuillez saisir le lieu de prise en charge"); return; }
+    if (!planifDate) { toast.error("Veuillez programmer la date de la mission"); return; }
+    if (onPlanifier) {
+      onPlanifier(op.id, planifLieu.trim(), planifDate.toISOString());
+    }
+    setShowPlanifDialog(false);
+    toast.success("Mission planifiée avec succès");
   };
 
   const handleUploadBL = async (file: File) => {
@@ -104,8 +122,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </div>
         <div className="flex gap-2">
           {canManage && op.statut === "DEMANDE" && (
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { onUpdateStatut(op.id, "PLANIFIEE"); toast.success("Demande validée et planifiée"); }}>
-              <CheckCircle2 className="mr-1.5 h-4 w-4" /> Valider la demande
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setShowPlanifDialog(true); }}>
+              <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
             </Button>
           )}
           {canManage && op.statut === "PLANIFIEE" && !op.camionId && (
@@ -462,6 +480,56 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDepenseDialog(false)}>Annuler</Button>
             <Button onClick={handleAddDepense}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Planification dialog */}
+      <Dialog open={showPlanifDialog} onOpenChange={setShowPlanifDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Planifier la mission</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Lieu de prise en charge</Label>
+              <Input
+                value={planifLieu}
+                onChange={(e) => setPlanifLieu(e.target.value)}
+                placeholder="Ex: Port Autonome de Douala"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Date de la mission</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !planifDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {planifDate ? format(planifDate, "PPP", { locale: fr }) : "Sélectionner une date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={planifDate}
+                    onSelect={setPlanifDate}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlanifDialog(false)}>Annuler</Button>
+            <Button onClick={handlePlanifier}>Planifier</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

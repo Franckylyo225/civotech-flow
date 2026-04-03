@@ -187,5 +187,25 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
-  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, refetch: fetchAll };
+  const planifierOperation = useCallback(async (opId: string, lieuEmbarquement: string, dateDepart: string) => {
+    await supabase.from("operations").update({
+      lieu_embarquement: lieuEmbarquement,
+      date_depart: dateDepart,
+      statut: "PLANIFIEE" as any,
+    }).eq("id", opId);
+
+    const now = new Date();
+    await supabase.from("timeline_events").insert({
+      operation_id: opId,
+      date: now.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+      heure: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      titre: "Mission planifiée",
+      description: `Lieu: ${lieuEmbarquement} — Départ: ${new Date(dateDepart).toLocaleDateString("fr-FR")}`,
+      statut: "done",
+    });
+
+    await fetchAll();
+  }, [fetchAll]);
+
+  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, refetch: fetchAll };
 }
