@@ -19,7 +19,6 @@ import { toast } from "sonner";
 const EMPTY_FORM = {
   immatriculation: "", marque: "", modele: "", type_vehicule: "Porteur",
   capacite_tonnes: 0, annee: new Date().getFullYear(), km_actuel: 0,
-  statut: "DISPONIBLE" as StatutCamion,
 };
 
 interface Props { canManage: boolean; }
@@ -50,7 +49,7 @@ export default function VehiculesTab({ canManage }: Props) {
       immatriculation: c.immatriculation, marque: c.marque, modele: c.modele,
       type_vehicule: (c as any).type_vehicule || "Porteur",
       capacite_tonnes: c.capacite_tonnes, annee: c.annee,
-      km_actuel: (c as any).km_actuel || 0, statut: c.statut,
+      km_actuel: (c as any).km_actuel || 0,
     });
     setShowDialog(true);
   };
@@ -209,17 +208,6 @@ export default function VehiculesTab({ canManage }: Props) {
               <div className="space-y-2"><Label>Capacité (T)</Label><Input type="number" value={form.capacite_tonnes} onChange={e => setForm(f => ({ ...f, capacite_tonnes: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Année</Label><Input type="number" value={form.annee} onChange={e => setForm(f => ({ ...f, annee: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km actuel</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>
-            </div>
-            <div className="space-y-2">
-              <Label>Statut</Label>
-              <Select value={form.statut} onValueChange={v => setForm(f => ({ ...f, statut: v as StatutCamion }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                  <SelectItem value="EN_MISSION">En mission</SelectItem>
-                  <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <DialogFooter>

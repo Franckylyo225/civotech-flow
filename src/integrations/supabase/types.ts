@@ -658,6 +658,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalculate_camion_statut: {
+        Args: { p_camion_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
