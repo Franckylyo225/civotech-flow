@@ -143,7 +143,7 @@ export default function VehiculesTab({ canManage }: Props) {
               {filtered.map(camion => {
                 const cfg = STATUT_CAMION_CONFIG[camion.statut];
                 return (
-                  <TableRow key={camion.id}>
+                  <TableRow key={camion.id} className="cursor-pointer" onClick={() => setDetailCamion(camion)}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
