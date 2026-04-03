@@ -93,6 +93,20 @@ export const CATEGORIE_DEPENSE_CONFIG: Record<CategorieDepense, { label: string 
   AUTRE: { label: "Autre" },
 };
 
+export const TYPE_INCIDENT_CONFIG: Record<TypeIncident, { label: string; icon: string }> = {
+  PANNE: { label: "Panne", icon: "🔧" },
+  ACCIDENT: { label: "Accident", icon: "💥" },
+  RETARD: { label: "Retard", icon: "⏰" },
+  VOL: { label: "Vol", icon: "🚨" },
+  AUTRE: { label: "Autre", icon: "⚠️" },
+};
+
+export const GRAVITE_CONFIG: Record<GraviteIncident, { label: string; color: string; bgColor: string }> = {
+  FAIBLE: { label: "Faible", color: "text-info", bgColor: "bg-info/10" },
+  MOYENNE: { label: "Moyenne", color: "text-warning", bgColor: "bg-warning/10" },
+  CRITIQUE: { label: "Critique", color: "text-destructive", bgColor: "bg-destructive/10" },
+};
+
 export function formatMontantOp(montant: number): string {
   return montant.toLocaleString("fr-FR") + " FCFA";
 }
