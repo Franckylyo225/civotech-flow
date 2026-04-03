@@ -1,5 +1,6 @@
 import { Search, LogOut, User, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { Button } from "@/components/ui/button";
