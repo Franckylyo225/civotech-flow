@@ -203,8 +203,16 @@ export function useOperationsStore() {
       montant: depense.montant,
       date: depense.date,
     });
+    // Create a decaissement automatically for DG approval
+    const op = operations.find(o => o.id === opId);
+    await supabase.from("decaissements").insert({
+      operation_id: opId,
+      montant: depense.montant,
+      motif: `Dépense mission ${op?.reference || ""} — ${depense.description}`,
+      statut: "EN_ATTENTE",
+    } as any);
     await fetchAll();
-  }, [fetchAll]);
+  }, [fetchAll, operations]);
 
   const planifierOperation = useCallback(async (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => {
     const updates: any = {
