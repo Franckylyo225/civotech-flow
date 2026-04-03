@@ -69,12 +69,27 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
     setShowRefusDialog(true);
   };
 
+  const [creatingOp, setCreatingOp] = useState(false);
+
   const handleCreateOperation = async () => {
     if (!onCreateOperation) return;
+    if (!opForm.lieu_embarquement.trim() || !opForm.lieu_livraison.trim()) {
+      toast.error("Les lieux de récupération et de livraison sont obligatoires");
+      return;
+    }
     setCreatingOp(true);
-    const ok = await onCreateOperation(devis);
+    const ok = await onCreateOperation(devis, {
+      lieu_embarquement: opForm.lieu_embarquement.trim(),
+      lieu_livraison: opForm.lieu_livraison.trim(),
+      poids_kg: opForm.poids_kg ? Number(opForm.poids_kg) : null,
+      nombre_colis: opForm.nombre_colis ? Number(opForm.nombre_colis) : null,
+      nature_marchandise: opForm.nature_marchandise.trim(),
+      precautions: opForm.precautions.trim(),
+      commentaires: opForm.commentaires.trim(),
+    });
     setCreatingOp(false);
     if (ok) {
+      setShowOpDialog(false);
       toast.success("Demande d'opération créée avec succès");
       navigate("/operations");
     }
