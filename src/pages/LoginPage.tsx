@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Star, TrendingUp, Truck, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { seedDatabase } from "@/lib/seed";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,33 @@ const TEST_ACCOUNTS = [
   { label: "Assistante", email: "assistante@civotech.ci", role: "ASSISTANTE", nom: "Yao", prenom: "Marie" },
 ];
 
+const TESTIMONIALS = [
+  {
+    quote: "Civotech Flow a transformé notre gestion logistique. Nous avons réduit nos délais de livraison de 35%.",
+    author: "Amadou K.",
+    role: "Directeur Général, TransCorp CI",
+    stars: 5,
+  },
+  {
+    quote: "Une plateforme intuitive qui nous fait gagner un temps précieux au quotidien. Le suivi en temps réel est un vrai plus.",
+    author: "Fatou D.",
+    role: "Responsable Logistique, AfriLog",
+    stars: 5,
+  },
+  {
+    quote: "La gestion des devis et factures n'a jamais été aussi simple. Mon équipe l'a adopté en une semaine.",
+    author: "Ibrahim T.",
+    role: "Chef d'exploitation, RapidTrans",
+    stars: 4,
+  },
+];
+
+const STATS = [
+  { icon: Truck, value: "2 500+", label: "Livraisons gérées" },
+  { icon: Users, value: "150+", label: "Entreprises clientes" },
+  { icon: TrendingUp, value: "35%", label: "Gain de productivité" },
+];
+
 export default function LoginPage() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +55,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Trigger mount animation
   useEffect(() => {
@@ -240,20 +276,79 @@ export default function LoginPage() {
           className="absolute inset-0 w-full h-full object-cover scale-[1.08] transition-transform duration-[80ms] ease-out will-change-transform"
         />
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/30 to-foreground/10" />
 
-        {/* Bottom content */}
+        {/* Stats bar */}
+        <div
+          className={`absolute top-8 left-8 right-8 flex gap-4 transition-all duration-700 delay-700 ease-out ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-6"
+          }`}
+        >
+          {STATS.map((stat, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 p-4 text-center"
+            >
+              <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary-foreground/80" />
+              <p className="text-xl font-bold text-primary-foreground">{stat.value}</p>
+              <p className="text-xs text-primary-foreground/60">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Testimonial carousel */}
         <div
           className={`absolute bottom-0 left-0 right-0 p-10 text-primary-foreground transition-all duration-800 delay-500 ease-out ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <p className="text-2xl font-bold leading-snug mb-2">
-            « La logistique au service de votre croissance »
-          </p>
-          <p className="text-primary-foreground/70 text-base leading-relaxed max-w-lg">
-            Gérez vos opérations de transport, devis, factures et parc automobile depuis une plateforme unique et moderne.
-          </p>
+          <div className="relative h-[180px]">
+            {TESTIMONIALS.map((t, i) => (
+              <div
+                key={i}
+                className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                  i === activeSlide
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4 pointer-events-none"
+                }`}
+              >
+                {/* Stars */}
+                <div className="flex gap-1 mb-3">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <Star
+                      key={s}
+                      className={`h-4 w-4 ${
+                        s < t.stars ? "fill-warning text-warning" : "text-primary-foreground/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-lg font-medium leading-relaxed mb-4 italic">
+                  « {t.quote} »
+                </p>
+                <div>
+                  <p className="font-semibold text-sm">{t.author}</p>
+                  <p className="text-xs text-primary-foreground/60">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Dots */}
+          <div className="flex gap-2 mt-4">
+            {TESTIMONIALS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveSlide(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === activeSlide
+                    ? "w-6 bg-primary-foreground"
+                    : "w-2 bg-primary-foreground/40 hover:bg-primary-foreground/60"
+                }`}
+              />
+            ))}
+          </div>
+
           <div className="mt-4 flex items-center gap-2">
             <span className="text-sm font-semibold">Civotech Flow</span>
             <span className="text-primary-foreground/50">•</span>
