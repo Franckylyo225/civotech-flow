@@ -3,19 +3,26 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleNavItems } from "@/lib/roles";
 import { cn } from "@/lib/utils";
-import { useApprobationsStore } from "@/hooks/use-approbations-store";
+import { useSidebarCounts } from "@/hooks/use-sidebar-counts";
 import logoImg from "@/assets/logo-civotech.png";
+
+const PATH_COUNT_MAP: Record<string, keyof ReturnType<typeof useSidebarCounts>["counts"]> = {
+  "/approbations": "approbations",
+  "/devis": "devis",
+  "/operations": "operations",
+  "/factures": "factures",
+  "/achats": "achats",
+  "/parc-auto": "parcAuto",
+};
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const { counts } = useApprobationsStore();
+  const { counts } = useSidebarCounts();
 
   if (!user) return null;
 
   const navItems = roleNavItems[user.role];
-  const showBadge = (path: string) =>
-    path === "/approbations" && counts.total > 0;
 
   return (
     <aside className="flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar">
@@ -28,6 +35,9 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
+          const countKey = PATH_COUNT_MAP[item.path];
+          const count = countKey ? counts[countKey] : 0;
+
           return (
             <Link
               key={item.path}
@@ -41,9 +51,14 @@ export function AppSidebar() {
             >
               <item.icon className={cn("h-[18px] w-[18px]", isActive && "text-sidebar-primary")} />
               <span className="flex-1">{item.label}</span>
-              {showBadge(item.path) && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
-                  {counts.total}
+              {count > 0 && (
+                <span className={cn(
+                  "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold",
+                  item.path === "/approbations"
+                    ? "bg-destructive text-destructive-foreground"
+                    : "bg-muted-foreground/15 text-muted-foreground"
+                )}>
+                  {count > 99 ? "99+" : count}
                 </span>
               )}
             </Link>
