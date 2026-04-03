@@ -59,7 +59,11 @@ export function useDecaissementsStore() {
     await fetchDecaissements();
   }, [fetchDecaissements]);
 
-  const stats = {
+  const deleteDecaissement = useCallback(async (id: string) => {
+    const { error } = await supabase.from("decaissements").delete().eq("id", id);
+    if (error) throw error;
+    await fetchDecaissements();
+  }, [fetchDecaissements]);
     total: decaissements.length,
     enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
     approuve: decaissements.filter(d => d.statut === "APPROUVE").length,
