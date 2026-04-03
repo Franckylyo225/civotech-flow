@@ -76,6 +76,7 @@ export function useOperationsStore() {
     const chauffeursList = (chRes.data || []).map(mapChauffeur);
     const allDepenses = depRes.data || [];
     const allTimeline = tlRes.data || [];
+    const allIncidents = incRes.data || [];
 
     setCamions(camionsList);
     setChauffeurs(chauffeursList);
