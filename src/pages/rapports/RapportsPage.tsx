@@ -4,7 +4,7 @@ import { format, subMonths, startOfMonth, endOfMonth, parseISO } from "date-fns"
 import { fr } from "date-fns/locale";
 import {
   BarChart3, TrendingUp, TrendingDown, Truck, FileText, Receipt, CreditCard,
-  DollarSign, Users, Wrench, CalendarIcon, ArrowUpRight, ArrowDownRight,
+  DollarSign, Users, Wrench, CalendarIcon, ArrowUpRight, ArrowDownRight, Percent,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
