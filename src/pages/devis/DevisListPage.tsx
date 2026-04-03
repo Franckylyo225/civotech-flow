@@ -43,6 +43,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("ALL");
+  const [showArchived, setShowArchived] = useState(false);
 
   const filtered = devisList.filter((d) => {
     const matchSearch =
