@@ -51,7 +51,7 @@ function AppRoutes() {
         <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
-        <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
+        <Route path="/calendrier" element={<CalendrierPage />} />
         <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
