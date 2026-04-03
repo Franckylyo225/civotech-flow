@@ -234,7 +234,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_paiement: string | null
-          demande_achat_id: string
+          demande_achat_id: string | null
           devis_fournisseur_id: string | null
           id: string
           montant: number
@@ -249,7 +249,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_paiement?: string | null
-          demande_achat_id: string
+          demande_achat_id?: string | null
           devis_fournisseur_id?: string | null
           id?: string
           montant?: number
@@ -264,7 +264,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_paiement?: string | null
-          demande_achat_id?: string
+          demande_achat_id?: string | null
           devis_fournisseur_id?: string | null
           id?: string
           montant?: number
