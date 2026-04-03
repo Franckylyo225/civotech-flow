@@ -184,7 +184,15 @@ export function useDevisStore() {
     await fetchDevis();
   }, [fetchDevis]);
 
-  const createOperationFromDevis = useCallback(async (devis: Devis) => {
+  const createOperationFromDevis = useCallback(async (devis: Devis, extras?: {
+    lieu_embarquement?: string;
+    lieu_livraison?: string;
+    poids_kg?: number | null;
+    nombre_colis?: number | null;
+    nature_marchandise?: string;
+    precautions?: string;
+    commentaires?: string;
+  }) => {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
 
@@ -195,8 +203,13 @@ export function useDevisStore() {
       client_id: devis.clientId,
       client_nom: devis.client?.nom || "",
       montant_devis: devis.montantTotal,
-      lieu_embarquement: "",
-      lieu_livraison: "",
+      lieu_embarquement: extras?.lieu_embarquement || "",
+      lieu_livraison: extras?.lieu_livraison || "",
+      poids_kg: extras?.poids_kg ?? null,
+      nombre_colis: extras?.nombre_colis ?? null,
+      nature_marchandise: extras?.nature_marchandise || "",
+      precautions: extras?.precautions || "",
+      commentaires: extras?.commentaires || "",
       statut: "DEMANDE" as any,
       created_by: userId || null,
     });
