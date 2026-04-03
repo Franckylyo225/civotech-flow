@@ -248,6 +248,7 @@ export default function FacturesTab({ canManage }: Props) {
                 <TableHead>Référence</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Opération</TableHead>
+                <TableHead>BL</TableHead>
                 <TableHead>Montant TTC</TableHead>
                 <TableHead>Payé</TableHead>
                 <TableHead>Statut</TableHead>
