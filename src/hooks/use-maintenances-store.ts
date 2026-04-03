@@ -56,10 +56,11 @@ export function useMaintenancesStore() {
     coutTotal: maintenances.reduce((s, m) => s + (m.cout_reel || m.cout_estime), 0),
   };
 
-  const addMaintenance = useCallback(async (m: Omit<MaintenanceRow, "id" | "created_at" | "updated_at" | "created_by">) => {
-    const { error } = await supabase.from("maintenances").insert(m as any);
+  const addMaintenance = useCallback(async (m: Omit<MaintenanceRow, "id" | "created_at" | "updated_at" | "created_by">): Promise<MaintenanceRow> => {
+    const { data, error } = await supabase.from("maintenances").insert(m as any).select().single();
     if (error) throw error;
     await fetchMaintenances();
+    return data as MaintenanceRow;
   }, [fetchMaintenances]);
 
   const updateMaintenance = useCallback(async (id: string, updates: Partial<MaintenanceRow>) => {
