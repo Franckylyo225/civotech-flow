@@ -30,7 +30,7 @@ interface OperationDetailProps {
   onUpdateStatut: (opId: string, statut: OperationStatut) => void;
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
-  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
+  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
   onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
 }
@@ -45,6 +45,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showPlanifDialog, setShowPlanifDialog] = useState(false);
   const [planifLieu, setPlanifLieu] = useState(op.lieuEmbarquement || "");
   const [planifDate, setPlanifDate] = useState<Date | undefined>(op.dateDepart ? new Date(op.dateDepart) : undefined);
+  const [planifDateLivraison, setPlanifDateLivraison] = useState<Date | undefined>(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
@@ -77,7 +78,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     if (!planifLieu.trim()) { toast.error("Veuillez saisir le lieu de prise en charge"); return; }
     if (!planifDate) { toast.error("Veuillez programmer la date de la mission"); return; }
     if (onPlanifier) {
-      onPlanifier(op.id, planifLieu.trim(), planifDate.toISOString());
+      onPlanifier(op.id, planifLieu.trim(), planifDate.toISOString(), planifDateLivraison?.toISOString());
     }
     setShowPlanifDialog(false);
     toast.success("Mission planifiée avec succès");
@@ -138,7 +139,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </div>
         <div className="flex gap-2">
           {canManage && op.statut === "DEMANDE" && (
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setShowPlanifDialog(true); }}>
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
               <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
             </Button>
           )}
@@ -596,6 +597,33 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                     mode="single"
                     selected={planifDate}
                     onSelect={setPlanifDate}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label>Date de livraison estimée</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !planifDateLivraison && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {planifDateLivraison ? format(planifDateLivraison, "PPP", { locale: fr }) : "Sélectionner une date (optionnel)"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={planifDateLivraison}
+                    onSelect={setPlanifDateLivraison}
                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
