@@ -253,6 +253,19 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                             </Button>
                           </>
                         )}
+                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
+                          <>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                              setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
+                              setEditDialog(d.id);
+                            }}>
+                              <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => handleAnnuler(d.id)}>
+                              <Trash2 className="mr-1 h-3.5 w-3.5" /> Annuler
+                            </Button>
+                          </>
+                        )
                         {canManage && d.statut === "APPROUVE" && (
                           <Button size="sm" className="h-7 text-xs" onClick={() => {
                             setPayForm({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
