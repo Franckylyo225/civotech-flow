@@ -41,7 +41,7 @@ function AppRoutes() {
         <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<OperationsModule />} />
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
-        <Route path="/achats" element={<PlaceholderPage title="Demandes d'achat" description="Créez et validez les demandes d'achat." />} />
+        <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
