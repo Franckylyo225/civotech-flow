@@ -59,6 +59,34 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     toast.success("Dépense ajoutée");
   };
 
+  const handleUploadBL = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${op.id}/bl_${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("bon-livraison").upload(filePath, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("bon-livraison").getPublicUrl(filePath);
+      await supabase.from("operations").update({ bon_livraison_url: urlData.publicUrl }).eq("id", op.id);
+      toast.success("Bon de livraison uploadé avec succès");
+      // Trigger refetch via parent
+      onUpdateStatut(op.id, op.statut);
+    } catch (err: any) {
+      toast.error("Erreur lors de l'upload : " + (err.message || "Erreur inconnue"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleTerminer = () => {
+    if (!op.bonLivraisonUrl) {
+      toast.error("Veuillez uploader le bon de livraison avant de terminer la mission");
+      return;
+    }
+    onUpdateStatut(op.id, "TERMINEE");
+    toast.success("Mission terminée");
+  };
+
   const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
 
   return (
