@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal, Eye,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
