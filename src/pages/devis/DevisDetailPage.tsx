@@ -220,6 +220,18 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
         </CardContent>
       </Card>
 
+      {onUpdateDevis && (
+        <DevisEditDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          devis={devis}
+          onSave={async (data) => {
+            await onUpdateDevis(devis.id, data);
+            toast.success("Devis modifié avec succès");
+          }}
+        />
+      )}
+
       <Dialog open={showRefusDialog} onOpenChange={setShowRefusDialog}>
         <DialogContent>
           <DialogHeader>
