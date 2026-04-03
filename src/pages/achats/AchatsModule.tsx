@@ -5,8 +5,8 @@ import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import FournisseursTab from "./FournisseursTab";
 
 export default function AchatsModule() {
-  const { role } = useAuth();
-  const canManage = role === "DG" || role === "ACHATS";
+  const { user } = useAuth();
+  const canManage = user?.role === "DG" || user?.role === "ACHATS";
 
   return (
     <div className="space-y-6">
