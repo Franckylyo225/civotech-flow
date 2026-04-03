@@ -104,7 +104,20 @@ export function useOperationsStore() {
           statut: t.statut as "done" | "current" | "pending",
         }));
 
-      return mapOperation(row, camionsList, chauffeursList, opTimeline, opDepenses);
+      const opIncidents: Incident[] = allIncidents
+        .filter((i: any) => i.operation_id === row.id)
+        .map((i: any) => ({
+          id: i.id,
+          operationId: i.operation_id,
+          type: i.type as TypeIncident,
+          description: i.description,
+          gravite: i.gravite as GraviteIncident,
+          dateIncident: i.date_incident,
+          resolu: i.resolu,
+          createdAt: i.created_at,
+        }));
+
+      return mapOperation(row, camionsList, chauffeursList, opTimeline, opDepenses, opIncidents);
     });
 
     setOperations(ops);
