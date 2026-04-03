@@ -1,0 +1,7 @@
+
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS montant_ht numeric NOT NULL DEFAULT 0;
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS taux_tva numeric NOT NULL DEFAULT 18;
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS montant_tva numeric NOT NULL DEFAULT 0;
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS type_remise text NOT NULL DEFAULT 'POURCENTAGE';
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS valeur_remise numeric NOT NULL DEFAULT 0;
+ALTER TABLE public.devis ADD COLUMN IF NOT EXISTS montant_remise numeric NOT NULL DEFAULT 0;
