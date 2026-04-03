@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Plus, Search, Receipt, Clock, CheckCircle2, DollarSign,
-  Pencil, Trash2, Send, Eye, CreditCard, AlertTriangle, FileText,
+  Pencil, Trash2, Send, Eye, CreditCard, AlertTriangle, FileText, Download, Paperclip,
 } from "lucide-react";
 import {
   useFacturesStore, STATUT_FACTURE_CONFIG,
