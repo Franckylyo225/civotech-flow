@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, MapPin, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, MapPin, Clock, Calendar as CalendarIcon, List, LayoutGrid } from "lucide-react";
 import { useCalendrierStore, type EvenementCalendrier, type EvenementInput } from "@/hooks/use-calendrier-store";
 import { useAuth } from "@/lib/auth-context";
 
