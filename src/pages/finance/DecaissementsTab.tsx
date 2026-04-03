@@ -69,9 +69,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       // Also update linked demande_achat to PAYEE
       const dec = decaissements.find(d => d.id === payDialog);
       if (dec) {
-        const { supabase: _ } = await import("@/integrations/supabase/client");
-        const supabaseClient = (await import("@/integrations/supabase/client")).supabase;
-        await supabaseClient.from("demandes_achat").update({ statut: "PAYEE" } as any).eq("id", dec.demande_achat_id);
+        await supabase.from("demandes_achat").update({ statut: "PAYEE" } as any).eq("id", dec.demande_achat_id);
       }
       toast.success("Paiement enregistré");
       setPayDialog(null);
