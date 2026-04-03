@@ -604,6 +604,33 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 </PopoverContent>
               </Popover>
             </div>
+            <div className="space-y-2">
+              <Label>Date de livraison estimée</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !planifDateLivraison && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {planifDateLivraison ? format(planifDateLivraison, "PPP", { locale: fr }) : "Sélectionner une date (optionnel)"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={planifDateLivraison}
+                    onSelect={setPlanifDateLivraison}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPlanifDialog(false)}>Annuler</Button>
