@@ -56,6 +56,7 @@ function AppRoutes() {
         <Route path="/utilisateurs" element={<Navigate to="/parametres" replace />} />
         <Route path="/rapports" element={<RapportsPage />} />
         <Route path="/parametres" element={<ParametresModule />} />
+        <Route path="/profil" element={<ProfilPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
