@@ -1,0 +1,1 @@
+ALTER TABLE public.decaissements ADD COLUMN operation_id uuid REFERENCES public.operations(id) ON DELETE SET NULL;

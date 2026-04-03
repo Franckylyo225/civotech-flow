@@ -239,6 +239,7 @@ export type Database = {
           id: string
           montant: number
           motif: string | null
+          operation_id: string | null
           reference: string
           reference_paiement: string | null
           statut: Database["public"]["Enums"]["statut_decaissement"]
@@ -254,6 +255,7 @@ export type Database = {
           id?: string
           montant?: number
           motif?: string | null
+          operation_id?: string | null
           reference?: string
           reference_paiement?: string | null
           statut?: Database["public"]["Enums"]["statut_decaissement"]
@@ -269,6 +271,7 @@ export type Database = {
           id?: string
           montant?: number
           motif?: string | null
+          operation_id?: string | null
           reference?: string
           reference_paiement?: string | null
           statut?: Database["public"]["Enums"]["statut_decaissement"]
@@ -287,6 +290,13 @@ export type Database = {
             columns: ["devis_fournisseur_id"]
             isOneToOne: false
             referencedRelation: "devis_fournisseurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decaissements_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
             referencedColumns: ["id"]
           },
         ]

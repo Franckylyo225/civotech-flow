@@ -8,6 +8,7 @@ export interface DecaissementRow {
   reference: string;
   demande_achat_id: string | null;
   devis_fournisseur_id: string | null;
+  operation_id: string | null;
   montant: number;
   statut: StatutDecaissement;
   motif: string | null;
