@@ -63,12 +63,13 @@ export function useOperationsStore() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [opsRes, camRes, chRes, depRes, tlRes] = await Promise.all([
+    const [opsRes, camRes, chRes, depRes, tlRes, incRes] = await Promise.all([
       supabase.from("operations").select("*").order("created_at", { ascending: false }),
       supabase.from("camions").select("*"),
       supabase.from("chauffeurs").select("*"),
       supabase.from("depenses").select("*"),
       supabase.from("timeline_events").select("*").order("created_at", { ascending: true }),
+      supabase.from("incidents").select("*").order("date_incident", { ascending: false }),
     ]);
 
     const camionsList = (camRes.data || []).map(mapCamion);
