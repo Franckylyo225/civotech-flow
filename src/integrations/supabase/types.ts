@@ -257,6 +257,48 @@ export type Database = {
           },
         ]
       }
+      fournisseurs: {
+        Row: {
+          actif: boolean
+          adresse: string | null
+          categorie: Database["public"]["Enums"]["categorie_fournisseur"]
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          nom: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          adresse?: string | null
+          categorie?: Database["public"]["Enums"]["categorie_fournisseur"]
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          nom: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          adresse?: string | null
+          categorie?: Database["public"]["Enums"]["categorie_fournisseur"]
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          nom?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       grille_tarifaire: {
         Row: {
           actif: boolean
@@ -676,6 +718,12 @@ export type Database = {
         | "ACHATS"
         | "ASSISTANTE"
       categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
+      categorie_fournisseur:
+        | "PIECES_AUTO"
+        | "CARBURANT"
+        | "PNEUMATIQUES"
+        | "SERVICES"
+        | "AUTRE"
       gravite_incident: "FAIBLE" | "MOYENNE" | "CRITIQUE"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
       statut_chauffeur:
@@ -837,6 +885,13 @@ export const Constants = {
         "ASSISTANTE",
       ],
       categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
+      categorie_fournisseur: [
+        "PIECES_AUTO",
+        "CARBURANT",
+        "PNEUMATIQUES",
+        "SERVICES",
+        "AUTRE",
+      ],
       gravite_incident: ["FAIBLE", "MOYENNE", "CRITIQUE"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
       statut_chauffeur: [

@@ -12,6 +12,7 @@ import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import ClientsModule from "@/pages/clients/ClientsModule";
+import AchatsModule from "@/pages/achats/AchatsModule";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,13 +41,13 @@ function AppRoutes() {
         <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<OperationsModule />} />
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
-        <Route path="/achats" element={<PlaceholderPage title="Demandes d'achat" description="Créez et validez les demandes d'achat." />} />
+        <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
         <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
-        <Route path="/fournisseurs" element={<PlaceholderPage title="Fournisseurs" description="Gérez le référentiel fournisseurs." />} />
+        <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
         <Route path="/paiements" element={<PlaceholderPage title="Paiements" description="Suivez les paiements clients et fournisseurs." />} />
         <Route path="/utilisateurs" element={<PlaceholderPage title="Utilisateurs" description="Gérez les comptes utilisateurs et les rôles." />} />
         <Route path="/rapports" element={<PlaceholderPage title="Rapports & Statistiques" description="Consultez les rapports de performance." />} />
