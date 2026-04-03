@@ -26,7 +26,7 @@ function mapChauffeur(row: any): Chauffeur {
   };
 }
 
-function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], timeline: TimelineEvent[], depenses: LigneDepense[]): Operation {
+function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], timeline: TimelineEvent[], depenses: LigneDepense[], incidents: Incident[]): Operation {
   return {
     id: row.id,
     reference: row.reference,
@@ -48,6 +48,7 @@ function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], time
     nombreColis: row.nombre_colis || undefined,
     bonLivraisonUrl: row.bon_livraison_url || undefined,
     depenses,
+    incidents,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     timeline,
