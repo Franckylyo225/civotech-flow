@@ -34,6 +34,15 @@ interface OperationDetailProps {
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
   onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
+  onUpdateOperation?: (opId: string, data: {
+    lieu_embarquement?: string;
+    lieu_livraison?: string;
+    poids_kg?: number | null;
+    nombre_colis?: number | null;
+    nature_marchandise?: string;
+    precautions?: string;
+    commentaires?: string;
+  }) => Promise<void>;
 }
 
 export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
