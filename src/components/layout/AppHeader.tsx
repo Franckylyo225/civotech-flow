@@ -40,13 +40,7 @@ export function AppHeader() {
           />
         </div>
 
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative rounded-full">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-            3
-          </span>
-        </Button>
+        <NotificationDropdown />
 
         {/* User avatar + dropdown */}
         <DropdownMenu>
