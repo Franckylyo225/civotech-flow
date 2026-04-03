@@ -148,6 +148,125 @@ export type Database = {
         }
         Relationships: []
       }
+      decaissements: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_paiement: string | null
+          demande_achat_id: string
+          devis_fournisseur_id: string | null
+          id: string
+          montant: number
+          motif: string | null
+          reference: string
+          reference_paiement: string | null
+          statut: Database["public"]["Enums"]["statut_decaissement"]
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          demande_achat_id: string
+          devis_fournisseur_id?: string | null
+          id?: string
+          montant?: number
+          motif?: string | null
+          reference?: string
+          reference_paiement?: string | null
+          statut?: Database["public"]["Enums"]["statut_decaissement"]
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_paiement?: string | null
+          demande_achat_id?: string
+          devis_fournisseur_id?: string | null
+          id?: string
+          montant?: number
+          motif?: string | null
+          reference?: string
+          reference_paiement?: string | null
+          statut?: Database["public"]["Enums"]["statut_decaissement"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decaissements_demande_achat_id_fkey"
+            columns: ["demande_achat_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decaissements_devis_fournisseur_id_fkey"
+            columns: ["devis_fournisseur_id"]
+            isOneToOne: false
+            referencedRelation: "devis_fournisseurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demandes_achat: {
+        Row: {
+          commentaire_dg: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          designation: string
+          id: string
+          maintenance_id: string | null
+          montant_estime: number
+          quantite: number
+          reference: string
+          statut: Database["public"]["Enums"]["statut_demande_achat"]
+          updated_at: string
+          urgence: string
+        }
+        Insert: {
+          commentaire_dg?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          designation?: string
+          id?: string
+          maintenance_id?: string | null
+          montant_estime?: number
+          quantite?: number
+          reference: string
+          statut?: Database["public"]["Enums"]["statut_demande_achat"]
+          updated_at?: string
+          urgence?: string
+        }
+        Update: {
+          commentaire_dg?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          designation?: string
+          id?: string
+          maintenance_id?: string | null
+          montant_estime?: number
+          quantite?: number
+          reference?: string
+          statut?: Database["public"]["Enums"]["statut_demande_achat"]
+          updated_at?: string
+          urgence?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demandes_achat_maintenance_id_fkey"
+            columns: ["maintenance_id"]
+            isOneToOne: false
+            referencedRelation: "maintenances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       depenses: {
         Row: {
           categorie: Database["public"]["Enums"]["categorie_depense"]
@@ -253,6 +372,66 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_fournisseurs: {
+        Row: {
+          commentaire: string | null
+          conditions: string | null
+          created_at: string
+          created_by: string | null
+          delai_livraison_jours: number | null
+          demande_achat_id: string
+          document_url: string | null
+          fournisseur_id: string
+          id: string
+          montant: number
+          retenu: boolean
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          delai_livraison_jours?: number | null
+          demande_achat_id: string
+          document_url?: string | null
+          fournisseur_id: string
+          id?: string
+          montant?: number
+          retenu?: boolean
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          delai_livraison_jours?: number | null
+          demande_achat_id?: string
+          document_url?: string | null
+          fournisseur_id?: string
+          id?: string
+          montant?: number
+          retenu?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_fournisseurs_demande_achat_id_fkey"
+            columns: ["demande_achat_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devis_fournisseurs_fournisseur_id_fkey"
+            columns: ["fournisseur_id"]
+            isOneToOne: false
+            referencedRelation: "fournisseurs"
             referencedColumns: ["id"]
           },
         ]
@@ -731,6 +910,17 @@ export type Database = {
         | "EN_MISSION"
         | "EN_REPOS"
         | "INDISPONIBLE"
+      statut_decaissement: "EN_ATTENTE" | "APPROUVE" | "PAYE" | "REJETE"
+      statut_demande_achat:
+        | "BROUILLON"
+        | "SOUMISE"
+        | "DEVIS_EN_COURS"
+        | "SOUMISE_DG"
+        | "VALIDEE_DG"
+        | "REFUSEE_DG"
+        | "DECAISSEMENT"
+        | "PAYEE"
+        | "CLOTUREE"
       statut_devis:
         | "BROUILLON"
         | "SOUMIS_DG"
@@ -899,6 +1089,18 @@ export const Constants = {
         "EN_MISSION",
         "EN_REPOS",
         "INDISPONIBLE",
+      ],
+      statut_decaissement: ["EN_ATTENTE", "APPROUVE", "PAYE", "REJETE"],
+      statut_demande_achat: [
+        "BROUILLON",
+        "SOUMISE",
+        "DEVIS_EN_COURS",
+        "SOUMISE_DG",
+        "VALIDEE_DG",
+        "REFUSEE_DG",
+        "DECAISSEMENT",
+        "PAYEE",
+        "CLOTUREE",
       ],
       statut_devis: [
         "BROUILLON",
