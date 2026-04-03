@@ -759,6 +759,53 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </DialogContent>
       </Dialog>
 
+      {/* Edit Operation Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Éditer la demande d'opération</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Lieu de récupération *</Label>
+                <Input value={editForm.lieu_embarquement} onChange={(e) => setEditForm(f => ({ ...f, lieu_embarquement: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Lieu de livraison *</Label>
+                <Input value={editForm.lieu_livraison} onChange={(e) => setEditForm(f => ({ ...f, lieu_livraison: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Poids (kg)</Label>
+                <Input type="number" value={editForm.poids_kg} onChange={(e) => setEditForm(f => ({ ...f, poids_kg: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Nombre de colis</Label>
+                <Input type="number" value={editForm.nombre_colis} onChange={(e) => setEditForm(f => ({ ...f, nombre_colis: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Nature de la marchandise</Label>
+              <Input value={editForm.nature_marchandise} onChange={(e) => setEditForm(f => ({ ...f, nature_marchandise: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Précautions particulières</Label>
+              <Textarea value={editForm.precautions} onChange={(e) => setEditForm(f => ({ ...f, precautions: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>Commentaires</Label>
+              <Textarea value={editForm.commentaires} onChange={(e) => setEditForm(f => ({ ...f, commentaires: e.target.value }))} rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Annuler</Button>
+            <Button onClick={handleEditOperation}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
