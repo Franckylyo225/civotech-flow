@@ -17,6 +17,8 @@ export default function ParcAutoModule() {
         <p className="text-sm text-muted-foreground mt-1">Véhicules, maintenance et chauffeurs</p>
       </div>
 
+      <ParcAlerts />
+
       <Tabs defaultValue="vehicules" className="space-y-4">
         <TabsList>
           <TabsTrigger value="vehicules" className="gap-1.5">
