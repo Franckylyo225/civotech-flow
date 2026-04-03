@@ -10,6 +10,7 @@ import {
   Wrench,
   BarChart3,
   Bell,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
