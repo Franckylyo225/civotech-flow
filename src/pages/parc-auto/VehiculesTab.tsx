@@ -209,17 +209,6 @@ export default function VehiculesTab({ canManage }: Props) {
               <div className="space-y-2"><Label>Année</Label><Input type="number" value={form.annee} onChange={e => setForm(f => ({ ...f, annee: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km actuel</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>
             </div>
-            <div className="space-y-2">
-              <Label>Statut</Label>
-              <Select value={form.statut} onValueChange={v => setForm(f => ({ ...f, statut: v as StatutCamion }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                  <SelectItem value="EN_MISSION">En mission</SelectItem>
-                  <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Annuler</Button>
