@@ -73,13 +73,15 @@ export default function FacturesTab({ canManage }: Props) {
     if (!createForm.operation_id) { toast.error("Sélectionnez une opération"); return; }
     const op = operations.find(o => o.id === createForm.operation_id);
     if (!op) return;
-    const montantHt = op.montant_devis;
+    // Get client_id from DB since Operation type uses camelCase without clientId
+    const { data: opRow } = await supabase.from("operations").select("client_id").eq("id", op.id).single();
+    const montantHt = op.montantDevis;
     const montantTva = montantHt * createForm.taux_tva / 100;
     const montantTtc = montantHt + montantTva;
     try {
       await addFacture({
         operation_id: op.id,
-        client_id: op.client_id,
+        client_id: opRow?.client_id || null,
         montant_ht: montantHt,
         taux_tva: createForm.taux_tva,
         montant_tva: Math.round(montantTva),
