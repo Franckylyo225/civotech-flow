@@ -4,6 +4,7 @@ import {
   Wrench, Navigation, Package, Calendar, Hash, Gauge,
 } from "lucide-react";
 import { useParcAutoStore, STATUT_CAMION_CONFIG, type CamionRow, type StatutCamion } from "@/hooks/use-parc-auto-store";
+import VehiculeDetailDialog from "./VehiculeDetailDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ export default function VehiculesTab({ canManage }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [detailCamion, setDetailCamion] = useState<CamionRow | null>(null);
 
   const filtered = camions.filter(c => {
     const matchSearch =
@@ -141,7 +143,7 @@ export default function VehiculesTab({ canManage }: Props) {
               {filtered.map(camion => {
                 const cfg = STATUT_CAMION_CONFIG[camion.statut];
                 return (
-                  <TableRow key={camion.id}>
+                  <TableRow key={camion.id} className="cursor-pointer" onClick={() => setDetailCamion(camion)}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
@@ -238,6 +240,8 @@ export default function VehiculesTab({ canManage }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VehiculeDetailDialog camion={detailCamion} open={!!detailCamion} onOpenChange={o => { if (!o) setDetailCamion(null); }} />
     </div>
   );
 }
