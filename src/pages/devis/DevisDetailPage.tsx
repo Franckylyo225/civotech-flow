@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -17,7 +19,15 @@ interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
   onUpdateDevis?: (devisId: string, data: { lignes: { id?: string; description: string; quantite: number; prixUnitaire: number }[]; tauxTva: number; typeRemise: TypeRemise; valeurRemise: number }) => Promise<void>;
-  onCreateOperation?: (devis: Devis) => Promise<boolean>;
+  onCreateOperation?: (devis: Devis, extras?: {
+    lieu_embarquement?: string;
+    lieu_livraison?: string;
+    poids_kg?: number | null;
+    nombre_colis?: number | null;
+    nature_marchandise?: string;
+    precautions?: string;
+    commentaires?: string;
+  }) => Promise<boolean>;
   onBack: () => void;
 }
 
@@ -28,7 +38,16 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
-  const [creatingOp, setCreatingOp] = useState(false);
+  const [showOpDialog, setShowOpDialog] = useState(false);
+  const [opForm, setOpForm] = useState({
+    lieu_embarquement: "",
+    lieu_livraison: "",
+    poids_kg: "",
+    nombre_colis: "",
+    nature_marchandise: "",
+    precautions: "",
+    commentaires: "",
+  });
 
   const role = user?.role;
 
@@ -50,12 +69,27 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
     setShowRefusDialog(true);
   };
 
+  const [creatingOp, setCreatingOp] = useState(false);
+
   const handleCreateOperation = async () => {
     if (!onCreateOperation) return;
+    if (!opForm.lieu_embarquement.trim() || !opForm.lieu_livraison.trim()) {
+      toast.error("Les lieux de récupération et de livraison sont obligatoires");
+      return;
+    }
     setCreatingOp(true);
-    const ok = await onCreateOperation(devis);
+    const ok = await onCreateOperation(devis, {
+      lieu_embarquement: opForm.lieu_embarquement.trim(),
+      lieu_livraison: opForm.lieu_livraison.trim(),
+      poids_kg: opForm.poids_kg ? Number(opForm.poids_kg) : null,
+      nombre_colis: opForm.nombre_colis ? Number(opForm.nombre_colis) : null,
+      nature_marchandise: opForm.nature_marchandise.trim(),
+      precautions: opForm.precautions.trim(),
+      commentaires: opForm.commentaires.trim(),
+    });
     setCreatingOp(false);
     if (ok) {
+      setShowOpDialog(false);
       toast.success("Demande d'opération créée avec succès");
       navigate("/operations");
     }
@@ -169,9 +203,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
               <div className="space-y-2">
                 <p className="text-sm text-success font-medium text-center">✓ Devis validé par le client</p>
                 {(role === "COMMERCIAL" || role === "DG" || role === "LOGISTIQUE") && (
-                  <Button className="w-full" onClick={handleCreateOperation} disabled={creatingOp}>
-                    <Truck className="mr-2 h-4 w-4" />
-                    {creatingOp ? "Création..." : "Créer une demande d'opération"}
+                  <Button className="w-full" onClick={() => setShowOpDialog(true)}>
+                    <Truck className="mr-2 h-4 w-4" /> Créer une demande d'opération
                   </Button>
                 )}
               </div>
@@ -249,6 +282,87 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
             <Button variant="outline" onClick={() => setShowRefusDialog(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleRefus} disabled={!commentaireRefus.trim()}>
               Confirmer le refus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Operation creation dialog */}
+      <Dialog open={showOpDialog} onOpenChange={setShowOpDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Créer une demande d'opération</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Lieu de récupération *</Label>
+                <Input
+                  value={opForm.lieu_embarquement}
+                  onChange={(e) => setOpForm((p) => ({ ...p, lieu_embarquement: e.target.value }))}
+                  placeholder="Ex: Port de Douala"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lieu de livraison *</Label>
+                <Input
+                  value={opForm.lieu_livraison}
+                  onChange={(e) => setOpForm((p) => ({ ...p, lieu_livraison: e.target.value }))}
+                  placeholder="Ex: Yaoundé Centre"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Poids (kg)</Label>
+                <Input
+                  type="number"
+                  value={opForm.poids_kg}
+                  onChange={(e) => setOpForm((p) => ({ ...p, poids_kg: e.target.value }))}
+                  placeholder="Ex: 5000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nombre de colis</Label>
+                <Input
+                  type="number"
+                  value={opForm.nombre_colis}
+                  onChange={(e) => setOpForm((p) => ({ ...p, nombre_colis: e.target.value }))}
+                  placeholder="Ex: 120"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Nature de la marchandise</Label>
+              <Input
+                value={opForm.nature_marchandise}
+                onChange={(e) => setOpForm((p) => ({ ...p, nature_marchandise: e.target.value }))}
+                placeholder="Ex: Matériaux de construction, denrées alimentaires..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Précautions particulières</Label>
+              <Textarea
+                value={opForm.precautions}
+                onChange={(e) => setOpForm((p) => ({ ...p, precautions: e.target.value }))}
+                placeholder="Ex: Fragile, maintenir au frais, ne pas empiler..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaires</Label>
+              <Textarea
+                value={opForm.commentaires}
+                onChange={(e) => setOpForm((p) => ({ ...p, commentaires: e.target.value }))}
+                placeholder="Informations complémentaires..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOpDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateOperation} disabled={creatingOp}>
+              {creatingOp ? "Création..." : "Créer la demande"}
             </Button>
           </DialogFooter>
         </DialogContent>
