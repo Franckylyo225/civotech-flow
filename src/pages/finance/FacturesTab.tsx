@@ -55,6 +55,7 @@ export default function FacturesTab({ canManage }: Props) {
 
   const getClientNom = (id: string | null) => id ? clients.find(c => c.id === id)?.nom || "—" : "—";
   const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
+  const getOpBL = (id: string | null) => id ? operations.find(o => o.id === id)?.bonLivraisonUrl : undefined;
 
   // Operations that don't have a facture yet and are TERMINEE
   const availableOps = operations.filter(op =>
