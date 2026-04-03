@@ -232,7 +232,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               {filtered.map(d => {
                 const statutCfg = STATUT_DECAISSEMENT_CONFIG[d.statut];
                 return (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailDialog(d)}>
                     <TableCell className="font-mono text-sm font-medium">{d.reference}</TableCell>
                     <TableCell className="text-sm max-w-[200px] truncate">{d.motif || "—"}</TableCell>
                     <TableCell className="text-sm">
@@ -242,7 +242,10 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                           <p className="text-xs text-muted-foreground truncate max-w-[150px]">{getDADesignation(d.demande_achat_id)}</p>
                         </div>
                       ) : d.operation_id ? (
-                        <Badge variant="outline" className="text-xs">Mission</Badge>
+                        <div>
+                          <span className="font-mono text-xs">{getOpRef(d.operation_id)}</span>
+                          <p className="text-xs text-muted-foreground">Mission</p>
+                        </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">Direct</span>
                       )}
