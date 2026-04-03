@@ -286,6 +286,87 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Operation creation dialog */}
+      <Dialog open={showOpDialog} onOpenChange={setShowOpDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Créer une demande d'opération</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Lieu de récupération *</Label>
+                <Input
+                  value={opForm.lieu_embarquement}
+                  onChange={(e) => setOpForm((p) => ({ ...p, lieu_embarquement: e.target.value }))}
+                  placeholder="Ex: Port de Douala"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lieu de livraison *</Label>
+                <Input
+                  value={opForm.lieu_livraison}
+                  onChange={(e) => setOpForm((p) => ({ ...p, lieu_livraison: e.target.value }))}
+                  placeholder="Ex: Yaoundé Centre"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Poids (kg)</Label>
+                <Input
+                  type="number"
+                  value={opForm.poids_kg}
+                  onChange={(e) => setOpForm((p) => ({ ...p, poids_kg: e.target.value }))}
+                  placeholder="Ex: 5000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nombre de colis</Label>
+                <Input
+                  type="number"
+                  value={opForm.nombre_colis}
+                  onChange={(e) => setOpForm((p) => ({ ...p, nombre_colis: e.target.value }))}
+                  placeholder="Ex: 120"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Nature de la marchandise</Label>
+              <Input
+                value={opForm.nature_marchandise}
+                onChange={(e) => setOpForm((p) => ({ ...p, nature_marchandise: e.target.value }))}
+                placeholder="Ex: Matériaux de construction, denrées alimentaires..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Précautions particulières</Label>
+              <Textarea
+                value={opForm.precautions}
+                onChange={(e) => setOpForm((p) => ({ ...p, precautions: e.target.value }))}
+                placeholder="Ex: Fragile, maintenir au frais, ne pas empiler..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaires</Label>
+              <Textarea
+                value={opForm.commentaires}
+                onChange={(e) => setOpForm((p) => ({ ...p, commentaires: e.target.value }))}
+                placeholder="Informations complémentaires..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOpDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateOperation} disabled={creatingOp}>
+              {creatingOp ? "Création..." : "Créer la demande"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
