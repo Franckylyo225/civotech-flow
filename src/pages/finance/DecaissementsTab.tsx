@@ -26,7 +26,7 @@ import { Calendar } from "@/components/ui/calendar";
 interface Props { canManage: boolean; isDG: boolean; }
 
 export default function DecaissementsTab({ canManage, isDG }: Props) {
-  const { decaissements, loading, stats, updateDecaissement, addDecaissement } = useDecaissementsStore();
+  const { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
