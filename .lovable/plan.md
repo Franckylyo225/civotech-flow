@@ -1,65 +1,41 @@
 
-# Module Paramètres — Plan d'implémentation
 
-## Ce qui existe déjà
-- ✅ Table `user_roles` avec enum `app_role` (DG, COMMERCIAL, LOGISTIQUE, FINANCE, ACHATS, ASSISTANTE)
-- ✅ Table `profiles` (nom, prénom, téléphone, avatar)
-- ✅ Authentification email/mot de passe
-- ✅ RLS policies par rôle sur toutes les tables
-- ✅ Fonction `has_role()` pour le contrôle d'accès
+# Plan: Triggers automatiques pour le journal d'activité
 
-## Phase 1 — Fondations (Tables + Pages de base)
+## Constat
+Les fonctions de notification (`on_devis_created`, `on_devis_soumis_dg`, etc.) existent mais **aucun trigger n'est attaché** aux tables. Le journal `activity_logs` n'est pas non plus alimenté automatiquement.
 
-### 1.1 Table `company_settings`
-- Informations entreprise (nom, logo, adresse, téléphone, email, site web)
-- Paramètres métier (devise, format date, fuseau horaire, langue)
-- Paramètres financiers (taux TVA, conditions paiement, préfixes factures)
-- Stocké en JSON flexible pour éviter les migrations à chaque nouveau champ
+## Migration SQL unique
 
-### 1.2 Table `activity_logs`
-- Journal d'activité (user_id, action, table concernée, détails, timestamp)
-- Pour traçabilité des changements importants
+### 1. Fonction générique `log_activity()`
+Fonction trigger SECURITY DEFINER qui insère dans `activity_logs` à chaque INSERT/UPDATE/DELETE sur les tables surveillées. Elle capture :
+- `user_id` depuis `auth.uid()`
+- `action` (CREATE/UPDATE/DELETE)
+- `table_cible` (nom de la table)
+- `enregistrement_id` (ID de l'enregistrement)
+- `details` (JSON avec les champs modifiés pour UPDATE, ou les données clés pour INSERT)
 
-### 1.3 Mise à jour enum `app_role`
-- Ajouter les rôles manquants : MAINTENANCE, ADMIN (si souhaité)
-- Ou garder les rôles existants et mapper LOGISTIQUE→Maintenance, FINANCE→Comptabilité
+### 2. Triggers activity_logs sur 6 tables
+Attacher `log_activity()` en AFTER INSERT/UPDATE/DELETE sur :
+- `devis`
+- `operations`
+- `factures`
+- `decaissements`
+- `demandes_achat`
+- `maintenances`
 
-### 1.4 Pages UI
-- `/parametres` avec onglets : Entreprise | Utilisateurs | Rôles | Sécurité | Profil
+### 3. Triggers notifications (manquants)
+Attacher les fonctions existantes qui ne sont pas connectées :
+- `on_devis_created` → AFTER INSERT on `devis`
+- `on_devis_soumis_dg` → AFTER UPDATE on `devis`
+- `on_maintenance_created` → AFTER INSERT on `maintenances`
+- `on_demande_achat_soumise_dg` → AFTER UPDATE on `demandes_achat`
+- `on_decaissement_created` → AFTER INSERT on `decaissements`
 
-## Phase 2 — Gestion utilisateurs + Rôles
+## Pas de changement UI
+Le `LogsTab.tsx` existant affiche déjà les données de `activity_logs` — il fonctionnera automatiquement une fois les triggers en place.
 
-### 2.1 Page Gestion Utilisateurs (DG/ADMIN only)
-- Liste des utilisateurs avec statut, rôle, dernière connexion
-- Création d'utilisateur (invitation par email)
-- Modification / désactivation
-- Réinitialisation mot de passe
+## Sécurité
+- La fonction `log_activity()` utilise `SECURITY DEFINER` pour pouvoir insérer dans `activity_logs` quel que soit le rôle
+- Les données sensibles (mots de passe, tokens) ne sont jamais loguées
 
-### 2.2 Page Rôles & Permissions
-- Vue matricielle : rôle × module × actions (lecture/création/validation/suppression)
-- Basé sur les rôles existants dans l'enum
-
-### 2.3 Page Profil Utilisateur
-- Modification infos personnelles
-- Changement mot de passe
-- Préférences (langue, notifications)
-
-## Phase 3 — Sécurité & Notifications
-
-### 3.1 Journal d'activité
-- Logs des actions critiques (connexion, modification données, validations)
-- Interface de consultation avec filtres
-
-### 3.2 Notifications in-app
-- Table `notifications` (user_id, type, message, lu, created_at)
-- Icône cloche dans le header avec badge
-- Notifications automatiques (validation DG, mission assignée, paiement)
-
-### 3.3 Dashboard Admin
-- Stats utilisateurs actifs, répartition par rôle
-- Activité récente, alertes sécurité
-
-## Décisions à prendre
-1. **Rôles** : Garder les 6 actuels ou ajouter MAINTENANCE + ADMIN ?
-2. **Multi-tenant** : Ce n'est pas un SaaS, donc une seule entreprise ? 
-3. **Notifications email/SMS** : Prioritaire ou à faire plus tard ?
