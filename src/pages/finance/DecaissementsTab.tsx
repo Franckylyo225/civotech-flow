@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal, Eye,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -29,6 +29,7 @@ interface Props { canManage: boolean; isDG: boolean; }
 export default function DecaissementsTab({ canManage, isDG }: Props) {
   const { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
+  const [operations, setOperations] = useState<{ id: string; reference: string; client_nom: string; lieu_embarquement: string; lieu_livraison: string }[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
@@ -40,9 +41,18 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [editDialog, setEditDialog] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
+  const [detailDialog, setDetailDialog] = useState<DecaissementRow | null>(null);
+
+  useEffect(() => {
+    supabase.from("operations").select("id, reference, client_nom, lieu_embarquement, lieu_livraison").then(({ data }) => {
+      setOperations(data || []);
+    });
+  }, []);
 
   const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
+  const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
+  const getOp = (id: string | null) => id ? operations.find(o => o.id === id) : null;
 
   const filtered = decaissements.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
@@ -222,7 +232,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               {filtered.map(d => {
                 const statutCfg = STATUT_DECAISSEMENT_CONFIG[d.statut];
                 return (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailDialog(d)}>
                     <TableCell className="font-mono text-sm font-medium">{d.reference}</TableCell>
                     <TableCell className="text-sm max-w-[200px] truncate">{d.motif || "—"}</TableCell>
                     <TableCell className="text-sm">
@@ -232,7 +242,10 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                           <p className="text-xs text-muted-foreground truncate max-w-[150px]">{getDADesignation(d.demande_achat_id)}</p>
                         </div>
                       ) : d.operation_id ? (
-                        <Badge variant="outline" className="text-xs">Mission</Badge>
+                        <div>
+                          <span className="font-mono text-xs">{getOpRef(d.operation_id)}</span>
+                          <p className="text-xs text-muted-foreground">Mission</p>
+                        </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">Direct</span>
                       )}
@@ -246,7 +259,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                     <TableCell className="text-sm text-muted-foreground">
                       {d.date_paiement ? format(new Date(d.date_paiement), "dd/MM/yyyy") : format(new Date(d.created_at), "dd/MM/yyyy")}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         {isDG && d.statut === "EN_ATTENTE" && (
                           <>
@@ -258,7 +271,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                             </Button>
                           </>
                         )}
-                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
+                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && !d.operation_id && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size="sm" variant="outline" className="h-7 w-7 p-0">
@@ -386,6 +399,91 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelDialog(null)}>Non, garder</Button>
             <Button variant="destructive" onClick={handleAnnuler}>Oui, annuler</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detail dialog */}
+      <Dialog open={!!detailDialog} onOpenChange={() => setDetailDialog(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="font-mono">{detailDialog?.reference}</span>
+              {detailDialog && (
+                <Badge variant="outline" className={cn("border-0 text-xs font-medium", STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].bgColor, STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].color)}>
+                  {STATUT_DECAISSEMENT_CONFIG[detailDialog.statut].label}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {detailDialog && (() => {
+            const op = getOp(detailDialog.operation_id);
+            const da = detailDialog.demande_achat_id ? demandes.find(d => d.id === detailDialog.demande_achat_id) : null;
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Montant</p>
+                    <p className="text-lg font-bold">{detailDialog.montant.toLocaleString()} F</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date de création</p>
+                    <p className="text-sm font-medium">{format(new Date(detailDialog.created_at), "dd/MM/yyyy à HH:mm")}</p>
+                  </div>
+                </div>
+
+                {detailDialog.motif && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Motif</p>
+                    <p className="text-sm">{detailDialog.motif}</p>
+                  </div>
+                )}
+
+                {detailDialog.commentaire && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Commentaire</p>
+                    <p className="text-sm">{detailDialog.commentaire}</p>
+                  </div>
+                )}
+
+                {/* Linked entity */}
+                {op && (
+                  <Card className="border border-border shadow-none">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">Opération liée</p>
+                      <p className="font-mono text-sm font-medium">{op.reference}</p>
+                      <p className="text-xs text-muted-foreground">Client : {op.client_nom}</p>
+                      <p className="text-xs text-muted-foreground">Trajet : {op.lieu_embarquement} → {op.lieu_livraison}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {da && (
+                  <Card className="border border-border shadow-none">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">Demande d'achat liée</p>
+                      <p className="font-mono text-sm font-medium">{da.reference}</p>
+                      <p className="text-xs text-muted-foreground">{da.designation}</p>
+                      <p className="text-xs text-muted-foreground">Montant estimé : {da.montant_estime?.toLocaleString()} F</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Payment info */}
+                {detailDialog.statut === "PAYE" && (
+                  <Card className="border border-border shadow-none bg-success/5">
+                    <CardContent className="p-3 space-y-1">
+                      <p className="text-xs font-semibold text-success">Paiement effectué</p>
+                      {detailDialog.reference_paiement && <p className="text-sm">Réf : {detailDialog.reference_paiement}</p>}
+                      {detailDialog.date_paiement && <p className="text-xs text-muted-foreground">Le {format(new Date(detailDialog.date_paiement), "dd/MM/yyyy")}</p>}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailDialog(null)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
