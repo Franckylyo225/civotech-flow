@@ -34,18 +34,9 @@ interface OperationDetailProps {
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
   onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
-  onUpdateOperation?: (opId: string, data: {
-    lieu_embarquement?: string;
-    lieu_livraison?: string;
-    poids_kg?: number | null;
-    nombre_colis?: number | null;
-    nature_marchandise?: string;
-    precautions?: string;
-    commentaires?: string;
-  }) => Promise<void>;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu, onUpdateOperation }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
@@ -63,16 +54,6 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showIncidentDialog, setShowIncidentDialog] = useState(false);
   const [incidentForm, setIncidentForm] = useState<{ type: TypeIncident; description: string; gravite: GraviteIncident }>({
     type: "AUTRE", description: "", gravite: "MOYENNE",
-  });
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editForm, setEditForm] = useState({
-    lieu_embarquement: "",
-    lieu_livraison: "",
-    poids_kg: "",
-    nombre_colis: "",
-    nature_marchandise: "",
-    precautions: "",
-    commentaires: "",
   });
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
@@ -158,22 +139,6 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
         </div>
         <div className="flex gap-2">
-          {canManage && op.statut === "DEMANDE" && (
-            <Button size="sm" variant="outline" onClick={() => {
-              setEditForm({
-                lieu_embarquement: op.lieuEmbarquement || "",
-                lieu_livraison: op.lieuLivraison || "",
-                poids_kg: op.poidsKg?.toString() || "",
-                nombre_colis: op.nombreColis?.toString() || "",
-                nature_marchandise: op.natureMarchandise || "",
-                precautions: op.precautions || "",
-                commentaires: op.commentaires || "",
-              });
-              setShowEditDialog(true);
-            }}>
-              Éditer la demande
-            </Button>
-          )}
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
               <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
@@ -746,102 +711,6 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </DialogContent>
       </Dialog>
 
-      {/* Edit DEMANDE dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Éditer la demande d'opération</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Lieu de récupération</Label>
-                <Input
-                  value={editForm.lieu_embarquement}
-                  onChange={(e) => setEditForm((p) => ({ ...p, lieu_embarquement: e.target.value }))}
-                  placeholder="Ex: Port de Douala"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Lieu de livraison</Label>
-                <Input
-                  value={editForm.lieu_livraison}
-                  onChange={(e) => setEditForm((p) => ({ ...p, lieu_livraison: e.target.value }))}
-                  placeholder="Ex: Yaoundé Centre"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Poids (kg)</Label>
-                <Input
-                  type="number"
-                  value={editForm.poids_kg}
-                  onChange={(e) => setEditForm((p) => ({ ...p, poids_kg: e.target.value }))}
-                  placeholder="Ex: 5000"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Nombre de colis</Label>
-                <Input
-                  type="number"
-                  value={editForm.nombre_colis}
-                  onChange={(e) => setEditForm((p) => ({ ...p, nombre_colis: e.target.value }))}
-                  placeholder="Ex: 120"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Nature de la marchandise</Label>
-              <Input
-                value={editForm.nature_marchandise}
-                onChange={(e) => setEditForm((p) => ({ ...p, nature_marchandise: e.target.value }))}
-                placeholder="Ex: Matériaux de construction, denrées alimentaires..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Précautions particulières</Label>
-              <Textarea
-                value={editForm.precautions}
-                onChange={(e) => setEditForm((p) => ({ ...p, precautions: e.target.value }))}
-                placeholder="Ex: Fragile, maintenir au frais, ne pas empiler..."
-                rows={3}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Commentaires</Label>
-              <Textarea
-                value={editForm.commentaires}
-                onChange={(e) => setEditForm((p) => ({ ...p, commentaires: e.target.value }))}
-                placeholder="Informations complémentaires..."
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Annuler</Button>
-            <Button onClick={async () => {
-              if (!editForm.lieu_embarquement.trim() || !editForm.lieu_livraison.trim()) {
-                toast.error("Les lieux de récupération et de livraison sont obligatoires");
-                return;
-              }
-              if (onUpdateOperation) {
-                await onUpdateOperation(op.id, {
-                  lieu_embarquement: editForm.lieu_embarquement.trim(),
-                  lieu_livraison: editForm.lieu_livraison.trim(),
-                  poids_kg: editForm.poids_kg ? Number(editForm.poids_kg) : null,
-                  nombre_colis: editForm.nombre_colis ? Number(editForm.nombre_colis) : null,
-                  nature_marchandise: editForm.nature_marchandise.trim(),
-                  precautions: editForm.precautions.trim(),
-                  commentaires: editForm.commentaires.trim(),
-                });
-              }
-              setShowEditDialog(false);
-              toast.success("Demande mise à jour");
-            }}>Enregistrer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
