@@ -662,6 +662,10 @@ export type Database = {
         Args: { p_camion_id: string }
         Returns: undefined
       }
+      recalculate_chauffeur_statut: {
+        Args: { p_chauffeur_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
