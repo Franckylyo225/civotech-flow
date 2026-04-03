@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDevisStore } from "@/hooks/use-devis-store";
+import { useGrilleTarifaireStore } from "@/hooks/use-grille-tarifaire-store";
 import DevisListPage from "./DevisListPage";
 import DevisCreateDialog from "./DevisCreateDialog";
 import DevisDetailPage from "./DevisDetailPage";
