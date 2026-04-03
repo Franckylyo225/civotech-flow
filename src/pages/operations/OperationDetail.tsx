@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut } from "@/types/operations";
-import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
+import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut, TypeIncident, GraviteIncident } from "@/types/operations";
+import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, TYPE_INCIDENT_CONFIG, GRAVITE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
