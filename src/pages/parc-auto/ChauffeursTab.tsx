@@ -21,7 +21,7 @@ const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", numero_permis: "",
   type_permis: "", date_expiration_permis: "",
   experience_annees: 0, disponible: true,
-  statut: "DISPONIBLE" as StatutChauffeur, camion_assigne_id: "",
+  camion_assigne_id: "",
 };
 
 interface Props { canManage: boolean; }
