@@ -12,6 +12,7 @@ import {
   Bell,
   Wallet,
   Settings,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 
