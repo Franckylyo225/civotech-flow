@@ -1,10 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Building2, Users, Shield, Activity } from "lucide-react";
+import { Settings, Building2, Users, Shield, Activity, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import EntrepriseTab from "./EntrepriseTab";
 import UtilisateursTab from "./UtilisateursTab";
 import RolesTab from "./RolesTab";
 import LogsTab from "./LogsTab";
+import AdminDashboardTab from "./AdminDashboardTab";
 
 export default function ParametresModule() {
   const { user } = useAuth();
@@ -19,8 +20,13 @@ export default function ParametresModule() {
         <p className="text-sm text-muted-foreground">Configuration de l'entreprise, utilisateurs et sécurité</p>
       </div>
 
-      <Tabs defaultValue="entreprise" className="space-y-4">
+      <Tabs defaultValue={isDGorAdmin ? "admin" : "entreprise"} className="space-y-4">
         <TabsList>
+          {isDGorAdmin && (
+            <TabsTrigger value="admin" className="gap-1.5">
+              <LayoutDashboard className="h-4 w-4" /> Dashboard
+            </TabsTrigger>
+          )}
           <TabsTrigger value="entreprise" className="gap-1.5">
             <Building2 className="h-4 w-4" /> Entreprise
           </TabsTrigger>
@@ -41,6 +47,11 @@ export default function ParametresModule() {
           )}
         </TabsList>
 
+        {isDGorAdmin && (
+          <TabsContent value="admin">
+            <AdminDashboardTab />
+          </TabsContent>
+        )}
         <TabsContent value="entreprise">
           <EntrepriseTab canEdit={isDGorAdmin} />
         </TabsContent>
