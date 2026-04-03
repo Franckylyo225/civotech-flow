@@ -688,6 +688,54 @@ export type Database = {
         }
         Relationships: []
       }
+      evenements_calendrier: {
+        Row: {
+          couleur: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          description: string | null
+          id: string
+          lieu: string | null
+          rappel_minutes: number | null
+          titre: string
+          toute_journee: boolean
+          type_evenement: Database["public"]["Enums"]["type_evenement"]
+          updated_at: string
+        }
+        Insert: {
+          couleur?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          description?: string | null
+          id?: string
+          lieu?: string | null
+          rappel_minutes?: number | null
+          titre: string
+          toute_journee?: boolean
+          type_evenement?: Database["public"]["Enums"]["type_evenement"]
+          updated_at?: string
+        }
+        Update: {
+          couleur?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          description?: string | null
+          id?: string
+          lieu?: string | null
+          rappel_minutes?: number | null
+          titre?: string
+          toute_journee?: boolean
+          type_evenement?: Database["public"]["Enums"]["type_evenement"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       factures: {
         Row: {
           client_id: string | null
@@ -1386,6 +1434,7 @@ export type Database = {
         | "EN_COURS"
         | "TERMINEE"
         | "ARCHIVEE"
+      type_evenement: "REUNION" | "RDV" | "DEPLACEMENT" | "RAPPEL" | "AUTRE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
       type_maintenance: "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT"
     }
@@ -1585,6 +1634,7 @@ export const Constants = {
         "TERMINEE",
         "ARCHIVEE",
       ],
+      type_evenement: ["REUNION", "RDV", "DEPLACEMENT", "RAPPEL", "AUTRE"],
       type_incident: ["PANNE", "ACCIDENT", "RETARD", "VOL", "AUTRE"],
       type_maintenance: ["PREVENTIVE", "CORRECTIVE", "REMPLACEMENT"],
     },

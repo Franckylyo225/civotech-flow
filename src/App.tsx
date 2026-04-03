@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
+import CalendrierPage from "@/pages/calendrier/CalendrierPage";
 import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
@@ -50,7 +51,7 @@ function AppRoutes() {
         <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
-        <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
+        <Route path="/calendrier" element={<CalendrierPage />} />
         <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
