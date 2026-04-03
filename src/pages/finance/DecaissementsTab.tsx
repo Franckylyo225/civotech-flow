@@ -30,6 +30,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [payDialog, setPayDialog] = useState<string | null>(null);
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
 
