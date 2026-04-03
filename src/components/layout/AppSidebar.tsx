@@ -3,15 +3,19 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleNavItems } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import { useApprobationsStore } from "@/hooks/use-approbations-store";
 import logoImg from "@/assets/logo-civotech.png";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const { counts } = useApprobationsStore();
 
   if (!user) return null;
 
   const navItems = roleNavItems[user.role];
+  const showBadge = (path: string) =>
+    path === "/approbations" && counts.total > 0;
 
   return (
     <aside className="flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar">
@@ -36,7 +40,12 @@ export function AppSidebar() {
               )}
             >
               <item.icon className={cn("h-[18px] w-[18px]", isActive && "text-sidebar-primary")} />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {showBadge(item.path) && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+                  {counts.total}
+                </span>
+              )}
             </Link>
           );
         })}
