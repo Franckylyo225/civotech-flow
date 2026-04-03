@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard, Loader2, CalendarIcon, AlertTriangle,
+  Phone, CreditCard, Loader2, CalendarIcon, AlertTriangle, Pencil,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,9 +34,10 @@ interface OperationDetailProps {
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
   onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
+  onUpdateOperation?: (opId: string, data: { lieu_embarquement?: string; lieu_livraison?: string; poids_kg?: number | null; nombre_colis?: number | null; nature_marchandise?: string; precautions?: string; commentaires?: string }) => void;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu, onUpdateOperation }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
@@ -55,6 +56,28 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [incidentForm, setIncidentForm] = useState<{ type: TypeIncident; description: string; gravite: GraviteIncident }>({
     type: "AUTRE", description: "", gravite: "MOYENNE",
   });
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editForm, setEditForm] = useState({
+    lieu_embarquement: op.lieuEmbarquement || "",
+    lieu_livraison: op.lieuLivraison || "",
+    poids_kg: op.poidsKg ?? "",
+    nombre_colis: op.nombreColis ?? "",
+    nature_marchandise: op.natureMarchandise || "",
+    precautions: op.precautions || "",
+    commentaires: op.commentaires || "",
+  });
+
+  useEffect(() => {
+    setEditForm({
+      lieu_embarquement: op.lieuEmbarquement || "",
+      lieu_livraison: op.lieuLivraison || "",
+      poids_kg: op.poidsKg ?? "",
+      nombre_colis: op.nombreColis ?? "",
+      nature_marchandise: op.natureMarchandise || "",
+      precautions: op.precautions || "",
+      commentaires: op.commentaires || "",
+    });
+  }, [op]);
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
   const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
@@ -123,6 +146,26 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     toast.success("Mission terminée");
   };
 
+  const handleEditOperation = () => {
+    if (!editForm.lieu_embarquement.trim() || !editForm.lieu_livraison.trim()) {
+      toast.error("Les lieux sont obligatoires");
+      return;
+    }
+    if (onUpdateOperation) {
+      onUpdateOperation(op.id, {
+        lieu_embarquement: editForm.lieu_embarquement.trim(),
+        lieu_livraison: editForm.lieu_livraison.trim(),
+        poids_kg: editForm.poids_kg ? Number(editForm.poids_kg) : null,
+        nombre_colis: editForm.nombre_colis ? Number(editForm.nombre_colis) : null,
+        nature_marchandise: editForm.nature_marchandise,
+        precautions: editForm.precautions,
+        commentaires: editForm.commentaires,
+      });
+    }
+    setShowEditDialog(false);
+    toast.success("Opération mise à jour");
+  };
+
   const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
 
   return (
@@ -139,6 +182,11 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
         </div>
         <div className="flex gap-2">
+          {canManage && op.statut === "DEMANDE" && (
+            <Button size="sm" variant="outline" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="mr-1.5 h-4 w-4" /> Éditer la demande
+            </Button>
+          )}
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
               <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
@@ -707,6 +755,53 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowIncidentDialog(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleAddIncident}>Signaler</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Operation Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Éditer la demande d'opération</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Lieu de récupération *</Label>
+                <Input value={editForm.lieu_embarquement} onChange={(e) => setEditForm(f => ({ ...f, lieu_embarquement: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Lieu de livraison *</Label>
+                <Input value={editForm.lieu_livraison} onChange={(e) => setEditForm(f => ({ ...f, lieu_livraison: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Poids (kg)</Label>
+                <Input type="number" value={editForm.poids_kg} onChange={(e) => setEditForm(f => ({ ...f, poids_kg: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Nombre de colis</Label>
+                <Input type="number" value={editForm.nombre_colis} onChange={(e) => setEditForm(f => ({ ...f, nombre_colis: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Nature de la marchandise</Label>
+              <Input value={editForm.nature_marchandise} onChange={(e) => setEditForm(f => ({ ...f, nature_marchandise: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Précautions particulières</Label>
+              <Textarea value={editForm.precautions} onChange={(e) => setEditForm(f => ({ ...f, precautions: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>Commentaires</Label>
+              <Textarea value={editForm.commentaires} onChange={(e) => setEditForm(f => ({ ...f, commentaires: e.target.value }))} rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Annuler</Button>
+            <Button onClick={handleEditOperation}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
