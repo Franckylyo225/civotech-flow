@@ -26,7 +26,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis }: 
   const filtered = devisList.filter((d) => {
     const matchSearch =
       d.reference.toLowerCase().includes(search.toLowerCase()) ||
-      d.client.nom.toLowerCase().includes(search.toLowerCase());
+      (d.client?.nom || "").toLowerCase().includes(search.toLowerCase());
     const matchStatut = statutFilter === "ALL" || d.statut === statutFilter;
     return matchSearch && matchStatut;
   });
