@@ -108,9 +108,13 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperati
 
         <Card>
           <CardHeader><CardTitle className="text-base">Montant</CardTitle></CardHeader>
-          <CardContent>
+          <CardContent className="space-y-1">
             <p className="text-3xl font-bold text-primary">{formatMontant(devis.montantTotal)}</p>
-            <p className="text-sm text-muted-foreground mt-1">{devis.lignes.length} ligne(s) de prestation</p>
+            <p className="text-xs text-muted-foreground">{devis.lignes.length} ligne(s) · HT: {formatMontant(devis.montantHT)}</p>
+            {devis.montantRemise > 0 && (
+              <p className="text-xs text-destructive">Remise: -{formatMontant(devis.montantRemise)}</p>
+            )}
+            <p className="text-xs text-muted-foreground">TVA ({devis.tauxTva}%): {formatMontant(devis.montantTva)}</p>
           </CardContent>
         </Card>
 

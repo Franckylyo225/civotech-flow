@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDevisStore } from "@/hooks/use-devis-store";
 import DevisListPage from "./DevisListPage";
-import DevisCreatePage from "./DevisCreatePage";
+import DevisCreateDialog from "./DevisCreateDialog";
 import DevisDetailPage from "./DevisDetailPage";
 import { Loader2 } from "lucide-react";
 
@@ -20,19 +20,6 @@ export default function DevisModule() {
     );
   }
 
-  if (showCreate) {
-    return (
-      <DevisCreatePage
-        clients={clients}
-        onSave={async (data) => {
-          await addDevis(data);
-          setShowCreate(false);
-        }}
-        onCancel={() => setShowCreate(false)}
-      />
-    );
-  }
-
   if (selectedDevis) {
     return (
       <DevisDetailPage
@@ -45,10 +32,18 @@ export default function DevisModule() {
   }
 
   return (
-    <DevisListPage
-      devisList={devisList}
-      onSelectDevis={(id) => setSelectedId(id)}
-      onNewDevis={() => setShowCreate(true)}
-    />
+    <>
+      <DevisListPage
+        devisList={devisList}
+        onSelectDevis={(id) => setSelectedId(id)}
+        onNewDevis={() => setShowCreate(true)}
+      />
+      <DevisCreateDialog
+        open={showCreate}
+        onOpenChange={setShowCreate}
+        clients={clients}
+        onSave={addDevis}
+      />
+    </>
   );
 }

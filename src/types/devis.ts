@@ -7,6 +7,8 @@ export type DevisStatut =
   | "VALIDE_CLIENT"
   | "REFUSE_CLIENT";
 
+export type TypeRemise = "POURCENTAGE" | "MONTANT";
+
 export interface LigneDevis {
   id: string;
   devisId: string;
@@ -31,6 +33,12 @@ export interface Devis {
   clientId: string | null;
   client?: Client;
   lignes: LigneDevis[];
+  montantHT: number;
+  tauxTva: number;
+  montantTva: number;
+  typeRemise: TypeRemise;
+  valeurRemise: number;
+  montantRemise: number;
   montantTotal: number;
   statut: DevisStatut;
   commentaireRefus?: string;
@@ -38,6 +46,14 @@ export interface Devis {
   commercialId: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateDevisData {
+  clientId: string;
+  lignes: { description: string; quantite: number; prixUnitaire: number }[];
+  tauxTva: number;
+  typeRemise: TypeRemise;
+  valeurRemise: number;
 }
 
 export const DEVIS_STATUT_CONFIG: Record<DevisStatut, { label: string; color: string; bgColor: string }> = {
@@ -68,4 +84,21 @@ export function formatDate(dateStr: string): string {
     month: "2-digit",
     year: "numeric",
   });
+}
+
+export function calculeDevisTotaux(
+  lignes: { quantite: number; prixUnitaire: number }[],
+  tauxTva: number,
+  typeRemise: TypeRemise,
+  valeurRemise: number
+) {
+  const montantHT = lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0);
+  const montantRemise =
+    typeRemise === "POURCENTAGE"
+      ? Math.round((montantHT * valeurRemise) / 100)
+      : valeurRemise;
+  const baseApresRemise = Math.max(0, montantHT - montantRemise);
+  const montantTva = Math.round((baseApresRemise * tauxTva) / 100);
+  const montantTotal = baseApresRemise + montantTva;
+  return { montantHT, montantRemise, montantTva, montantTotal };
 }

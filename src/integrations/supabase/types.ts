@@ -170,9 +170,15 @@ export type Database = {
           description: string | null
           id: string
           montant: number
+          montant_ht: number
+          montant_remise: number
+          montant_tva: number
           reference: string
           statut: Database["public"]["Enums"]["statut_devis"]
+          taux_tva: number
+          type_remise: string
           updated_at: string
+          valeur_remise: number
         }
         Insert: {
           client_id?: string | null
@@ -183,9 +189,15 @@ export type Database = {
           description?: string | null
           id?: string
           montant?: number
+          montant_ht?: number
+          montant_remise?: number
+          montant_tva?: number
           reference: string
           statut?: Database["public"]["Enums"]["statut_devis"]
+          taux_tva?: number
+          type_remise?: string
           updated_at?: string
+          valeur_remise?: number
         }
         Update: {
           client_id?: string | null
@@ -196,9 +208,15 @@ export type Database = {
           description?: string | null
           id?: string
           montant?: number
+          montant_ht?: number
+          montant_remise?: number
+          montant_tva?: number
           reference?: string
           statut?: Database["public"]["Enums"]["statut_devis"]
+          taux_tva?: number
+          type_remise?: string
           updated_at?: string
+          valeur_remise?: number
         }
         Relationships: [
           {
