@@ -43,7 +43,10 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       getDARef(d.demande_achat_id).toLowerCase().includes(search.toLowerCase()) ||
       getDADesignation(d.demande_achat_id).toLowerCase().includes(search.toLowerCase());
     const matchStatut = filterStatut === "ALL" || d.statut === filterStatut;
-    return matchSearch && matchStatut;
+    const createdDate = new Date(d.created_at);
+    const matchFrom = !dateFrom || createdDate >= dateFrom;
+    const matchTo = !dateTo || createdDate <= new Date(dateTo.getTime() + 86400000 - 1);
+    return matchSearch && matchStatut && matchFrom && matchTo;
   });
 
   const handleApprouver = async (id: string) => {
