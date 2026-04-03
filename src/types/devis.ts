@@ -5,7 +5,8 @@ export type DevisStatut =
   | "REFUSE_DG"
   | "ENVOYE_CLIENT"
   | "VALIDE_CLIENT"
-  | "REFUSE_CLIENT";
+  | "REFUSE_CLIENT"
+  | "ARCHIVE";
 
 export type TypeRemise = "POURCENTAGE" | "MONTANT";
 
