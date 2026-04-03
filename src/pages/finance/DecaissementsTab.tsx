@@ -66,10 +66,16 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
         date_paiement: payForm.date_paiement,
         commentaire: payForm.commentaire || null,
       });
-      // Also update linked demande_achat to PAYEE
+      // Update linked demande_achat to PAYEE + maintenance to EN_COURS
       const dec = decaissements.find(d => d.id === payDialog);
       if (dec) {
         await supabase.from("demandes_achat").update({ statut: "PAYEE" } as any).eq("id", dec.demande_achat_id);
+        // Find linked maintenance and start it
+        const { data: da } = await supabase.from("demandes_achat").select("maintenance_id").eq("id", dec.demande_achat_id).single();
+        if (da?.maintenance_id) {
+          await supabase.from("maintenances").update({ statut: "EN_COURS", date_debut: new Date().toISOString().slice(0, 10) } as any).eq("id", da.maintenance_id);
+          toast.success("Maintenance passée en cours d'exécution", { description: "Les pièces sont disponibles" });
+        }
       }
       toast.success("Paiement enregistré");
       setPayDialog(null);
