@@ -31,9 +31,11 @@ interface OperationDetailProps {
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
+  onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
+  onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
