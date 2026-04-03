@@ -46,6 +46,9 @@ function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], time
     montantDevis: Number(row.montant_devis),
     poidsKg: row.poids_kg ? Number(row.poids_kg) : undefined,
     nombreColis: row.nombre_colis || undefined,
+    natureMarchandise: row.nature_marchandise || undefined,
+    precautions: row.precautions || undefined,
+    commentaires: row.commentaires || undefined,
     bonLivraisonUrl: row.bon_livraison_url || undefined,
     depenses,
     incidents,
@@ -256,5 +259,18 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
-  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, refetch: fetchAll };
+  const updateOperation = useCallback(async (opId: string, data: {
+    lieu_embarquement?: string;
+    lieu_livraison?: string;
+    poids_kg?: number | null;
+    nombre_colis?: number | null;
+    nature_marchandise?: string;
+    precautions?: string;
+    commentaires?: string;
+  }) => {
+    await supabase.from("operations").update(data).eq("id", opId);
+    await fetchAll();
+  }, [fetchAll]);
+
+  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, updateOperation, refetch: fetchAll };
 }

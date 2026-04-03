@@ -63,6 +63,9 @@ export interface Operation {
   montantDevis: number;
   poidsKg?: number;
   nombreColis?: number;
+  natureMarchandise?: string;
+  precautions?: string;
+  commentaires?: string;
   createdAt: string;
   updatedAt: string;
   incidents: Incident[];

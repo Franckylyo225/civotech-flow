@@ -44,7 +44,7 @@ const TABS: { label: string; statut: OperationStatut | "ALL" }[] = [
 ];
 
 export default function OperationsModule() {
-  const { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu } = useOperationsStore();
+  const { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, updateOperation } = useOperationsStore();
   const [selectedId, setSelectedId] = useState<string>("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<OperationStatut | "ALL">("ALL");
@@ -182,6 +182,7 @@ export default function OperationsModule() {
             onPlanifier={planifierOperation}
             onAddIncident={addIncident}
             onToggleIncidentResolu={toggleIncidentResolu}
+            onUpdateOperation={updateOperation}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">

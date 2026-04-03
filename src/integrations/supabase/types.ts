@@ -353,6 +353,7 @@ export type Database = {
           chauffeur_id: string | null
           client_id: string | null
           client_nom: string
+          commentaires: string | null
           created_at: string
           created_by: string | null
           date_depart: string | null
@@ -365,8 +366,10 @@ export type Database = {
           lieu_embarquement: string
           lieu_livraison: string
           montant_devis: number
+          nature_marchandise: string | null
           nombre_colis: number | null
           poids_kg: number | null
+          precautions: string | null
           reference: string
           statut: Database["public"]["Enums"]["statut_operation"]
           updated_at: string
@@ -377,6 +380,7 @@ export type Database = {
           chauffeur_id?: string | null
           client_id?: string | null
           client_nom?: string
+          commentaires?: string | null
           created_at?: string
           created_by?: string | null
           date_depart?: string | null
@@ -389,8 +393,10 @@ export type Database = {
           lieu_embarquement?: string
           lieu_livraison?: string
           montant_devis?: number
+          nature_marchandise?: string | null
           nombre_colis?: number | null
           poids_kg?: number | null
+          precautions?: string | null
           reference: string
           statut?: Database["public"]["Enums"]["statut_operation"]
           updated_at?: string
@@ -401,6 +407,7 @@ export type Database = {
           chauffeur_id?: string | null
           client_id?: string | null
           client_nom?: string
+          commentaires?: string | null
           created_at?: string
           created_by?: string | null
           date_depart?: string | null
@@ -413,8 +420,10 @@ export type Database = {
           lieu_embarquement?: string
           lieu_livraison?: string
           montant_devis?: number
+          nature_marchandise?: string | null
           nombre_colis?: number | null
           poids_kg?: number | null
+          precautions?: string | null
           reference?: string
           statut?: Database["public"]["Enums"]["statut_operation"]
           updated_at?: string
