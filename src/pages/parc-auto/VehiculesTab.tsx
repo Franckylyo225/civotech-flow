@@ -32,6 +32,7 @@ export default function VehiculesTab({ canManage }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [detailCamion, setDetailCamion] = useState<CamionRow | null>(null);
 
   const filtered = camions.filter(c => {
     const matchSearch =
