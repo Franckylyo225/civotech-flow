@@ -21,10 +21,11 @@ interface DevisDetailPageProps {
   onBack: () => void;
 }
 
-export default function DevisDetailPage({ devis, onUpdateStatut, onCreateOperation, onBack }: DevisDetailPageProps) {
+export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, onCreateOperation, onBack }: DevisDetailPageProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showRefusDialog, setShowRefusDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
   const [creatingOp, setCreatingOp] = useState(false);
