@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Plus, Trash2, CheckCircle2, XCircle, Send, Star, FileText,
+  Plus, Trash2, CheckCircle2, XCircle, Send, Star, FileText, ChevronDown, ChevronUp,
 } from "lucide-react";
 import {
   useDevisFournisseursStore, type DevisFournisseurRow,
@@ -44,6 +44,7 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
   const [showAddDevis, setShowAddDevis] = useState(false);
   const [devisForm, setDevisForm] = useState(EMPTY_DEVIS);
   const [commentaireDG, setCommentaireDG] = useState(demande.commentaire_dg || "");
+  const [saving, setSaving] = useState(false);
 
   const statutCfg = STATUT_DA_CONFIG[demande.statut];
   const activeFournisseurs = fournisseurs.filter(f => f.actif);
@@ -77,7 +78,6 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
         if (decError) {
           toast.error("Validation OK mais erreur génération décaissement");
         } else {
-          // Also transition demande to DECAISSEMENT
           await onUpdate(demande.id, { statut: "DECAISSEMENT" as any });
           toast.success("Décaissement généré automatiquement", { description: "Consultez le module Finance" });
         }
@@ -91,6 +91,7 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
   const handleAddDevis = async () => {
     if (!devisForm.fournisseur_id) { toast.error("Sélectionnez un fournisseur"); return; }
     if (devisForm.montant <= 0) { toast.error("Le montant doit être positif"); return; }
+    setSaving(true);
     try {
       await addDevis({
         demande_achat_id: demande.id,
@@ -109,7 +110,8 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
       toast.success("Devis fournisseur ajouté");
       setShowAddDevis(false);
       setDevisForm(EMPTY_DEVIS);
-    } catch (err: any) { toast.error(err.message || "Erreur"); }
+    } catch (err: any) { toast.error(err.message || "Erreur lors de l'ajout"); }
+    finally { setSaving(false); }
   };
 
   const handleSelectDevis = async (id: string) => {
@@ -119,7 +121,6 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
-  // Find best offer
   const bestMontant = devisFournisseurs.length > 0 ? Math.min(...devisFournisseurs.map(d => d.montant)) : 0;
 
   return (
@@ -158,7 +159,7 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText className="h-4 w-4" /> Devis fournisseurs ({devisFournisseurs.length})
               </CardTitle>
-              {canAddDevis && (
+              {canAddDevis && !showAddDevis && (
                 <Button size="sm" variant="outline" onClick={() => setShowAddDevis(true)}>
                   <Plus className="mr-1 h-3.5 w-3.5" /> Ajouter un devis
                 </Button>
@@ -213,7 +214,48 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-center py-6 text-sm text-muted-foreground">Aucun devis fournisseur ajouté</p>
+              !showAddDevis && <p className="text-center py-6 text-sm text-muted-foreground">Aucun devis fournisseur ajouté</p>
+            )}
+
+            {/* Inline add devis form (replaces nested dialog) */}
+            {showAddDevis && (
+              <div className="border-t border-border p-4 space-y-4 bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-foreground">Nouveau devis fournisseur</h4>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setShowAddDevis(false); setDevisForm(EMPTY_DEVIS); }}>
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Fournisseur *</Label>
+                  <Select value={devisForm.fournisseur_id} onValueChange={v => setDevisForm(f => ({ ...f, fournisseur_id: v }))}>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner un fournisseur" /></SelectTrigger>
+                    <SelectContent>
+                      {activeFournisseurs.map(f => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Montant (F) *</Label>
+                    <Input type="number" min={1} value={devisForm.montant || ""} onChange={e => setDevisForm(f => ({ ...f, montant: Number(e.target.value) }))} placeholder="0" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">Délai (jours)</Label>
+                    <Input type="number" min={0} value={devisForm.delai_livraison_jours || ""} onChange={e => setDevisForm(f => ({ ...f, delai_livraison_jours: Number(e.target.value) }))} placeholder="0" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Conditions</Label>
+                  <Textarea value={devisForm.conditions} onChange={e => setDevisForm(f => ({ ...f, conditions: e.target.value }))} placeholder="Conditions de paiement, garantie..." rows={2} />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setShowAddDevis(false); setDevisForm(EMPTY_DEVIS); }}>Annuler</Button>
+                  <Button size="sm" onClick={handleAddDevis} disabled={saving}>
+                    {saving ? "Ajout..." : "Ajouter le devis"}
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -254,42 +296,6 @@ export default function DemandeAchatDetailDialog({ demande, open, onClose, canMa
             </Button>
           )}
         </DialogFooter>
-
-        {/* Add devis sub-dialog */}
-        <Dialog open={showAddDevis} onOpenChange={setShowAddDevis}>
-          <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>Ajouter un devis fournisseur</DialogTitle></DialogHeader>
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label>Fournisseur *</Label>
-                <Select value={devisForm.fournisseur_id} onValueChange={v => setDevisForm(f => ({ ...f, fournisseur_id: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent>
-                    {activeFournisseurs.map(f => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Montant (F) *</Label>
-                  <Input type="number" value={devisForm.montant} onChange={e => setDevisForm(f => ({ ...f, montant: Number(e.target.value) }))} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Délai (jours)</Label>
-                  <Input type="number" value={devisForm.delai_livraison_jours} onChange={e => setDevisForm(f => ({ ...f, delai_livraison_jours: Number(e.target.value) }))} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Conditions</Label>
-                <Textarea value={devisForm.conditions} onChange={e => setDevisForm(f => ({ ...f, conditions: e.target.value }))} placeholder="Conditions de paiement, garantie..." rows={2} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddDevis(false)}>Annuler</Button>
-              <Button onClick={handleAddDevis}>Ajouter</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </DialogContent>
     </Dialog>
   );
