@@ -101,8 +101,8 @@ export default function RapportsPage() {
     const mKey = format(m, "yyyy-MM");
     const label = format(m, "MMM yy", { locale: fr });
     const entrees = factures
-      .filter(f => f.statut === "PAYEE" && f.date_emission?.startsWith(mKey))
-      .reduce((s, f) => s + (f.montant_ttc || 0), 0);
+      .filter(f => ["PAYEE", "PARTIELLEMENT_PAYEE"].includes(f.statut) && f.date_emission?.startsWith(mKey))
+      .reduce((s, f) => s + (f.montant_paye || 0), 0);
     const sorties = decaissements
       .filter(d => d.statut === "PAYE" && (d.date_paiement?.startsWith(mKey) || d.created_at?.startsWith(mKey)))
       .reduce((s, d) => s + d.montant, 0);
