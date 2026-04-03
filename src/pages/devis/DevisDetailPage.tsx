@@ -38,7 +38,16 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
-  const [creatingOp, setCreatingOp] = useState(false);
+  const [showOpDialog, setShowOpDialog] = useState(false);
+  const [opForm, setOpForm] = useState({
+    lieu_embarquement: "",
+    lieu_livraison: "",
+    poids_kg: "",
+    nombre_colis: "",
+    nature_marchandise: "",
+    precautions: "",
+    commentaires: "",
+  });
 
   const role = user?.role;
 
