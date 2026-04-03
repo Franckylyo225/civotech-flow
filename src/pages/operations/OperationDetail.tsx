@@ -30,6 +30,7 @@ interface OperationDetailProps {
   onUpdateStatut: (opId: string, statut: OperationStatut) => void;
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
+  onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
 }
 
 export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense }: OperationDetailProps) {
