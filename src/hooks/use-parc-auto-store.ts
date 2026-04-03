@@ -55,8 +55,10 @@ export function useParcAutoStore() {
       immatriculation: camion.immatriculation,
       marque: camion.marque,
       modele: camion.modele,
+      type_vehicule: camion.type_vehicule,
       capacite_tonnes: camion.capacite_tonnes,
       annee: camion.annee,
+      km_actuel: camion.km_actuel,
       statut: camion.statut as any,
     });
     if (error) throw error;
