@@ -4,7 +4,7 @@ import type { Client } from "@/types/devis";
 import { toast } from "sonner";
 
 function mapClient(row: any): Client {
-  return { id: row.id, nom: row.nom, email: row.email, telephone: row.telephone, adresse: row.adresse, contact: row.contact };
+  return { id: row.id, nom: row.nom, email: row.email, telephone: row.telephone, adresse: row.adresse, contact: row.contact, created_at: row.created_at };
 }
 
 export interface CreateClientData {

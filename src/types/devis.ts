@@ -25,6 +25,7 @@ export interface Client {
   telephone: string | null;
   adresse: string | null;
   contact: string | null;
+  created_at?: string;
 }
 
 export interface Devis {
