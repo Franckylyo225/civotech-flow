@@ -228,6 +228,39 @@ export type Database = {
           },
         ]
       }
+      grille_tarifaire: {
+        Row: {
+          actif: boolean
+          categorie: string
+          created_at: string
+          designation: string
+          id: string
+          prix_unitaire: number
+          unite: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          categorie?: string
+          created_at?: string
+          designation: string
+          id?: string
+          prix_unitaire?: number
+          unite?: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          categorie?: string
+          created_at?: string
+          designation?: string
+          id?: string
+          prix_unitaire?: number
+          unite?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       incidents: {
         Row: {
           created_at: string
