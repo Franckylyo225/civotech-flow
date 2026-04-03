@@ -42,10 +42,10 @@ function AppRoutes() {
         <Route path="/factures" element={<PlaceholderPage title="Facturation" description="Gérez les factures et suivez les paiements." />} />
         <Route path="/achats" element={<PlaceholderPage title="Demandes d'achat" description="Créez et validez les demandes d'achat." />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
-        <Route path="/maintenance" element={<PlaceholderPage title="Maintenance" description="Suivez les demandes de maintenance." />} />
+        <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/calendrier" element={<PlaceholderPage title="Calendrier DG" description="Gérez l'agenda de la Direction Générale." />} />
         <Route path="/clients" element={<ClientsModule />} />
-        <Route path="/chauffeurs" element={<PlaceholderPage title="Chauffeurs" description="Gérez les chauffeurs et leur disponibilité." />} />
+        <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/fournisseurs" element={<PlaceholderPage title="Fournisseurs" description="Gérez le référentiel fournisseurs." />} />
         <Route path="/paiements" element={<PlaceholderPage title="Paiements" description="Suivez les paiements clients et fournisseurs." />} />
         <Route path="/utilisateurs" element={<PlaceholderPage title="Utilisateurs" description="Gérez les comptes utilisateurs et les rôles." />} />

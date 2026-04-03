@@ -21,9 +21,11 @@ export type Database = {
           created_at: string
           id: string
           immatriculation: string
+          km_actuel: number
           marque: string
           modele: string
           statut: Database["public"]["Enums"]["statut_camion"]
+          type_vehicule: string
           updated_at: string
         }
         Insert: {
@@ -32,9 +34,11 @@ export type Database = {
           created_at?: string
           id?: string
           immatriculation: string
+          km_actuel?: number
           marque: string
           modele: string
           statut?: Database["public"]["Enums"]["statut_camion"]
+          type_vehicule?: string
           updated_at?: string
         }
         Update: {
@@ -43,45 +47,70 @@ export type Database = {
           created_at?: string
           id?: string
           immatriculation?: string
+          km_actuel?: number
           marque?: string
           modele?: string
           statut?: Database["public"]["Enums"]["statut_camion"]
+          type_vehicule?: string
           updated_at?: string
         }
         Relationships: []
       }
       chauffeurs: {
         Row: {
+          camion_assigne_id: string | null
           created_at: string
+          date_expiration_permis: string | null
           disponible: boolean
+          experience_annees: number
           id: string
           nom: string
           numero_permis: string | null
           prenom: string
+          statut: Database["public"]["Enums"]["statut_chauffeur"]
           telephone: string | null
+          type_permis: string | null
           updated_at: string
         }
         Insert: {
+          camion_assigne_id?: string | null
           created_at?: string
+          date_expiration_permis?: string | null
           disponible?: boolean
+          experience_annees?: number
           id?: string
           nom: string
           numero_permis?: string | null
           prenom: string
+          statut?: Database["public"]["Enums"]["statut_chauffeur"]
           telephone?: string | null
+          type_permis?: string | null
           updated_at?: string
         }
         Update: {
+          camion_assigne_id?: string | null
           created_at?: string
+          date_expiration_permis?: string | null
           disponible?: boolean
+          experience_annees?: number
           id?: string
           nom?: string
           numero_permis?: string | null
           prenom?: string
+          statut?: Database["public"]["Enums"]["statut_chauffeur"]
           telephone?: string | null
+          type_permis?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chauffeurs_camion_assigne_id_fkey"
+            columns: ["camion_assigne_id"]
+            isOneToOne: false
+            referencedRelation: "camions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -346,6 +375,68 @@ export type Database = {
           },
         ]
       }
+      maintenances: {
+        Row: {
+          camion_id: string
+          cout_estime: number
+          cout_reel: number | null
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          date_prevue: string
+          description: string
+          id: string
+          km_declenchement: number | null
+          pieces_changees: string | null
+          statut: Database["public"]["Enums"]["statut_maintenance"]
+          type: Database["public"]["Enums"]["type_maintenance"]
+          updated_at: string
+        }
+        Insert: {
+          camion_id: string
+          cout_estime?: number
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_prevue?: string
+          description?: string
+          id?: string
+          km_declenchement?: number | null
+          pieces_changees?: string | null
+          statut?: Database["public"]["Enums"]["statut_maintenance"]
+          type?: Database["public"]["Enums"]["type_maintenance"]
+          updated_at?: string
+        }
+        Update: {
+          camion_id?: string
+          cout_estime?: number
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_prevue?: string
+          description?: string
+          id?: string
+          km_declenchement?: number | null
+          pieces_changees?: string | null
+          statut?: Database["public"]["Enums"]["statut_maintenance"]
+          type?: Database["public"]["Enums"]["type_maintenance"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenances_camion_id_fkey"
+            columns: ["camion_id"]
+            isOneToOne: false
+            referencedRelation: "camions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operations: {
         Row: {
           bon_livraison_url: string | null
@@ -579,6 +670,11 @@ export type Database = {
       categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
       gravite_incident: "FAIBLE" | "MOYENNE" | "CRITIQUE"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
+      statut_chauffeur:
+        | "DISPONIBLE"
+        | "EN_MISSION"
+        | "EN_REPOS"
+        | "INDISPONIBLE"
       statut_devis:
         | "BROUILLON"
         | "SOUMIS_DG"
@@ -588,6 +684,7 @@ export type Database = {
         | "VALIDE_CLIENT"
         | "REFUSE_CLIENT"
         | "ARCHIVE"
+      statut_maintenance: "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ANNULEE"
       statut_operation:
         | "DEMANDE"
         | "PLANIFIEE"
@@ -595,6 +692,7 @@ export type Database = {
         | "TERMINEE"
         | "ARCHIVEE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
+      type_maintenance: "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -733,6 +831,12 @@ export const Constants = {
       categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
       gravite_incident: ["FAIBLE", "MOYENNE", "CRITIQUE"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
+      statut_chauffeur: [
+        "DISPONIBLE",
+        "EN_MISSION",
+        "EN_REPOS",
+        "INDISPONIBLE",
+      ],
       statut_devis: [
         "BROUILLON",
         "SOUMIS_DG",
@@ -743,6 +847,7 @@ export const Constants = {
         "REFUSE_CLIENT",
         "ARCHIVE",
       ],
+      statut_maintenance: ["PLANIFIEE", "EN_COURS", "TERMINEE", "ANNULEE"],
       statut_operation: [
         "DEMANDE",
         "PLANIFIEE",
@@ -751,6 +856,7 @@ export const Constants = {
         "ARCHIVEE",
       ],
       type_incident: ["PANNE", "ACCIDENT", "RETARD", "VOL", "AUTRE"],
+      type_maintenance: ["PREVENTIVE", "CORRECTIVE", "REMPLACEMENT"],
     },
   },
 } as const

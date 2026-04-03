@@ -8,8 +8,10 @@ export interface CamionRow {
   immatriculation: string;
   marque: string;
   modele: string;
+  type_vehicule: string;
   capacite_tonnes: number;
   annee: number;
+  km_actuel: number;
   statut: StatutCamion;
   created_at: string;
   updated_at: string;
@@ -53,8 +55,10 @@ export function useParcAutoStore() {
       immatriculation: camion.immatriculation,
       marque: camion.marque,
       modele: camion.modele,
+      type_vehicule: camion.type_vehicule,
       capacite_tonnes: camion.capacite_tonnes,
       annee: camion.annee,
+      km_actuel: camion.km_actuel,
       statut: camion.statut as any,
     });
     if (error) throw error;
@@ -66,8 +70,10 @@ export function useParcAutoStore() {
     if (updates.immatriculation !== undefined) dbUpdates.immatriculation = updates.immatriculation;
     if (updates.marque !== undefined) dbUpdates.marque = updates.marque;
     if (updates.modele !== undefined) dbUpdates.modele = updates.modele;
+    if (updates.type_vehicule !== undefined) dbUpdates.type_vehicule = updates.type_vehicule;
     if (updates.capacite_tonnes !== undefined) dbUpdates.capacite_tonnes = updates.capacite_tonnes;
     if (updates.annee !== undefined) dbUpdates.annee = updates.annee;
+    if (updates.km_actuel !== undefined) dbUpdates.km_actuel = updates.km_actuel;
     if (updates.statut !== undefined) dbUpdates.statut = updates.statut;
     const { error } = await supabase.from("camions").update(dbUpdates).eq("id", id);
     if (error) throw error;
