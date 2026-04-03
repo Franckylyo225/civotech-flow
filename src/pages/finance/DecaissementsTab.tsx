@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -26,7 +26,7 @@ import { Calendar } from "@/components/ui/calendar";
 interface Props { canManage: boolean; isDG: boolean; }
 
 export default function DecaissementsTab({ canManage, isDG }: Props) {
-  const { decaissements, loading, stats, updateDecaissement, addDecaissement } = useDecaissementsStore();
+  const { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
@@ -36,6 +36,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "" });
+  const [editDialog, setEditDialog] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
 
   const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
@@ -97,6 +99,25 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       toast.success("Demande de décaissement créée — en attente d'approbation DG");
       setShowCreate(false);
       setCreateForm({ montant: 0, motif: "", commentaire: "" });
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
+  const handleEdit = async () => {
+    if (!editDialog) return;
+    if (editForm.montant <= 0) { toast.error("Le montant doit être supérieur à 0"); return; }
+    if (!editForm.motif.trim()) { toast.error("Le motif est obligatoire"); return; }
+    try {
+      await updateDecaissement(editDialog, { montant: editForm.montant, motif: editForm.motif, commentaire: editForm.commentaire || null } as any);
+      toast.success("Décaissement modifié");
+      setEditDialog(null);
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
+  const handleAnnuler = async (id: string) => {
+    if (!confirm("Annuler cette demande de décaissement ?")) return;
+    try {
+      await deleteDecaissement(id);
+      toast.success("Demande de décaissement annulée");
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
@@ -232,6 +253,19 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                             </Button>
                           </>
                         )}
+                        {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
+                          <>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                              setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
+                              setEditDialog(d.id);
+                            }}>
+                              <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => handleAnnuler(d.id)}>
+                              <Trash2 className="mr-1 h-3.5 w-3.5" /> Annuler
+                            </Button>
+                          </>
+                        )}
                         {canManage && d.statut === "APPROUVE" && (
                           <Button size="sm" className="h-7 text-xs" onClick={() => {
                             setPayForm({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
@@ -303,6 +337,31 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setPayDialog(null)}>Annuler</Button>
             <Button onClick={handlePayer}>Confirmer le paiement</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={!!editDialog} onOpenChange={() => setEditDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Modifier la demande de décaissement</DialogTitle></DialogHeader>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label>Motif *</Label>
+              <Input value={editForm.motif} onChange={e => setEditForm(f => ({ ...f, motif: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Montant (F) *</Label>
+              <Input type="number" value={editForm.montant} onChange={e => setEditForm(f => ({ ...f, montant: Number(e.target.value) }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaire</Label>
+              <Textarea value={editForm.commentaire} onChange={e => setEditForm(f => ({ ...f, commentaire: e.target.value }))} rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialog(null)}>Annuler</Button>
+            <Button onClick={handleEdit}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

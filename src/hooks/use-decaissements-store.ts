@@ -59,6 +59,12 @@ export function useDecaissementsStore() {
     await fetchDecaissements();
   }, [fetchDecaissements]);
 
+  const deleteDecaissement = useCallback(async (id: string) => {
+    const { error } = await supabase.from("decaissements").delete().eq("id", id);
+    if (error) throw error;
+    await fetchDecaissements();
+  }, [fetchDecaissements]);
+
   const stats = {
     total: decaissements.length,
     enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
@@ -68,5 +74,5 @@ export function useDecaissementsStore() {
     montantEnAttente: decaissements.filter(d => d.statut === "EN_ATTENTE" || d.statut === "APPROUVE").reduce((s, d) => s + d.montant, 0),
   };
 
-  return { decaissements, loading, stats, updateDecaissement, addDecaissement, refetch: fetchDecaissements };
+  return { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement, refetch: fetchDecaissements };
 }
