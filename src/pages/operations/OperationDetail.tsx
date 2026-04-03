@@ -483,6 +483,56 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Planification dialog */}
+      <Dialog open={showPlanifDialog} onOpenChange={setShowPlanifDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Planifier la mission</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Lieu de prise en charge</Label>
+              <Input
+                value={planifLieu}
+                onChange={(e) => setPlanifLieu(e.target.value)}
+                placeholder="Ex: Port Autonome de Douala"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Date de la mission</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !planifDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {planifDate ? format(planifDate, "PPP", { locale: fr }) : "Sélectionner une date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={planifDate}
+                    onSelect={setPlanifDate}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlanifDialog(false)}>Annuler</Button>
+            <Button onClick={handlePlanifier}>Planifier</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
