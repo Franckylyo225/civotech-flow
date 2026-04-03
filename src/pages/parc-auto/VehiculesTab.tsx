@@ -240,6 +240,8 @@ export default function VehiculesTab({ canManage }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VehiculeDetailDialog camion={detailCamion} open={!!detailCamion} onOpenChange={o => { if (!o) setDetailCamion(null); }} />
     </div>
   );
 }
