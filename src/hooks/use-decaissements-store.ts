@@ -48,6 +48,17 @@ export function useDecaissementsStore() {
     await fetchDecaissements();
   }, [fetchDecaissements]);
 
+  const addDecaissement = useCallback(async (data: { montant: number; motif: string; commentaire?: string }) => {
+    const { error } = await supabase.from("decaissements").insert({
+      montant: data.montant,
+      motif: data.motif,
+      commentaire: data.commentaire || "",
+      statut: "EN_ATTENTE",
+    } as any);
+    if (error) throw error;
+    await fetchDecaissements();
+  }, [fetchDecaissements]);
+
   const stats = {
     total: decaissements.length,
     enAttente: decaissements.filter(d => d.statut === "EN_ATTENTE").length,
