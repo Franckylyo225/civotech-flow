@@ -150,6 +150,40 @@ export function useDevisStore() {
     await fetchDevis();
   }, [fetchDevis]);
 
+  const updateDevis = useCallback(async (
+    devisId: string,
+    data: { lignes: { id?: string; description: string; quantite: number; prixUnitaire: number }[]; tauxTva: number; typeRemise: TypeRemise; valeurRemise: number }
+  ) => {
+    const totaux = calculeDevisTotaux(data.lignes, data.tauxTva, data.typeRemise, data.valeurRemise);
+
+    const { error } = await supabase.from("devis").update({
+      montant: totaux.montantTotal,
+      montant_ht: totaux.montantHT,
+      taux_tva: data.tauxTva,
+      montant_tva: totaux.montantTva,
+      type_remise: data.typeRemise,
+      valeur_remise: data.valeurRemise,
+      montant_remise: totaux.montantRemise,
+      commentaire_refus: "",
+    } as any).eq("id", devisId);
+
+    if (error) { toast.error("Erreur mise à jour devis: " + error.message); return; }
+
+    // Replace all lines
+    await supabase.from("lignes_devis").delete().eq("devis_id", devisId);
+    const lignesInsert = data.lignes.map((l) => ({
+      devis_id: devisId,
+      description: l.description,
+      quantite: l.quantite,
+      prix_unitaire: l.prixUnitaire,
+      montant: l.quantite * l.prixUnitaire,
+    }));
+    const { error: lignesError } = await supabase.from("lignes_devis").insert(lignesInsert);
+    if (lignesError) { toast.error("Erreur mise à jour lignes: " + lignesError.message); }
+
+    await fetchDevis();
+  }, [fetchDevis]);
+
   const createOperationFromDevis = useCallback(async (devis: Devis) => {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
@@ -171,5 +205,4 @@ export function useDevisStore() {
     return true;
   }, []);
 
-  return { devisList, clients, loading, addDevis, updateStatut, createOperationFromDevis };
-}
+  return { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis };

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import type { Devis, DevisStatut } from "@/types/devis";
+import type { Devis, DevisStatut, TypeRemise } from "@/types/devis";
 import { formatMontant, formatDate } from "@/types/devis";
+import DevisEditDialog from "./DevisEditDialog";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
