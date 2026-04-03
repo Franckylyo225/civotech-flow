@@ -206,6 +206,21 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                 <X className="h-4 w-4" />
               </Button>
             )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <FileDown className="mr-1.5 h-4 w-4" />Exporter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportDecaissementsPdf({ data: filtered, getLinkedLabel })}>
+                  <FileDown className="mr-2 h-4 w-4" /> Export PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportDecaissementsExcel({ data: filtered, getLinkedLabel })}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Export Excel (CSV)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {canManage && (
               <Button onClick={() => setShowCreate(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />Nouveau décaissement
