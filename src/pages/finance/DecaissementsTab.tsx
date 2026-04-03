@@ -263,7 +263,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                             }}>
                               <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
                             </Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => handleAnnuler(d.id)}>
+                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => setCancelDialog(d.id)}>
                               <Trash2 className="mr-1 h-3.5 w-3.5" /> Annuler
                             </Button>
                           </>
