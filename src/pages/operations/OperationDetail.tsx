@@ -4,12 +4,12 @@ import { fr } from "date-fns/locale";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard, Loader2, CalendarIcon,
+  Phone, CreditCard, Loader2, CalendarIcon, AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut } from "@/types/operations";
-import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
+import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut, TypeIncident, GraviteIncident } from "@/types/operations";
+import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, TYPE_INCIDENT_CONFIG, GRAVITE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +31,11 @@ interface OperationDetailProps {
   onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string) => void;
+  onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
+  onToggleIncidentResolu?: (incidentId: string, resolu: boolean) => void;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
@@ -46,6 +48,10 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
+  });
+  const [showIncidentDialog, setShowIncidentDialog] = useState(false);
+  const [incidentForm, setIncidentForm] = useState<{ type: TypeIncident; description: string; gravite: GraviteIncident }>({
+    type: "AUTRE", description: "", gravite: "MOYENNE",
   });
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
@@ -96,6 +102,16 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     }
   };
 
+  const handleAddIncident = () => {
+    if (!incidentForm.description.trim()) { toast.error("Veuillez décrire l'incident"); return; }
+    if (onAddIncident) {
+      onAddIncident(op.id, incidentForm);
+    }
+    setShowIncidentDialog(false);
+    setIncidentForm({ type: "AUTRE", description: "", gravite: "MOYENNE" });
+    toast.success("Incident signalé");
+  };
+
   const handleTerminer = () => {
     if (!op.bonLivraisonUrl) {
       toast.error("Veuillez uploader le bon de livraison avant de terminer la mission");
@@ -134,6 +150,11 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           {canManage && op.statut === "PLANIFIEE" && op.camionId && (
             <Button size="sm" onClick={() => { onUpdateStatut(op.id, "EN_COURS"); toast.success("Mission démarrée"); }}>
               <Play className="mr-1.5 h-4 w-4" /> Démarrer
+            </Button>
+          )}
+          {canManage && op.statut === "EN_COURS" && (
+            <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowIncidentDialog(true)}>
+              <AlertTriangle className="mr-1.5 h-4 w-4" /> Signaler incident
             </Button>
           )}
           {canManage && op.statut === "EN_COURS" && (
@@ -409,6 +430,62 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </Card>
       )}
 
+      {/* Incidents */}
+      {(op.statut === "EN_COURS" || op.statut === "TERMINEE") && (
+        <Card className="border border-border shadow-none">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Incidents ({op.incidents.length})
+            </CardTitle>
+            {canManage && op.statut === "EN_COURS" && (
+              <Button variant="outline" size="sm" onClick={() => setShowIncidentDialog(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Signaler
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="pt-0">
+            {op.incidents.length > 0 ? (
+              <div className="space-y-3">
+                {op.incidents.map((inc) => {
+                  const typeConfig = TYPE_INCIDENT_CONFIG[inc.type];
+                  const gravConfig = GRAVITE_CONFIG[inc.gravite];
+                  return (
+                    <div key={inc.id} className={cn("flex items-start gap-3 rounded-lg border p-3", inc.resolu ? "bg-muted/50 opacity-70" : "")}>
+                      <span className="text-lg mt-0.5">{typeConfig.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={cn("border-0 text-xs font-medium", gravConfig.bgColor, gravConfig.color)}>
+                            {gravConfig.label}
+                          </Badge>
+                          <Badge variant="outline" className="border-0 bg-muted text-muted-foreground text-xs">
+                            {typeConfig.label}
+                          </Badge>
+                          {inc.resolu && (
+                            <Badge variant="outline" className="border-0 bg-success/10 text-success text-xs">
+                              Résolu
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-foreground">{inc.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDateShort(inc.dateIncident)}</p>
+                      </div>
+                      {canManage && !inc.resolu && (
+                        <Button variant="outline" size="sm" className="text-xs shrink-0" onClick={() => onToggleIncidentResolu?.(inc.id, true)}>
+                          Résoudre
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Aucun incident signalé</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Affectation dialog */}
       <Dialog open={showAffectDialog} onOpenChange={setShowAffectDialog}>
         <DialogContent>
@@ -530,6 +607,51 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPlanifDialog(false)}>Annuler</Button>
             <Button onClick={handlePlanifier}>Planifier</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Incident dialog */}
+      <Dialog open={showIncidentDialog} onOpenChange={setShowIncidentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Signaler un incident</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type d'incident</Label>
+              <Select value={incidentForm.type} onValueChange={(v) => setIncidentForm((p) => ({ ...p, type: v as TypeIncident }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(TYPE_INCIDENT_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.icon} {cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Gravité</Label>
+              <Select value={incidentForm.gravite} onValueChange={(v) => setIncidentForm((p) => ({ ...p, gravite: v as GraviteIncident }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(GRAVITE_CONFIG).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                value={incidentForm.description}
+                onChange={(e) => setIncidentForm((p) => ({ ...p, description: e.target.value }))}
+                placeholder="Décrivez l'incident..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIncidentDialog(false)}>Annuler</Button>
+            <Button variant="destructive" onClick={handleAddIncident}>Signaler</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

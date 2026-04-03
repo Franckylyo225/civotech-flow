@@ -1,5 +1,7 @@
 export type OperationStatut = "DEMANDE" | "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ARCHIVEE";
 export type CategorieDepense = "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE";
+export type TypeIncident = "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE";
+export type GraviteIncident = "FAIBLE" | "MOYENNE" | "CRITIQUE";
 
 export interface Camion {
   id: string;
@@ -29,6 +31,17 @@ export interface LigneDepense {
   date: string;
 }
 
+export interface Incident {
+  id: string;
+  operationId: string;
+  type: TypeIncident;
+  description: string;
+  gravite: GraviteIncident;
+  dateIncident: string;
+  resolu: boolean;
+  createdAt: string;
+}
+
 export interface Operation {
   id: string;
   reference: string;
@@ -52,6 +65,7 @@ export interface Operation {
   nombreColis?: number;
   createdAt: string;
   updatedAt: string;
+  incidents: Incident[];
   timeline: TimelineEvent[];
 }
 
@@ -77,6 +91,20 @@ export const CATEGORIE_DEPENSE_CONFIG: Record<CategorieDepense, { label: string 
   PEAGE: { label: "Péage" },
   TAXE: { label: "Taxe" },
   AUTRE: { label: "Autre" },
+};
+
+export const TYPE_INCIDENT_CONFIG: Record<TypeIncident, { label: string; icon: string }> = {
+  PANNE: { label: "Panne", icon: "🔧" },
+  ACCIDENT: { label: "Accident", icon: "💥" },
+  RETARD: { label: "Retard", icon: "⏰" },
+  VOL: { label: "Vol", icon: "🚨" },
+  AUTRE: { label: "Autre", icon: "⚠️" },
+};
+
+export const GRAVITE_CONFIG: Record<GraviteIncident, { label: string; color: string; bgColor: string }> = {
+  FAIBLE: { label: "Faible", color: "text-info", bgColor: "bg-info/10" },
+  MOYENNE: { label: "Moyenne", color: "text-warning", bgColor: "bg-warning/10" },
+  CRITIQUE: { label: "Critique", color: "text-destructive", bgColor: "bg-destructive/10" },
 };
 
 export function formatMontantOp(montant: number): string {

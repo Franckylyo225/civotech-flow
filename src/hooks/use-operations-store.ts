@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent } from "@/types/operations";
+import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent, Incident, TypeIncident, GraviteIncident } from "@/types/operations";
 
 // Map DB row to app type
 function mapCamion(row: any): Camion {
@@ -26,7 +26,7 @@ function mapChauffeur(row: any): Chauffeur {
   };
 }
 
-function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], timeline: TimelineEvent[], depenses: LigneDepense[]): Operation {
+function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], timeline: TimelineEvent[], depenses: LigneDepense[], incidents: Incident[]): Operation {
   return {
     id: row.id,
     reference: row.reference,
@@ -48,6 +48,7 @@ function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], time
     nombreColis: row.nombre_colis || undefined,
     bonLivraisonUrl: row.bon_livraison_url || undefined,
     depenses,
+    incidents,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     timeline,
@@ -62,18 +63,20 @@ export function useOperationsStore() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [opsRes, camRes, chRes, depRes, tlRes] = await Promise.all([
+    const [opsRes, camRes, chRes, depRes, tlRes, incRes] = await Promise.all([
       supabase.from("operations").select("*").order("created_at", { ascending: false }),
       supabase.from("camions").select("*"),
       supabase.from("chauffeurs").select("*"),
       supabase.from("depenses").select("*"),
       supabase.from("timeline_events").select("*").order("created_at", { ascending: true }),
+      supabase.from("incidents").select("*").order("date_incident", { ascending: false }),
     ]);
 
     const camionsList = (camRes.data || []).map(mapCamion);
     const chauffeursList = (chRes.data || []).map(mapChauffeur);
     const allDepenses = depRes.data || [];
     const allTimeline = tlRes.data || [];
+    const allIncidents = incRes.data || [];
 
     setCamions(camionsList);
     setChauffeurs(chauffeursList);
@@ -101,7 +104,20 @@ export function useOperationsStore() {
           statut: t.statut as "done" | "current" | "pending",
         }));
 
-      return mapOperation(row, camionsList, chauffeursList, opTimeline, opDepenses);
+      const opIncidents: Incident[] = allIncidents
+        .filter((i: any) => i.operation_id === row.id)
+        .map((i: any) => ({
+          id: i.id,
+          operationId: i.operation_id,
+          type: i.type as TypeIncident,
+          description: i.description,
+          gravite: i.gravite as GraviteIncident,
+          dateIncident: i.date_incident,
+          resolu: i.resolu,
+          createdAt: i.created_at,
+        }));
+
+      return mapOperation(row, camionsList, chauffeursList, opTimeline, opDepenses, opIncidents);
     });
 
     setOperations(ops);
@@ -207,5 +223,32 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
-  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, refetch: fetchAll };
+  const addIncident = useCallback(async (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => {
+    await supabase.from("incidents").insert({
+      operation_id: opId,
+      type: incident.type as any,
+      description: incident.description,
+      gravite: incident.gravite as any,
+    });
+
+    // Timeline event
+    const now = new Date();
+    await supabase.from("timeline_events").insert({
+      operation_id: opId,
+      date: now.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+      heure: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      titre: `Incident signalé`,
+      description: `${incident.type} — ${incident.description}`,
+      statut: "done",
+    });
+
+    await fetchAll();
+  }, [fetchAll]);
+
+  const toggleIncidentResolu = useCallback(async (incidentId: string, resolu: boolean) => {
+    await supabase.from("incidents").update({ resolu }).eq("id", incidentId);
+    await fetchAll();
+  }, [fetchAll]);
+
+  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, refetch: fetchAll };
 }

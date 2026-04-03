@@ -228,6 +228,53 @@ export type Database = {
           },
         ]
       }
+      incidents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_incident: string
+          description: string
+          gravite: Database["public"]["Enums"]["gravite_incident"]
+          id: string
+          operation_id: string
+          resolu: boolean
+          type: Database["public"]["Enums"]["type_incident"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_incident?: string
+          description?: string
+          gravite?: Database["public"]["Enums"]["gravite_incident"]
+          id?: string
+          operation_id: string
+          resolu?: boolean
+          type?: Database["public"]["Enums"]["type_incident"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_incident?: string
+          description?: string
+          gravite?: Database["public"]["Enums"]["gravite_incident"]
+          id?: string
+          operation_id?: string
+          resolu?: boolean
+          type?: Database["public"]["Enums"]["type_incident"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lignes_devis: {
         Row: {
           created_at: string
@@ -488,6 +535,7 @@ export type Database = {
         | "ACHATS"
         | "ASSISTANTE"
       categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
+      gravite_incident: "FAIBLE" | "MOYENNE" | "CRITIQUE"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
       statut_devis:
         | "BROUILLON"
@@ -503,6 +551,7 @@ export type Database = {
         | "EN_COURS"
         | "TERMINEE"
         | "ARCHIVEE"
+      type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -639,6 +688,7 @@ export const Constants = {
         "ASSISTANTE",
       ],
       categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
+      gravite_incident: ["FAIBLE", "MOYENNE", "CRITIQUE"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
       statut_devis: [
         "BROUILLON",
@@ -656,6 +706,7 @@ export const Constants = {
         "TERMINEE",
         "ARCHIVEE",
       ],
+      type_incident: ["PANNE", "ACCIDENT", "RETARD", "VOL", "AUTRE"],
     },
   },
 } as const
