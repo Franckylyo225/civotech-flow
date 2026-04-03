@@ -193,8 +193,9 @@ export default function RapportsPage() {
       </div>
 
       {/* Secondary KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
+          { label: "Taux de recouvrement", value: `${tauxRecouvrement}%`, sub: `${totalPaye.toLocaleString("fr-FR")} / ${totalFacture.toLocaleString("fr-FR")} F`, icon: Percent, color: tauxRecouvrement >= 80 ? "success" : tauxRecouvrement >= 50 ? "warning" : "destructive" },
           { label: "Opérations terminées", value: opsTerminees, sub: `${opsEnCours} en cours`, icon: Truck, color: "primary" },
           { label: "Taux conversion devis", value: `${tauxConversion}%`, sub: `${devisValides}/${devis.length} validés`, icon: FileText, color: "success" },
           { label: "Coût maintenances", value: `${maintenanceCost.toLocaleString("fr-FR")} F`, sub: `${maintenances.length} interventions`, icon: Wrench, color: "warning" },
