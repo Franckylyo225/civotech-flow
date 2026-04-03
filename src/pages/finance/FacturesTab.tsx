@@ -300,7 +300,7 @@ export default function FacturesTab({ canManage }: Props) {
             {createForm.operation_id && (() => {
               const op = operations.find(o => o.id === createForm.operation_id);
               if (!op) return null;
-              const ht = op.montant_devis;
+              const ht = op.montantDevis;
               const tva = ht * createForm.taux_tva / 100;
               return (
                 <div className="p-3 rounded-lg bg-muted/50 border border-border text-sm space-y-1">
