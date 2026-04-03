@@ -182,6 +182,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 <TableHead>Date prévue</TableHead>
                 <TableHead>Coût</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead>Demande d'achat</TableHead>
                 {canManage && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
