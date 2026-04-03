@@ -124,6 +124,15 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               ))}
             </SelectContent>
           </Select>
+          <Button
+            variant={showArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowArchived(!showArchived)}
+            className="gap-1.5"
+          >
+            <Archive className="h-4 w-4" />
+            Archivés
+          </Button>
           <div className="flex rounded-lg border">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
