@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -26,7 +26,7 @@ import { Calendar } from "@/components/ui/calendar";
 interface Props { canManage: boolean; isDG: boolean; }
 
 export default function DecaissementsTab({ canManage, isDG }: Props) {
-  const { decaissements, loading, stats, updateDecaissement } = useDecaissementsStore();
+  const { decaissements, loading, stats, updateDecaissement, addDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
@@ -34,14 +34,16 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [payDialog, setPayDialog] = useState<string | null>(null);
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "" });
 
-  const getDARef = (id: string) => demandes.find(d => d.id === id)?.reference || "—";
-  const getDADesignation = (id: string) => demandes.find(d => d.id === id)?.designation || "";
+  const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
+  const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
 
   const filtered = decaissements.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
-      getDARef(d.demande_achat_id).toLowerCase().includes(search.toLowerCase()) ||
-      getDADesignation(d.demande_achat_id).toLowerCase().includes(search.toLowerCase());
+      (d.motif || "").toLowerCase().includes(search.toLowerCase()) ||
+      (d.demande_achat_id ? getDARef(d.demande_achat_id).toLowerCase().includes(search.toLowerCase()) : false);
     const matchStatut = filterStatut === "ALL" || d.statut === filterStatut;
     const createdDate = new Date(d.created_at);
     const matchFrom = !dateFrom || createdDate >= dateFrom;
@@ -73,11 +75,9 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
         date_paiement: payForm.date_paiement,
         commentaire: payForm.commentaire || null,
       });
-      // Update linked demande_achat to PAYEE + maintenance to EN_COURS
       const dec = decaissements.find(d => d.id === payDialog);
-      if (dec) {
+      if (dec?.demande_achat_id) {
         await supabase.from("demandes_achat").update({ statut: "PAYEE" } as any).eq("id", dec.demande_achat_id);
-        // Find linked maintenance and start it
         const { data: da } = await supabase.from("demandes_achat").select("maintenance_id").eq("id", dec.demande_achat_id).single();
         if (da?.maintenance_id) {
           await supabase.from("maintenances").update({ statut: "EN_COURS", date_debut: new Date().toISOString().slice(0, 10) } as any).eq("id", da.maintenance_id);
@@ -86,6 +86,17 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       }
       toast.success("Paiement enregistré");
       setPayDialog(null);
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
+  const handleCreate = async () => {
+    if (createForm.montant <= 0) { toast.error("Le montant doit être supérieur à 0"); return; }
+    if (!createForm.motif.trim()) { toast.error("Le motif est obligatoire"); return; }
+    try {
+      await addDecaissement(createForm);
+      toast.success("Demande de décaissement créée — en attente d'approbation DG");
+      setShowCreate(false);
+      setCreateForm({ montant: 0, motif: "", commentaire: "" });
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
@@ -121,7 +132,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Rechercher par référence..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              <Input placeholder="Rechercher par référence ou motif..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
             <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
@@ -159,6 +170,11 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                 <X className="h-4 w-4" />
               </Button>
             )}
+            {canManage && (
+              <Button onClick={() => setShowCreate(true)}>
+                <Plus className="mr-1.5 h-4 w-4" />Nouveau décaissement
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -170,8 +186,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead>Référence</TableHead>
-                <TableHead>Demande d'achat</TableHead>
                 <TableHead>Motif</TableHead>
+                <TableHead>Lié à</TableHead>
                 <TableHead>Montant</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Date</TableHead>
@@ -184,13 +200,17 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                 return (
                   <TableRow key={d.id}>
                     <TableCell className="font-mono text-sm font-medium">{d.reference}</TableCell>
+                    <TableCell className="text-sm max-w-[200px] truncate">{d.motif || "—"}</TableCell>
                     <TableCell className="text-sm">
-                      <div>
-                        <span className="font-mono text-xs">{getDARef(d.demande_achat_id)}</span>
-                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{getDADesignation(d.demande_achat_id)}</p>
-                      </div>
+                      {d.demande_achat_id ? (
+                        <div>
+                          <span className="font-mono text-xs">{getDARef(d.demande_achat_id)}</span>
+                          <p className="text-xs text-muted-foreground truncate max-w-[150px]">{getDADesignation(d.demande_achat_id)}</p>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Direct</span>
+                      )}
                     </TableCell>
-                    <TableCell className="text-sm max-w-[150px] truncate">{d.motif || "—"}</TableCell>
                     <TableCell className="text-sm font-semibold">{d.montant.toLocaleString()} F</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("border-0 text-xs font-medium", statutCfg.bgColor, statutCfg.color)}>
@@ -235,6 +255,32 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Create dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Nouvelle demande de décaissement</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Cette demande sera soumise au DG pour approbation avant décaissement.</p>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label>Motif *</Label>
+              <Input value={createForm.motif} onChange={e => setCreateForm(f => ({ ...f, motif: e.target.value }))} placeholder="Ex: Frais carburant projet X, Loyer bureau..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Montant (F) *</Label>
+              <Input type="number" value={createForm.montant} onChange={e => setCreateForm(f => ({ ...f, montant: Number(e.target.value) }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Commentaire</Label>
+              <Textarea value={createForm.commentaire} onChange={e => setCreateForm(f => ({ ...f, commentaire: e.target.value }))} placeholder="Détails supplémentaires..." rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreate(false)}>Annuler</Button>
+            <Button onClick={handleCreate}>Soumettre au DG</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Pay dialog */}
       <Dialog open={!!payDialog} onOpenChange={() => setPayDialog(null)}>
