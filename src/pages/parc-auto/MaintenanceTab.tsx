@@ -75,11 +75,31 @@ export default function MaintenanceTab({ canManage }: Props) {
         await updateMaintenance(editingId, payload);
         toast.success("Maintenance mise à jour");
       } else {
-        await addMaintenance(payload);
+        const created = await addMaintenance(payload);
         toast.success("Maintenance créée");
+        // Auto-generate demande d'achat if pieces_changees is filled
+        if (form.pieces_changees && form.pieces_changees.trim()) {
+          const camionLabel = getCamionLabel(form.camion_id);
+          const { error: daError } = await supabase.from("demandes_achat").insert({
+            reference: "",
+            maintenance_id: created.id,
+            designation: `Pièces maintenance — ${camionLabel}`,
+            description: `Pièces nécessaires : ${form.pieces_changees}\n\nMaintenance : ${form.description}`,
+            quantite: 1,
+            montant_estime: form.cout_estime,
+            urgence: "NORMALE",
+            statut: "SOUMISE",
+          } as any);
+          if (daError) {
+            toast.error("Maintenance créée mais erreur lors de la génération de la demande d'achat");
+          } else {
+            toast.success("Demande d'achat générée automatiquement", { description: "Consultez le module Achats" });
+          }
+        }
       }
       setShowDialog(false);
     } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
   };
 
   const handleDelete = async (id: string) => {
