@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil } from "lucide-react";
+import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil, Archive } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut } from "@/types/devis";
 import { DEVIS_STATUT_CONFIG, formatMontant, formatDate } from "@/types/devis";
@@ -43,8 +43,10 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("ALL");
+  const [showArchived, setShowArchived] = useState(false);
 
   const filtered = devisList.filter((d) => {
+    if (!showArchived && d.statut === "ARCHIVE") return false;
     const matchSearch =
       d.reference.toLowerCase().includes(search.toLowerCase()) ||
       (d.client?.nom || "").toLowerCase().includes(search.toLowerCase());
@@ -122,6 +124,15 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               ))}
             </SelectContent>
           </Select>
+          <Button
+            variant={showArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowArchived(!showArchived)}
+            className="gap-1.5"
+          >
+            <Archive className="h-4 w-4" />
+            Archivés
+          </Button>
           <div className="flex rounded-lg border">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
