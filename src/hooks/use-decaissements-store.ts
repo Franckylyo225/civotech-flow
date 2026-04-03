@@ -68,5 +68,5 @@ export function useDecaissementsStore() {
     montantEnAttente: decaissements.filter(d => d.statut === "EN_ATTENTE" || d.statut === "APPROUVE").reduce((s, d) => s + d.montant, 0),
   };
 
-  return { decaissements, loading, stats, updateDecaissement, refetch: fetchDecaissements };
+  return { decaissements, loading, stats, updateDecaissement, addDecaissement, refetch: fetchDecaissements };
 }
