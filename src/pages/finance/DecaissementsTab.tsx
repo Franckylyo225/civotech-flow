@@ -257,17 +257,24 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                           </>
                         )}
                         {canManage && d.statut === "EN_ATTENTE" && !d.demande_achat_id && (
-                          <>
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
-                              setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
-                              setEditDialog(d.id);
-                            }}>
-                              <Pencil className="mr-1 h-3.5 w-3.5" /> Modifier
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs text-destructive" onClick={() => setCancelDialog(d.id)}>
-                              <Trash2 className="mr-1 h-3.5 w-3.5" /> Annuler
-                            </Button>
-                          </>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline" className="h-7 w-7 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setEditForm({ montant: d.montant, motif: d.motif || "", commentaire: d.commentaire || "" });
+                                setEditDialog(d.id);
+                              }}>
+                                <Pencil className="mr-2 h-4 w-4" /> Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelDialog(d.id)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Annuler
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                         {canManage && d.statut === "APPROUVE" && (
                           <Button size="sm" className="h-7 text-xs" onClick={() => {
