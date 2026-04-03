@@ -49,7 +49,7 @@ export default function VehiculesTab({ canManage }: Props) {
       immatriculation: c.immatriculation, marque: c.marque, modele: c.modele,
       type_vehicule: (c as any).type_vehicule || "Porteur",
       capacite_tonnes: c.capacite_tonnes, annee: c.annee,
-      km_actuel: (c as any).km_actuel || 0, statut: c.statut,
+      km_actuel: (c as any).km_actuel || 0,
     });
     setShowDialog(true);
   };
