@@ -21,7 +21,7 @@ const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", numero_permis: "",
   type_permis: "", date_expiration_permis: "",
   experience_annees: 0, disponible: true,
-  statut: "DISPONIBLE" as StatutChauffeur, camion_assigne_id: "",
+  camion_assigne_id: "",
 };
 
 interface Props { canManage: boolean; }
@@ -51,7 +51,7 @@ export default function ChauffeursTab({ canManage }: Props) {
       numero_permis: c.numero_permis || "", type_permis: c.type_permis || "",
       date_expiration_permis: c.date_expiration_permis || "",
       experience_annees: c.experience_annees, disponible: c.disponible,
-      statut: c.statut, camion_assigne_id: c.camion_assigne_id || "",
+      camion_assigne_id: c.camion_assigne_id || "",
     });
     setShowDialog(true);
   };
@@ -237,31 +237,17 @@ export default function ChauffeursTab({ canManage }: Props) {
               </div>
               <div className="space-y-2"><Label>Expiration permis</Label><Input type="date" value={form.date_expiration_permis} onChange={e => setForm(f => ({ ...f, date_expiration_permis: e.target.value }))} /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Statut</Label>
-                <Select value={form.statut} onValueChange={v => setForm(f => ({ ...f, statut: v as StatutChauffeur }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                    <SelectItem value="EN_MISSION">En mission</SelectItem>
-                    <SelectItem value="EN_REPOS">En repos</SelectItem>
-                    <SelectItem value="INDISPONIBLE">Indisponible</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Véhicule assigné</Label>
-                <Select value={form.camion_assigne_id || "none"} onValueChange={v => setForm(f => ({ ...f, camion_assigne_id: v === "none" ? "" : v }))}>
-                  <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
-                    {camions.filter(c => c.statut === "DISPONIBLE").map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.immatriculation} — {c.marque}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label>Véhicule assigné</Label>
+              <Select value={form.camion_assigne_id || "none"} onValueChange={v => setForm(f => ({ ...f, camion_assigne_id: v === "none" ? "" : v }))}>
+                <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Aucun</SelectItem>
+                  {camions.filter(c => c.statut === "DISPONIBLE").map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.immatriculation} — {c.marque}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
