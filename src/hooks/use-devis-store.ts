@@ -202,6 +202,10 @@ export function useDevisStore() {
     });
 
     if (error) { toast.error("Erreur création opération: " + error.message); return false; }
+
+    // Archive the devis after operation creation
+    await supabase.from("devis").update({ statut: "ARCHIVE" as any }).eq("id", devis.id);
+    await fetchDevis();
     return true;
   }, []);
 

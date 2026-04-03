@@ -578,6 +578,7 @@ export type Database = {
         | "ENVOYE_CLIENT"
         | "VALIDE_CLIENT"
         | "REFUSE_CLIENT"
+        | "ARCHIVE"
       statut_operation:
         | "DEMANDE"
         | "PLANIFIEE"
@@ -731,6 +732,7 @@ export const Constants = {
         "ENVOYE_CLIENT",
         "VALIDE_CLIENT",
         "REFUSE_CLIENT",
+        "ARCHIVE",
       ],
       statut_operation: [
         "DEMANDE",

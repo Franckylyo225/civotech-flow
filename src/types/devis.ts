@@ -5,7 +5,8 @@ export type DevisStatut =
   | "REFUSE_DG"
   | "ENVOYE_CLIENT"
   | "VALIDE_CLIENT"
-  | "REFUSE_CLIENT";
+  | "REFUSE_CLIENT"
+  | "ARCHIVE";
 
 export type TypeRemise = "POURCENTAGE" | "MONTANT";
 
@@ -65,6 +66,7 @@ export const DEVIS_STATUT_CONFIG: Record<DevisStatut, { label: string; color: st
   ENVOYE_CLIENT: { label: "Envoyé client", color: "text-primary", bgColor: "bg-primary/10" },
   VALIDE_CLIENT: { label: "Validé client", color: "text-success", bgColor: "bg-success/10" },
   REFUSE_CLIENT: { label: "Refusé client", color: "text-destructive", bgColor: "bg-destructive/10" },
+  ARCHIVE: { label: "Archivé", color: "text-muted-foreground", bgColor: "bg-muted/50" },
 };
 
 export const PIPELINE_STAGES: DevisStatut[] = [

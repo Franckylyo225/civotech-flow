@@ -1,0 +1,1 @@
+ALTER TYPE public.statut_devis ADD VALUE IF NOT EXISTS 'ARCHIVE';
