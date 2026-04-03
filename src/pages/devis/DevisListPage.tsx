@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil, Archive } from "lucide-react";
 import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut } from "@/types/devis";
