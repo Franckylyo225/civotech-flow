@@ -260,11 +260,23 @@ export default function FacturesTab({ canManage }: Props) {
               {filtered.map(f => {
                 const statutCfg = STATUT_FACTURE_CONFIG[f.statut];
                 const isOverdue = f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date();
+                const blUrl = getOpBL(f.operation_id);
                 return (
                   <TableRow key={f.id}>
                     <TableCell className="font-mono text-sm font-medium">{f.reference}</TableCell>
                     <TableCell className="text-sm">{getClientNom(f.client_id)}</TableCell>
                     <TableCell className="font-mono text-xs">{getOpRef(f.operation_id)}</TableCell>
+                    <TableCell>
+                      {blUrl ? (
+                        <a href={blUrl} target="_blank" rel="noopener noreferrer" title="Voir le bon de livraison">
+                          <Badge variant="outline" className="border-0 text-xs bg-success/10 text-success gap-1 cursor-pointer hover:bg-success/20">
+                            <Paperclip className="h-3 w-3" />BL
+                          </Badge>
+                        </a>
+                      ) : (
+                        <Badge variant="outline" className="border-0 text-xs bg-muted text-muted-foreground">—</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm font-semibold">{f.montant_ttc.toLocaleString()} F</TableCell>
                     <TableCell className="text-sm">
                       <span className={cn(f.montant_paye > 0 && "text-success font-medium")}>{f.montant_paye.toLocaleString()} F</span>
