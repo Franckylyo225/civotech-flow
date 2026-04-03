@@ -206,3 +206,4 @@ export function useDevisStore() {
   }, []);
 
   return { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis };
+}
