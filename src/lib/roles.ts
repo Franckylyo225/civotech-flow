@@ -57,7 +57,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   FINANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Factures", path: "/factures", icon: Receipt },
+    { label: "Finance & Comptabilité", path: "/factures", icon: Wallet },
     { label: "Paiements", path: "/paiements", icon: BarChart3 },
     { label: "Fournisseurs", path: "/fournisseurs", icon: Users },
   ],
