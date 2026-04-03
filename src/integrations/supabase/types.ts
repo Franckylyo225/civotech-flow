@@ -436,6 +436,87 @@ export type Database = {
           },
         ]
       }
+      factures: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          date_echeance: string | null
+          date_emission: string
+          date_paiement: string | null
+          id: string
+          mode_paiement: string | null
+          montant_ht: number
+          montant_paye: number
+          montant_ttc: number
+          montant_tva: number
+          notes: string | null
+          operation_id: string | null
+          reference: string
+          reference_paiement: string | null
+          statut: Database["public"]["Enums"]["statut_facture"]
+          taux_tva: number
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_emission?: string
+          date_paiement?: string | null
+          id?: string
+          mode_paiement?: string | null
+          montant_ht?: number
+          montant_paye?: number
+          montant_ttc?: number
+          montant_tva?: number
+          notes?: string | null
+          operation_id?: string | null
+          reference: string
+          reference_paiement?: string | null
+          statut?: Database["public"]["Enums"]["statut_facture"]
+          taux_tva?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_emission?: string
+          date_paiement?: string | null
+          id?: string
+          mode_paiement?: string | null
+          montant_ht?: number
+          montant_paye?: number
+          montant_ttc?: number
+          montant_tva?: number
+          notes?: string | null
+          operation_id?: string | null
+          reference?: string
+          reference_paiement?: string | null
+          statut?: Database["public"]["Enums"]["statut_facture"]
+          taux_tva?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factures_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factures_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fournisseurs: {
         Row: {
           actif: boolean
@@ -930,6 +1011,12 @@ export type Database = {
         | "VALIDE_CLIENT"
         | "REFUSE_CLIENT"
         | "ARCHIVE"
+      statut_facture:
+        | "BROUILLON"
+        | "ENVOYEE"
+        | "PARTIELLEMENT_PAYEE"
+        | "PAYEE"
+        | "ANNULEE"
       statut_maintenance: "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ANNULEE"
       statut_operation:
         | "DEMANDE"
@@ -1111,6 +1198,13 @@ export const Constants = {
         "VALIDE_CLIENT",
         "REFUSE_CLIENT",
         "ARCHIVE",
+      ],
+      statut_facture: [
+        "BROUILLON",
+        "ENVOYEE",
+        "PARTIELLEMENT_PAYEE",
+        "PAYEE",
+        "ANNULEE",
       ],
       statut_maintenance: ["PLANIFIEE", "EN_COURS", "TERMINEE", "ANNULEE"],
       statut_operation: [
