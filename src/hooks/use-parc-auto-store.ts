@@ -8,8 +8,10 @@ export interface CamionRow {
   immatriculation: string;
   marque: string;
   modele: string;
+  type_vehicule: string;
   capacite_tonnes: number;
   annee: number;
+  km_actuel: number;
   statut: StatutCamion;
   created_at: string;
   updated_at: string;
