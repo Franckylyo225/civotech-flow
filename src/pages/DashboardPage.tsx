@@ -147,43 +147,51 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Validation requests */}
         <Card className="lg:col-span-2 border border-border shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Demandes de validation</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-primary" />
+              Approbations
+              {appCounts.total > 0 && (
+                <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-xs ml-1">
+                  {appCounts.total}
+                </Badge>
+              )}
+            </CardTitle>
+            <Button variant="ghost" size="sm" className="text-primary text-xs gap-1" asChild>
+              <Link to="/approbations">Voir tout <ArrowRight className="h-3 w-3" /></Link>
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            {validationRequests.map((req) => (
-              <div key={req.id} className="flex items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
-                <div className={`mt-0.5 rounded-lg p-2 ${req.type === "devis" ? "bg-accent" : "bg-warning/10"}`}>
-                  {req.type === "devis" ? (
-                    <FileText className={`h-4 w-4 ${req.type === "devis" ? "text-primary" : "text-warning"}`} />
-                  ) : (
-                    <ShoppingCart className="h-4 w-4 text-warning" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-muted-foreground">{req.reference}</span>
-                    <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px]">
-                      En attente
-                    </Badge>
-                  </div>
-                  <p className="text-sm font-medium text-foreground mt-0.5 truncate">{req.titre}</p>
-                  <p className="text-sm font-semibold text-primary mt-0.5">
-                    {req.montant.toLocaleString("fr-FR")} FCFA
-                  </p>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  <button className="rounded-lg p-1.5 text-success hover:bg-success/10 transition-colors" title="Approuver">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </button>
-                  <button className="rounded-lg p-1.5 text-destructive hover:bg-destructive/10 transition-colors" title="Refuser">
-                    <XCircle className="h-4 w-4" />
-                  </button>
-                </div>
+            {approbations.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <CheckCircle2 className="mx-auto h-8 w-8 text-success/40 mb-2" />
+                <p className="text-sm">Aucune demande en attente</p>
               </div>
-            ))}
+            ) : (
+              approbations.slice(0, 4).map((item) => {
+                const cfg = TYPE_CONFIG[item.type] || TYPE_CONFIG.devis;
+                return (
+                  <Link key={item.id} to="/approbations" className="flex items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
+                    <div className={`mt-0.5 rounded-lg p-2 ${cfg.bg}`}>
+                      <cfg.icon className={`h-4 w-4 ${cfg.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted-foreground">{item.reference}</span>
+                        <Badge variant="outline" className={`border-0 text-[10px] font-medium ${cfg.bg} ${cfg.color}`}>
+                          {cfg.label}
+                        </Badge>
+                      </div>
+                      <p className="text-sm font-medium text-foreground mt-0.5 truncate">{item.titre}</p>
+                      <p className="text-sm font-semibold text-primary mt-0.5">
+                        {item.montant.toLocaleString("fr-FR")} FCFA
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </CardContent>
         </Card>
       </div>
