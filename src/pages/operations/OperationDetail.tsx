@@ -37,7 +37,7 @@ interface OperationDetailProps {
   onUpdateOperation?: (opId: string, data: { lieu_embarquement?: string; lieu_livraison?: string; poids_kg?: number | null; nombre_colis?: number | null; nature_marchandise?: string; precautions?: string; commentaires?: string }) => void;
 }
 
-export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu }: OperationDetailProps) {
+export default function OperationDetail({ operation: op, camions, chauffeurs, onUpdateStatut, onAffecter, onAddDepense, onPlanifier, onAddIncident, onToggleIncidentResolu, onUpdateOperation }: OperationDetailProps) {
   const { user } = useAuth();
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
