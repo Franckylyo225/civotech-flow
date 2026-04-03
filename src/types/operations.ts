@@ -1,5 +1,7 @@
 export type OperationStatut = "DEMANDE" | "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ARCHIVEE";
 export type CategorieDepense = "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE";
+export type TypeIncident = "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE";
+export type GraviteIncident = "FAIBLE" | "MOYENNE" | "CRITIQUE";
 
 export interface Camion {
   id: string;
