@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Truck, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { seedDatabase } from "@/lib/seed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import logoImg from "@/assets/logo-civotech.png";
 
 const TEST_ACCOUNTS = [
   { label: "DG", email: "dg@civotech.ci", role: "DG", nom: "Koné", prenom: "Amadou" },
@@ -27,19 +28,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);
 
-  // Seed database + create test users on first load
   useEffect(() => {
     let cancelled = false;
     async function init() {
       setSeeding(true);
       try {
         await seedDatabase();
-        // Try creating test accounts (will fail silently if they exist)
         for (const acc of TEST_ACCOUNTS) {
           try {
             await signup(acc.email, "admin123", acc.nom, acc.prenom, acc.role as any);
           } catch {
-            // Account already exists, ignore
+            // Account already exists
           }
         }
       } catch (e) {
@@ -84,13 +83,11 @@ export default function LoginPage() {
     <div className="flex min-h-screen">
       {/* Left panel - branding */}
       <div className="sidebar-gradient hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-sidebar-foreground">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sidebar-primary">
-            <Truck className="h-10 w-10 text-sidebar-primary-foreground" />
-          </div>
-          <div>
+        <div className="flex flex-col items-center gap-6 mb-8">
+          <img src={logoImg} alt="Civotech" className="h-16" />
+          <div className="text-center">
             <h1 className="text-4xl font-bold">Civotech Flow</h1>
-            <p className="text-sidebar-muted text-lg">Transport & Logistique</p>
+            <p className="text-sidebar-muted text-lg mt-1">Transport & Logistique</p>
           </div>
         </div>
         <p className="max-w-md text-center text-sidebar-foreground/80 text-lg leading-relaxed">
@@ -103,10 +100,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-md border-0 shadow-lg">
           <CardContent className="p-8">
             <div className="mb-8 lg:hidden flex items-center gap-3 justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-                <Truck className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground">Civotech Flow</h1>
+              <img src={logoImg} alt="Civotech" className="h-10" />
             </div>
 
             <div className="mb-6">

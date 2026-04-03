@@ -3,16 +3,32 @@ import autoTable from "jspdf-autotable";
 import type { Devis } from "@/types/devis";
 import { formatMontant, formatDate } from "@/types/devis";
 
-export function generateDevisPdf(devis: Devis) {
+async function loadLogoAsBase64(): Promise<string> {
+  const response = await fetch("/logo-civotech.png");
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function generateDevisPdf(devis: Devis) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
 
-  // ── Header: Company info ──
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(16, 185, 129); // primary green
-  doc.text("CIVOTECH", margin, 25);
+  // ── Logo ──
+  try {
+    const logoBase64 = await loadLogoAsBase64();
+    doc.addImage(logoBase64, "PNG", margin, 12, 48, 14);
+  } catch {
+    // Fallback text if logo fails
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(16, 185, 129);
+    doc.text("CIVOTECH", margin, 25);
+  }
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");

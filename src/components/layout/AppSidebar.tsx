@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { LogOut, Truck, ChevronDown } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { roleNavItems, roleLabels } from "@/lib/roles";
+import { roleNavItems } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import logoImg from "@/assets/logo-civotech.png";
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
@@ -16,10 +17,7 @@ export function AppSidebar() {
     <aside className="flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <Truck className="h-5 w-5 text-primary-foreground" />
-        </div>
-        <span className="text-lg font-bold text-sidebar-heading">Civotech</span>
+        <img src={logoImg} alt="Civotech" className="h-8" />
       </div>
 
       {/* Navigation */}
