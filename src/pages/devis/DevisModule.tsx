@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDevisStore } from "@/hooks/use-devis-store";
+import { useGrilleTarifaireStore } from "@/hooks/use-grille-tarifaire-store";
 import DevisListPage from "./DevisListPage";
 import DevisCreateDialog from "./DevisCreateDialog";
 import DevisDetailPage from "./DevisDetailPage";
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 export default function DevisModule() {
   const { devisList, clients, loading, addDevis, updateDevis, updateStatut, createOperationFromDevis } = useDevisStore();
+  const { tarifs } = useGrilleTarifaireStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [activeTab, setActiveTab] = useState<"devis" | "grille">("devis");
@@ -79,6 +81,7 @@ export default function DevisModule() {
             open={showCreate}
             onOpenChange={setShowCreate}
             clients={clients}
+            tarifs={tarifs.filter((t) => t.actif)}
             onSave={addDevis}
           />
         </>
