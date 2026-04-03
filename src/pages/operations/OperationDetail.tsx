@@ -263,6 +263,32 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </Card>
       </div>
 
+      {/* Nature, précautions, commentaires */}
+      {(op.natureMarchandise || op.precautions || op.commentaires) && (
+        <Card className="border border-border shadow-none">
+          <CardContent className="p-5 space-y-3">
+            {op.natureMarchandise && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Nature de la marchandise</p>
+                <p className="text-sm text-foreground">{op.natureMarchandise}</p>
+              </div>
+            )}
+            {op.precautions && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Précautions particulières</p>
+                <p className="text-sm text-foreground">{op.precautions}</p>
+              </div>
+            )}
+            {op.commentaires && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Commentaires</p>
+                <p className="text-sm text-foreground">{op.commentaires}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Timeline + Vehicle/Driver */}
       <div className="grid grid-cols-5 gap-4">
         {/* Timeline */}
