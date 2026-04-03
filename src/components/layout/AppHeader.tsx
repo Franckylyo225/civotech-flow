@@ -57,11 +57,11 @@ export function AppHeader() {
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 cursor-pointer">
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/profil")}>
               <User className="h-4 w-4" />
               Mon profil
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer">
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/parametres")}>
               <Settings className="h-4 w-4" />
               Paramètres
             </DropdownMenuItem>
