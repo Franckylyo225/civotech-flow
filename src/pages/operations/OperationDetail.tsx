@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard, Loader2,
+  Phone, CreditCard, Loader2, CalendarIcon,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
