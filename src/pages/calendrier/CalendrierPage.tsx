@@ -150,11 +150,31 @@ export default function CalendrierPage() {
           <h1 className="text-2xl font-bold text-foreground">Calendrier DG</h1>
           <p className="text-muted-foreground">Agenda de la Direction Générale</p>
         </div>
-        {canManage && (
-          <Button onClick={() => openCreateDialog()} className="bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-2" /> Nouvel événement
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <div className="flex border rounded-lg overflow-hidden">
+            <Button
+              variant={viewMode === "mois" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("mois")}
+              className={viewMode === "mois" ? "bg-primary hover:bg-primary/90" : ""}
+            >
+              <LayoutGrid className="h-4 w-4 mr-1" /> Mois
+            </Button>
+            <Button
+              variant={viewMode === "agenda" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("agenda")}
+              className={viewMode === "agenda" ? "bg-primary hover:bg-primary/90" : ""}
+            >
+              <List className="h-4 w-4 mr-1" /> Agenda
+            </Button>
+          </div>
+          {canManage && (
+            <Button onClick={() => openCreateDialog()} className="bg-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4 mr-2" /> Nouvel événement
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
