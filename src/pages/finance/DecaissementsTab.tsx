@@ -367,6 +367,18 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Cancel confirmation dialog */}
+      <Dialog open={!!cancelDialog} onOpenChange={() => setCancelDialog(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Confirmer l'annulation</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Êtes-vous sûr de vouloir annuler cette demande de décaissement ? Cette action est irréversible.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialog(null)}>Non, garder</Button>
+            <Button variant="destructive" onClick={handleAnnuler}>Oui, annuler</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
