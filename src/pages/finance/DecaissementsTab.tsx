@@ -54,6 +54,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
   const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
   const getOp = (id: string | null) => id ? operations.find(o => o.id === id) : null;
+  const getLinkedLabel = (d: DecaissementRow) => d.demande_achat_id ? getDARef(d.demande_achat_id) : d.operation_id ? getOpRef(d.operation_id) + " (Mission)" : "Direct";
 
   const filtered = decaissements.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
