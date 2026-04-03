@@ -430,6 +430,62 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </Card>
       )}
 
+      {/* Incidents */}
+      {(op.statut === "EN_COURS" || op.statut === "TERMINEE") && (
+        <Card className="border border-border shadow-none">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Incidents ({op.incidents.length})
+            </CardTitle>
+            {canManage && op.statut === "EN_COURS" && (
+              <Button variant="outline" size="sm" onClick={() => setShowIncidentDialog(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Signaler
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="pt-0">
+            {op.incidents.length > 0 ? (
+              <div className="space-y-3">
+                {op.incidents.map((inc) => {
+                  const typeConfig = TYPE_INCIDENT_CONFIG[inc.type];
+                  const gravConfig = GRAVITE_CONFIG[inc.gravite];
+                  return (
+                    <div key={inc.id} className={cn("flex items-start gap-3 rounded-lg border p-3", inc.resolu ? "bg-muted/50 opacity-70" : "")}>
+                      <span className="text-lg mt-0.5">{typeConfig.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={cn("border-0 text-xs font-medium", gravConfig.bgColor, gravConfig.color)}>
+                            {gravConfig.label}
+                          </Badge>
+                          <Badge variant="outline" className="border-0 bg-muted text-muted-foreground text-xs">
+                            {typeConfig.label}
+                          </Badge>
+                          {inc.resolu && (
+                            <Badge variant="outline" className="border-0 bg-success/10 text-success text-xs">
+                              Résolu
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-foreground">{inc.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDateShort(inc.dateIncident)}</p>
+                      </div>
+                      {canManage && !inc.resolu && (
+                        <Button variant="outline" size="sm" className="text-xs shrink-0" onClick={() => onToggleIncidentResolu?.(inc.id, true)}>
+                          Résoudre
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Aucun incident signalé</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Affectation dialog */}
       <Dialog open={showAffectDialog} onOpenChange={setShowAffectDialog}>
         <DialogContent>
