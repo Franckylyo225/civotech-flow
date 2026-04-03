@@ -16,6 +16,7 @@ import { toast } from "sonner";
 interface DevisDetailPageProps {
   devis: Devis;
   onUpdateStatut: (devisId: string, statut: DevisStatut, commentaire?: string) => void;
+  onUpdateDevis?: (devisId: string, data: { lignes: { id?: string; description: string; quantite: number; prixUnitaire: number }[]; tauxTva: number; typeRemise: TypeRemise; valeurRemise: number }) => Promise<void>;
   onCreateOperation?: (devis: Devis) => Promise<boolean>;
   onBack: () => void;
 }
