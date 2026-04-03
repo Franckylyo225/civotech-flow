@@ -87,14 +87,33 @@ export default function ClientsModule() {
   const [showCreate, setShowCreate] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [stats, setStats] = useState({ totalDevis: 0, totalOperations: 0, caTotal: 0 });
 
   const canManage = user?.role === "DG" || user?.role === "COMMERCIAL";
+
+  useEffect(() => {
+    async function fetchStats() {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const [devisRes, opsRes] = await Promise.all([
+        supabase.from("devis").select("id, montant, client_id"),
+        supabase.from("operations").select("id, client_id"),
+      ]);
+      const devisList = devisRes.data || [];
+      const opsList = opsRes.data || [];
+      const caTotal = devisList.reduce((s, d) => s + Number(d.montant || 0), 0);
+      setStats({ totalDevis: devisList.length, totalOperations: opsList.length, caTotal });
+    }
+    if (!loading) fetchStats();
+  }, [loading]);
 
   const filtered = clients.filter((c) =>
     c.nom.toLowerCase().includes(search.toLowerCase()) ||
     (c.contact || "").toLowerCase().includes(search.toLowerCase()) ||
     (c.email || "").toLowerCase().includes(search.toLowerCase())
   );
+
+  const clientsWithEmail = clients.filter((c) => c.email).length;
+  const clientsWithPhone = clients.filter((c) => c.telephone).length;
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -112,6 +131,54 @@ export default function ClientsModule() {
             <Plus className="mr-2 h-4 w-4" /> Nouveau client
           </Button>
         )}
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{clients.length}</p>
+              <p className="text-xs text-muted-foreground">Total clients</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+              <TrendingUp className="h-5 w-5 text-success" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{stats.totalDevis}</p>
+              <p className="text-xs text-muted-foreground">Devis générés</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+              <UserCheck className="h-5 w-5 text-warning" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{clientsWithEmail}</p>
+              <p className="text-xs text-muted-foreground">Avec email</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+              <Phone className="h-5 w-5 text-info" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{clientsWithPhone}</p>
+              <p className="text-xs text-muted-foreground">Avec téléphone</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
