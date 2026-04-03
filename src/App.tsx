@@ -14,6 +14,7 @@ import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import ClientsModule from "@/pages/clients/ClientsModule";
 import AchatsModule from "@/pages/achats/AchatsModule";
 import FinanceModule from "@/pages/finance/FinanceModule";
+import RapportsPage from "@/pages/rapports/RapportsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
