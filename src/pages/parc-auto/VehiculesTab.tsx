@@ -4,6 +4,7 @@ import {
   Wrench, Navigation, Package, Calendar, Hash, Gauge,
 } from "lucide-react";
 import { useParcAutoStore, STATUT_CAMION_CONFIG, type CamionRow, type StatutCamion } from "@/hooks/use-parc-auto-store";
+import VehiculeDetailDialog from "./VehiculeDetailDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
