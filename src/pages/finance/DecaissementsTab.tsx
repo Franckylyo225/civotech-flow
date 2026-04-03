@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -20,6 +20,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 interface Props { canManage: boolean; isDG: boolean; }
 
@@ -28,6 +30,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [payDialog, setPayDialog] = useState<string | null>(null);
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
 
@@ -39,7 +43,10 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       getDARef(d.demande_achat_id).toLowerCase().includes(search.toLowerCase()) ||
       getDADesignation(d.demande_achat_id).toLowerCase().includes(search.toLowerCase());
     const matchStatut = filterStatut === "ALL" || d.statut === filterStatut;
-    return matchSearch && matchStatut;
+    const createdDate = new Date(d.created_at);
+    const matchFrom = !dateFrom || createdDate >= dateFrom;
+    const matchTo = !dateTo || createdDate <= new Date(dateTo.getTime() + 86400000 - 1);
+    return matchSearch && matchStatut && matchFrom && matchTo;
   });
 
   const handleApprouver = async (id: string) => {
@@ -111,8 +118,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       {/* Filters */}
       <Card className="border border-border shadow-none">
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher par référence..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
@@ -125,6 +132,33 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                 ))}
               </SelectContent>
             </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-[140px] justify-start text-left text-sm font-normal", !dateFrom && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                  {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Du"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-[140px] justify-start text-left text-sm font-normal", !dateTo && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                  {dateTo ? format(dateTo, "dd/MM/yyyy") : "Au"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            {(dateFrom || dateTo) && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }} title="Réinitialiser">
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
