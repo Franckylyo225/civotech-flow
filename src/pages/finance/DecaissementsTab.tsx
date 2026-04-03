@@ -36,6 +36,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "" });
+  const [editDialog, setEditDialog] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
 
   const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
