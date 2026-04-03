@@ -231,6 +231,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                           <span className="font-mono text-xs">{getDARef(d.demande_achat_id)}</span>
                           <p className="text-xs text-muted-foreground truncate max-w-[150px]">{getDADesignation(d.demande_achat_id)}</p>
                         </div>
+                      ) : d.operation_id ? (
+                        <Badge variant="outline" className="text-xs">Mission</Badge>
                       ) : (
                         <span className="text-xs text-muted-foreground">Direct</span>
                       )}
