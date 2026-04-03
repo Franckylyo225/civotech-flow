@@ -203,9 +203,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
               <div className="space-y-2">
                 <p className="text-sm text-success font-medium text-center">✓ Devis validé par le client</p>
                 {(role === "COMMERCIAL" || role === "DG" || role === "LOGISTIQUE") && (
-                  <Button className="w-full" onClick={handleCreateOperation} disabled={creatingOp}>
-                    <Truck className="mr-2 h-4 w-4" />
-                    {creatingOp ? "Création..." : "Créer une demande d'opération"}
+                  <Button className="w-full" onClick={() => setShowOpDialog(true)}>
+                    <Truck className="mr-2 h-4 w-4" /> Créer une demande d'opération
                   </Button>
                 )}
               </div>
