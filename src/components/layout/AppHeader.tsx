@@ -1,5 +1,6 @@
 import { Search, LogOut, User, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
 
 export function AppHeader() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -55,11 +57,11 @@ export function AppHeader() {
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 cursor-pointer">
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/profil")}>
               <User className="h-4 w-4" />
               Mon profil
             </DropdownMenuItem>
-            <DropdownMenuItem className="gap-2 cursor-pointer">
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => navigate("/parametres")}>
               <Settings className="h-4 w-4" />
               Paramètres
             </DropdownMenuItem>

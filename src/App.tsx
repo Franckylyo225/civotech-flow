@@ -16,6 +16,7 @@ import AchatsModule from "@/pages/achats/AchatsModule";
 import FinanceModule from "@/pages/finance/FinanceModule";
 import RapportsPage from "@/pages/rapports/RapportsPage";
 import ParametresModule from "@/pages/parametres/ParametresModule";
+import ProfilPage from "@/pages/parametres/ProfilPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/utilisateurs" element={<Navigate to="/parametres" replace />} />
         <Route path="/rapports" element={<RapportsPage />} />
         <Route path="/parametres" element={<ParametresModule />} />
+        <Route path="/profil" element={<ProfilPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
