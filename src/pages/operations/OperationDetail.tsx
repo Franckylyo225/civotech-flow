@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Truck, User, MapPin, ArrowRight, Package, Weight, Clock,
   Play, CheckCircle2, Upload, Plus, Receipt, Fuel, CircleDot,
-  Phone, CreditCard,
+  Phone, CreditCard, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut } from "@/types/operations";
 import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
   const [selectedCamion, setSelectedCamion] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [depForm, setDepForm] = useState<{ categorie: CategorieDepense; description: string; montant: number }>({
     categorie: "CARBURANT", description: "", montant: 0,
   });
@@ -54,6 +57,34 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     setShowDepenseDialog(false);
     setDepForm({ categorie: "CARBURANT", description: "", montant: 0 });
     toast.success("Dépense ajoutée");
+  };
+
+  const handleUploadBL = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${op.id}/bl_${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("bon-livraison").upload(filePath, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("bon-livraison").getPublicUrl(filePath);
+      await supabase.from("operations").update({ bon_livraison_url: urlData.publicUrl }).eq("id", op.id);
+      toast.success("Bon de livraison uploadé avec succès");
+      // Trigger refetch via parent
+      onUpdateStatut(op.id, op.statut);
+    } catch (err: any) {
+      toast.error("Erreur lors de l'upload : " + (err.message || "Erreur inconnue"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleTerminer = () => {
+    if (!op.bonLivraisonUrl) {
+      toast.error("Veuillez uploader le bon de livraison avant de terminer la mission");
+      return;
+    }
+    onUpdateStatut(op.id, "TERMINEE");
+    toast.success("Mission terminée");
   };
 
   const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
@@ -88,7 +119,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             </Button>
           )}
           {canManage && op.statut === "EN_COURS" && (
-            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => { onUpdateStatut(op.id, "TERMINEE"); toast.success("Mission terminée"); }}>
+            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={handleTerminer}>
               <CheckCircle2 className="mr-1.5 h-4 w-4" /> Terminer
             </Button>
           )}
@@ -327,17 +358,31 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 <CheckCircle2 className="h-5 w-5 text-success" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">BL uploadé</p>
-                  <p className="text-xs text-muted-foreground">{op.bonLivraisonUrl}</p>
+                  <p className="text-xs text-muted-foreground truncate max-w-md">{op.bonLivraisonUrl.split("/").pop()}</p>
                 </div>
-                <Button variant="outline" size="sm">Télécharger</Button>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer">Télécharger</a>
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
                 <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">Aucun bon de livraison uploadé</p>
+                <p className="text-sm text-muted-foreground mb-1">Aucun bon de livraison uploadé</p>
+                <p className="text-xs text-destructive mb-3">Requis pour terminer la mission</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUploadBL(file);
+                  }}
+                />
                 {canManage && (
-                  <Button variant="outline" size="sm">
-                    <Upload className="mr-1.5 h-4 w-4" /> Uploader le BL
+                  <Button variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                    {uploading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
+                    {uploading ? "Upload en cours..." : "Uploader le BL"}
                   </Button>
                 )}
               </div>
