@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal, Eye,
+  Search, CreditCard, Clock, CheckCircle2, Ban, DollarSign, CalendarIcon, X, Plus, Pencil, Trash2, MoreHorizontal, Eye, FileDown, FileSpreadsheet,
 } from "lucide-react";
 import {
   useDecaissementsStore, STATUT_DECAISSEMENT_CONFIG,
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { exportDecaissementsPdf, exportDecaissementsExcel } from "@/lib/export-decaissements";
 
 interface Props { canManage: boolean; isDG: boolean; }
 
@@ -53,6 +54,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
   const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
   const getOp = (id: string | null) => id ? operations.find(o => o.id === id) : null;
+  const getLinkedLabel = (d: DecaissementRow) => d.demande_achat_id ? getDARef(d.demande_achat_id) : d.operation_id ? getOpRef(d.operation_id) + " (Mission)" : "Direct";
 
   const filtered = decaissements.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
@@ -204,6 +206,21 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                 <X className="h-4 w-4" />
               </Button>
             )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <FileDown className="mr-1.5 h-4 w-4" />Exporter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportDecaissementsPdf({ data: filtered, getLinkedLabel })}>
+                  <FileDown className="mr-2 h-4 w-4" /> Export PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportDecaissementsExcel({ data: filtered, getLinkedLabel })}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Export Excel (CSV)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {canManage && (
               <Button onClick={() => setShowCreate(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />Nouveau décaissement
