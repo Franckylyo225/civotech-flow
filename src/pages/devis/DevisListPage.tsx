@@ -113,7 +113,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis }: 
               {filtered.map((devis) => (
                 <TableRow key={devis.id} className="cursor-pointer" onClick={() => onSelectDevis(devis.id)}>
                   <TableCell className="font-mono text-sm">{devis.reference}</TableCell>
-                  <TableCell className="font-medium">{devis.client.nom}</TableCell>
+                  <TableCell className="font-medium">{devis.client?.nom || "—"}</TableCell>
                   <TableCell className="font-semibold text-primary">{formatMontant(devis.montantTotal)}</TableCell>
                   <TableCell>{devis.lignes.length}</TableCell>
                   <TableCell><DevisStatutBadge statut={devis.statut} /></TableCell>
