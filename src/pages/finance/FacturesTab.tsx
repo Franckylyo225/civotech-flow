@@ -69,7 +69,10 @@ export default function FacturesTab({ canManage }: Props) {
       getClientNom(f.client_id).toLowerCase().includes(search.toLowerCase()) ||
       getOpRef(f.operation_id).toLowerCase().includes(search.toLowerCase());
     const matchStatut = filterStatut === "ALL" || f.statut === filterStatut;
-    return matchSearch && matchStatut;
+    const emissionDate = new Date(f.date_emission);
+    const matchFrom = !dateFrom || emissionDate >= dateFrom;
+    const matchTo = !dateTo || emissionDate <= new Date(dateTo.getTime() + 86400000 - 1);
+    return matchSearch && matchStatut && matchFrom && matchTo;
   });
 
   const handleCreate = async () => {
