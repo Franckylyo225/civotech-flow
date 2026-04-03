@@ -14,6 +14,7 @@ import {
 
 export function AppHeader() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
