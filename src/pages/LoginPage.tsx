@@ -18,6 +18,33 @@ const TEST_ACCOUNTS = [
   { label: "Assistante", email: "assistante@civotech.ci", role: "ASSISTANTE", nom: "Yao", prenom: "Marie" },
 ];
 
+const TESTIMONIALS = [
+  {
+    quote: "Civotech Flow a transformé notre gestion logistique. Nous avons réduit nos délais de livraison de 35%.",
+    author: "Amadou K.",
+    role: "Directeur Général, TransCorp CI",
+    stars: 5,
+  },
+  {
+    quote: "Une plateforme intuitive qui nous fait gagner un temps précieux au quotidien. Le suivi en temps réel est un vrai plus.",
+    author: "Fatou D.",
+    role: "Responsable Logistique, AfriLog",
+    stars: 5,
+  },
+  {
+    quote: "La gestion des devis et factures n'a jamais été aussi simple. Mon équipe l'a adopté en une semaine.",
+    author: "Ibrahim T.",
+    role: "Chef d'exploitation, RapidTrans",
+    stars: 4,
+  },
+];
+
+const STATS = [
+  { icon: Truck, value: "2 500+", label: "Livraisons gérées" },
+  { icon: Users, value: "150+", label: "Entreprises clientes" },
+  { icon: TrendingUp, value: "35%", label: "Gain de productivité" },
+];
+
 export default function LoginPage() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
