@@ -70,8 +70,10 @@ export function useParcAutoStore() {
     if (updates.immatriculation !== undefined) dbUpdates.immatriculation = updates.immatriculation;
     if (updates.marque !== undefined) dbUpdates.marque = updates.marque;
     if (updates.modele !== undefined) dbUpdates.modele = updates.modele;
+    if (updates.type_vehicule !== undefined) dbUpdates.type_vehicule = updates.type_vehicule;
     if (updates.capacite_tonnes !== undefined) dbUpdates.capacite_tonnes = updates.capacite_tonnes;
     if (updates.annee !== undefined) dbUpdates.annee = updates.annee;
+    if (updates.km_actuel !== undefined) dbUpdates.km_actuel = updates.km_actuel;
     if (updates.statut !== undefined) dbUpdates.statut = updates.statut;
     const { error } = await supabase.from("camions").update(dbUpdates).eq("id", id);
     if (error) throw error;
