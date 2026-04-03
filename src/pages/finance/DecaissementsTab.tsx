@@ -38,6 +38,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "" });
   const [editDialog, setEditDialog] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
+  const [cancelDialog, setCancelDialog] = useState<string | null>(null);
 
   const getDARef = (id: string | null) => id ? demandes.find(d => d.id === id)?.reference || "—" : "—";
   const getDADesignation = (id: string | null) => id ? demandes.find(d => d.id === id)?.designation || "" : "";
