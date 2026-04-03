@@ -86,7 +86,7 @@ export default function RapportsPage() {
   const months = useMemo(() => getPeriodMonths(period), [period]);
 
   // --- KPIs ---
-  const totalCA = factures.filter(f => f.statut === "PAYEE").reduce((s, f) => s + (f.montant_ttc || 0), 0);
+  const totalCA = factures.filter(f => ["PAYEE", "PARTIELLEMENT_PAYEE"].includes(f.statut)).reduce((s, f) => s + (f.montant_paye || 0), 0);
   const totalDecaisse = decaissements.filter(d => d.statut === "PAYE").reduce((s, d) => s + d.montant, 0);
   const beneficeBrut = totalCA - totalDecaisse;
   const opsTerminees = operations.filter(o => o.statut === "TERMINEE" || o.statut === "ARCHIVEE").length;
