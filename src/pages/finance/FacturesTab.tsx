@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Plus, Search, Receipt, Clock, CheckCircle2, DollarSign,
-  Pencil, Trash2, Send, Eye, CreditCard, AlertTriangle, FileText,
+  Pencil, Trash2, Send, Eye, CreditCard, AlertTriangle, FileText, Download, Paperclip,
 } from "lucide-react";
 import {
   useFacturesStore, STATUT_FACTURE_CONFIG,
@@ -55,6 +55,7 @@ export default function FacturesTab({ canManage }: Props) {
 
   const getClientNom = (id: string | null) => id ? clients.find(c => c.id === id)?.nom || "—" : "—";
   const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
+  const getOpBL = (id: string | null) => id ? operations.find(o => o.id === id)?.bonLivraisonUrl : undefined;
 
   // Operations that don't have a facture yet and are TERMINEE
   const availableOps = operations.filter(op =>
@@ -187,6 +188,15 @@ export default function FacturesTab({ canManage }: Props) {
                       <span className="font-mono text-sm font-medium">{op.reference}</span>
                       <span className="text-muted-foreground text-sm ml-2">— {op.clientNom}</span>
                     </div>
+                    {op.bonLivraisonUrl ? (
+                      <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-success hover:underline">
+                        <Paperclip className="h-3 w-3" />BL joint
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs text-destructive">
+                        <Paperclip className="h-3 w-3" />BL manquant
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold">{op.montantDevis.toLocaleString()} F</span>
@@ -238,6 +248,7 @@ export default function FacturesTab({ canManage }: Props) {
                 <TableHead>Référence</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Opération</TableHead>
+                <TableHead>BL</TableHead>
                 <TableHead>Montant TTC</TableHead>
                 <TableHead>Payé</TableHead>
                 <TableHead>Statut</TableHead>
@@ -249,11 +260,23 @@ export default function FacturesTab({ canManage }: Props) {
               {filtered.map(f => {
                 const statutCfg = STATUT_FACTURE_CONFIG[f.statut];
                 const isOverdue = f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date();
+                const blUrl = getOpBL(f.operation_id);
                 return (
                   <TableRow key={f.id}>
                     <TableCell className="font-mono text-sm font-medium">{f.reference}</TableCell>
                     <TableCell className="text-sm">{getClientNom(f.client_id)}</TableCell>
                     <TableCell className="font-mono text-xs">{getOpRef(f.operation_id)}</TableCell>
+                    <TableCell>
+                      {blUrl ? (
+                        <a href={blUrl} target="_blank" rel="noopener noreferrer" title="Voir le bon de livraison">
+                          <Badge variant="outline" className="border-0 text-xs bg-success/10 text-success gap-1 cursor-pointer hover:bg-success/20">
+                            <Paperclip className="h-3 w-3" />BL
+                          </Badge>
+                        </a>
+                      ) : (
+                        <Badge variant="outline" className="border-0 text-xs bg-muted text-muted-foreground">—</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm font-semibold">{f.montant_ttc.toLocaleString()} F</TableCell>
                     <TableCell className="text-sm">
                       <span className={cn(f.montant_paye > 0 && "text-success font-medium")}>{f.montant_paye.toLocaleString()} F</span>
@@ -293,7 +316,7 @@ export default function FacturesTab({ canManage }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune facture</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune facture</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -435,6 +458,27 @@ export default function FacturesTab({ canManage }: Props) {
                   </>
                 )}
                 {f.notes && <div className="text-sm p-2 rounded bg-muted/50 border"><span className="text-muted-foreground text-xs">Notes :</span><p className="mt-0.5">{f.notes}</p></div>}
+                {/* Bon de livraison */}
+                {(() => {
+                  const blUrl = getOpBL(f.operation_id);
+                  return blUrl ? (
+                    <>
+                      <Separator />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-success/5 border border-success/20">
+                        <Paperclip className="h-4 w-4 text-success" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">Bon de livraison</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-xs">{blUrl.split("/").pop()}</p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={blUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-3.5 w-3.5 mr-1" />Télécharger
+                          </a>
+                        </Button>
+                      </div>
+                    </>
+                  ) : null;
+                })()}
               </>
             );
           })()}
