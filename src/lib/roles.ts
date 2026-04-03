@@ -11,10 +11,11 @@ import {
   BarChart3,
   Bell,
   Wallet,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
-export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE";
+export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN";
 
 export interface NavItem {
   label: string;
@@ -29,6 +30,8 @@ export const roleLabels: Record<UserRole, string> = {
   FINANCE: "Finance",
   ACHATS: "Achats",
   ASSISTANTE: "Assistante DG",
+  MAINTENANCE: "Maintenance",
+  ADMIN: "Administrateur",
 };
 
 export const roleNavItems: Record<UserRole, NavItem[]> = {
@@ -41,8 +44,8 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Achats", path: "/achats", icon: ShoppingCart },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package },
     { label: "Calendrier", path: "/calendrier", icon: Calendar },
-    { label: "Utilisateurs", path: "/utilisateurs", icon: Users },
     { label: "Rapports", path: "/rapports", icon: BarChart3 },
+    { label: "Paramètres", path: "/parametres", icon: Settings },
   ],
   COMMERCIAL: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
@@ -68,5 +71,20 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   ASSISTANTE: [
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
+  ],
+  MAINTENANCE: [
+    { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Gestion du Parc", path: "/parc-auto", icon: Package },
+  ],
+  ADMIN: [
+    { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Devis", path: "/devis", icon: FileText },
+    { label: "Opérations", path: "/operations", icon: Truck },
+    { label: "Clients", path: "/clients", icon: Users },
+    { label: "Finance & Comptabilité", path: "/factures", icon: Wallet },
+    { label: "Achats", path: "/achats", icon: ShoppingCart },
+    { label: "Gestion du Parc", path: "/parc-auto", icon: Package },
+    { label: "Rapports", path: "/rapports", icon: BarChart3 },
+    { label: "Paramètres", path: "/parametres", icon: Settings },
   ],
 };
