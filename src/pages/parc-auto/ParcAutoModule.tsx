@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import VehiculesTab from "./VehiculesTab";
 import MaintenanceTab from "./MaintenanceTab";
 import ChauffeursTab from "./ChauffeursTab";
+import ParcAlerts from "@/components/parc-auto/ParcAlerts";
 
 export default function ParcAutoModule() {
   const { user } = useAuth();
