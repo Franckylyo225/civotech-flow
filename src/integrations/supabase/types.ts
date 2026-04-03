@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          enregistrement_id: string | null
+          id: string
+          ip_address: string | null
+          table_cible: string | null
+          user_email: string | null
+          user_id: string
+          user_nom: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          enregistrement_id?: string | null
+          id?: string
+          ip_address?: string | null
+          table_cible?: string | null
+          user_email?: string | null
+          user_id: string
+          user_nom?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          enregistrement_id?: string | null
+          id?: string
+          ip_address?: string | null
+          table_cible?: string | null
+          user_email?: string | null
+          user_id?: string
+          user_nom?: string | null
+        }
+        Relationships: []
+      }
       camions: {
         Row: {
           annee: number
@@ -224,6 +263,87 @@ export type Database = {
           id?: string
           nom?: string
           telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          adresse: string | null
+          categories_depenses: Json
+          conditions_paiement: string | null
+          created_at: string
+          devise: string
+          email: string | null
+          format_date: string
+          fuseau_horaire: string
+          id: string
+          langue: string
+          logo_url: string | null
+          modes_paiement: Json
+          nom: string
+          prefixe_decaissement: string
+          prefixe_demande_achat: string
+          prefixe_devis: string
+          prefixe_facture: string
+          prefixe_operation: string
+          site_web: string | null
+          taux_tva: number
+          telephone: string | null
+          types_prestations: Json
+          types_vehicules: Json
+          updated_at: string
+        }
+        Insert: {
+          adresse?: string | null
+          categories_depenses?: Json
+          conditions_paiement?: string | null
+          created_at?: string
+          devise?: string
+          email?: string | null
+          format_date?: string
+          fuseau_horaire?: string
+          id?: string
+          langue?: string
+          logo_url?: string | null
+          modes_paiement?: Json
+          nom?: string
+          prefixe_decaissement?: string
+          prefixe_demande_achat?: string
+          prefixe_devis?: string
+          prefixe_facture?: string
+          prefixe_operation?: string
+          site_web?: string | null
+          taux_tva?: number
+          telephone?: string | null
+          types_prestations?: Json
+          types_vehicules?: Json
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string | null
+          categories_depenses?: Json
+          conditions_paiement?: string | null
+          created_at?: string
+          devise?: string
+          email?: string | null
+          format_date?: string
+          fuseau_horaire?: string
+          id?: string
+          langue?: string
+          logo_url?: string | null
+          modes_paiement?: Json
+          nom?: string
+          prefixe_decaissement?: string
+          prefixe_demande_achat?: string
+          prefixe_devis?: string
+          prefixe_facture?: string
+          prefixe_operation?: string
+          site_web?: string | null
+          taux_tva?: number
+          telephone?: string | null
+          types_prestations?: Json
+          types_vehicules?: Json
           updated_at?: string
         }
         Relationships: []
