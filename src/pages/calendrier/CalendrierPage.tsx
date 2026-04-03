@@ -47,6 +47,7 @@ export default function CalendrierPage() {
   const { user } = useAuth();
   const canManage = user?.role === "DG" || user?.role === "ASSISTANTE";
 
+  const [viewMode, setViewMode] = useState<"mois" | "agenda">("mois");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
