@@ -223,5 +223,32 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
-  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, refetch: fetchAll };
+  const addIncident = useCallback(async (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => {
+    await supabase.from("incidents").insert({
+      operation_id: opId,
+      type: incident.type as any,
+      description: incident.description,
+      gravite: incident.gravite as any,
+    });
+
+    // Timeline event
+    const now = new Date();
+    await supabase.from("timeline_events").insert({
+      operation_id: opId,
+      date: now.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
+      heure: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      titre: `Incident signalé`,
+      description: `${incident.type} — ${incident.description}`,
+      statut: "done",
+    });
+
+    await fetchAll();
+  }, [fetchAll]);
+
+  const toggleIncidentResolu = useCallback(async (incidentId: string, resolu: boolean) => {
+    await supabase.from("incidents").update({ resolu }).eq("id", incidentId);
+    await fetchAll();
+  }, [fetchAll]);
+
+  return { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, refetch: fetchAll };
 }
