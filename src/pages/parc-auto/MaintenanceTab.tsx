@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Wrench, Plus, Search, Pencil, Trash2, Clock,
-  CheckCircle2, AlertTriangle, Ban, Calendar,
+  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart,
 } from "lucide-react";
 import { useMaintenancesStore, STATUT_MAINTENANCE_CONFIG, TYPE_MAINTENANCE_CONFIG, type MaintenanceRow, type TypeMaintenance, type StatutMaintenance } from "@/hooks/use-maintenances-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { supabase } from "@/integrations/supabase/client";
+import { STATUT_DA_CONFIG, type StatutDemandeAchat } from "@/hooks/use-demandes-achat-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
