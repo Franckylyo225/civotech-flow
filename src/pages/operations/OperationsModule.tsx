@@ -182,6 +182,7 @@ export default function OperationsModule() {
             onPlanifier={planifierOperation}
             onAddIncident={addIncident}
             onToggleIncidentResolu={toggleIncidentResolu}
+            onUpdateOperation={updateOperation}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
