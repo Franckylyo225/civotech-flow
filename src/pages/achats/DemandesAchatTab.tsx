@@ -256,7 +256,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
                 <SelectTrigger><SelectValue placeholder="Aucune" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE">Aucune</SelectItem>
-                  {maintenances.filter(m => m.statut !== "TERMINEE" && m.statut !== "ANNULEE").map(m => (
+                  {maintenances.filter(m => m.statut !== "TERMINEE" && m.statut !== "ANNULEE" && !demandes.some(d => d.maintenance_id === m.id && d.id !== editingId)).map(m => (
                     <SelectItem key={m.id} value={m.id}>{m.description.slice(0, 50)}</SelectItem>
                   ))}
                 </SelectContent>
