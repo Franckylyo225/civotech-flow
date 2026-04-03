@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Plus, Search, Receipt, Clock, CheckCircle2, DollarSign,
-  Pencil, Trash2, Send, Eye, CreditCard,
+  Pencil, Trash2, Send, Eye, CreditCard, AlertTriangle, FileText,
 } from "lucide-react";
 import {
   useFacturesStore, STATUT_FACTURE_CONFIG,
@@ -167,6 +167,41 @@ export default function FacturesTab({ canManage }: Props) {
           </Card>
         ))}
       </div>
+
+      {/* Operations en attente de facture */}
+      {availableOps.length > 0 && (
+        <Card className="border border-warning/30 bg-warning/5 shadow-none">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <h3 className="font-semibold text-sm text-foreground">
+                {availableOps.length} opération{availableOps.length > 1 ? "s" : ""} terminée{availableOps.length > 1 ? "s" : ""} en attente de facturation
+              </h3>
+            </div>
+            <div className="grid gap-2">
+              {availableOps.map(op => (
+                <div key={op.id} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <span className="font-mono text-sm font-medium">{op.reference}</span>
+                      <span className="text-muted-foreground text-sm ml-2">— {op.clientNom}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold">{op.montantDevis.toLocaleString()} F</span>
+                    {canManage && (
+                      <Button size="sm" variant="outline" onClick={() => { setCreateForm(f => ({ ...f, operation_id: op.id })); setShowCreate(true); }}>
+                        <Plus className="h-3.5 w-3.5 mr-1" />Facturer
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
