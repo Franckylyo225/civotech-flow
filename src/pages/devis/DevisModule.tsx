@@ -81,6 +81,7 @@ export default function DevisModule() {
             open={showCreate}
             onOpenChange={setShowCreate}
             clients={clients}
+            tarifs={tarifs.filter((t) => t.actif)}
             onSave={addDevis}
           />
         </>
