@@ -163,6 +163,7 @@ export type Database = {
       devis: {
         Row: {
           client_id: string | null
+          commentaire_refus: string | null
           commercial_id: string | null
           created_at: string
           date_validite: string | null
@@ -175,6 +176,7 @@ export type Database = {
         }
         Insert: {
           client_id?: string | null
+          commentaire_refus?: string | null
           commercial_id?: string | null
           created_at?: string
           date_validite?: string | null
@@ -187,6 +189,7 @@ export type Database = {
         }
         Update: {
           client_id?: string | null
+          commentaire_refus?: string | null
           commercial_id?: string | null
           created_at?: string
           date_validite?: string | null
@@ -203,6 +206,44 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lignes_devis: {
+        Row: {
+          created_at: string
+          description: string
+          devis_id: string
+          id: string
+          montant: number
+          prix_unitaire: number
+          quantite: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          devis_id: string
+          id?: string
+          montant?: number
+          prix_unitaire?: number
+          quantite?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          devis_id?: string
+          id?: string
+          montant?: number
+          prix_unitaire?: number
+          quantite?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lignes_devis_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
             referencedColumns: ["id"]
           },
         ]
@@ -430,7 +471,14 @@ export type Database = {
         | "ASSISTANTE"
       categorie_depense: "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
-      statut_devis: "BROUILLON" | "EN_ATTENTE" | "VALIDE" | "REJETE" | "FACTURE"
+      statut_devis:
+        | "BROUILLON"
+        | "SOUMIS_DG"
+        | "APPROUVE_DG"
+        | "REFUSE_DG"
+        | "ENVOYE_CLIENT"
+        | "VALIDE_CLIENT"
+        | "REFUSE_CLIENT"
       statut_operation:
         | "DEMANDE"
         | "PLANIFIEE"
@@ -574,7 +622,15 @@ export const Constants = {
       ],
       categorie_depense: ["CARBURANT", "PEAGE", "TAXE", "AUTRE"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
-      statut_devis: ["BROUILLON", "EN_ATTENTE", "VALIDE", "REJETE", "FACTURE"],
+      statut_devis: [
+        "BROUILLON",
+        "SOUMIS_DG",
+        "APPROUVE_DG",
+        "REFUSE_DG",
+        "ENVOYE_CLIENT",
+        "VALIDE_CLIENT",
+        "REFUSE_CLIENT",
+      ],
       statut_operation: [
         "DEMANDE",
         "PLANIFIEE",
