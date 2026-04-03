@@ -17,6 +17,7 @@ import FinanceModule from "@/pages/finance/FinanceModule";
 import RapportsPage from "@/pages/rapports/RapportsPage";
 import ParametresModule from "@/pages/parametres/ParametresModule";
 import ProfilPage from "@/pages/parametres/ProfilPage";
+import ApprobationsPage from "@/pages/approbations/ApprobationsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
