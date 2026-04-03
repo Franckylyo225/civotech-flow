@@ -9,6 +9,7 @@ export type DevisStatut =
 
 export interface LigneDevis {
   id: string;
+  devisId: string;
   description: string;
   quantite: number;
   prixUnitaire: number;
@@ -18,23 +19,23 @@ export interface LigneDevis {
 export interface Client {
   id: string;
   nom: string;
-  email: string;
-  telephone: string;
-  adresse: string;
-  ville: string;
-  pays: string;
+  email: string | null;
+  telephone: string | null;
+  adresse: string | null;
+  contact: string | null;
 }
 
 export interface Devis {
   id: string;
   reference: string;
-  clientId: string;
-  client: Client;
+  clientId: string | null;
+  client?: Client;
   lignes: LigneDevis[];
   montantTotal: number;
   statut: DevisStatut;
   commentaireRefus?: string;
-  createdBy: string;
+  description?: string;
+  commercialId: string | null;
   createdAt: string;
   updatedAt: string;
 }

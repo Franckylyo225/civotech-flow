@@ -30,7 +30,7 @@ export function DevisPipeline({ devisList, onSelectDevis }: DevisPipelineProps) 
                 >
                   <CardContent className="p-3">
                     <p className="text-xs font-mono text-muted-foreground">{devis.reference}</p>
-                    <p className="mt-1 text-sm font-medium text-foreground truncate">{devis.client.nom}</p>
+                    <p className="mt-1 text-sm font-medium text-foreground truncate">{devis.client?.nom || "—"}</p>
                     <p className="mt-1 text-sm font-semibold text-primary">{formatMontant(devis.montantTotal)}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{devis.lignes.length} ligne(s)</p>
                   </CardContent>
