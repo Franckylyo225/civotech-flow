@@ -12,6 +12,7 @@ import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import ClientsModule from "@/pages/clients/ClientsModule";
+import AchatsModule from "@/pages/achats/AchatsModule";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
