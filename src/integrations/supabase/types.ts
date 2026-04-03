@@ -1168,6 +1168,8 @@ export type Database = {
         | "FINANCE"
         | "ACHATS"
         | "ASSISTANTE"
+        | "MAINTENANCE"
+        | "ADMIN"
       categorie_charge:
         | "LOYER"
         | "SALAIRES"
@@ -1357,6 +1359,8 @@ export const Constants = {
         "FINANCE",
         "ACHATS",
         "ASSISTANTE",
+        "MAINTENANCE",
+        "ADMIN",
       ],
       categorie_charge: [
         "LOYER",
