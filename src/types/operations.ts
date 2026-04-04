@@ -22,6 +22,8 @@ export interface Chauffeur {
   disponible: boolean;
 }
 
+export type StatutDepense = "EN_ATTENTE" | "APPROUVE" | "PAYE" | "REJETE";
+
 export interface LigneDepense {
   id: string;
   operationId: string;
@@ -29,7 +31,16 @@ export interface LigneDepense {
   description: string;
   montant: number;
   date: string;
+  statutDecaissement?: StatutDepense;
+  decaissementId?: string;
 }
+
+export const STATUT_DEPENSE_CONFIG: Record<StatutDepense, { label: string; color: string; bgColor: string }> = {
+  EN_ATTENTE: { label: "En attente", color: "text-warning", bgColor: "bg-warning/10" },
+  APPROUVE: { label: "Approuvé", color: "text-info", bgColor: "bg-info/10" },
+  PAYE: { label: "Payé", color: "text-success", bgColor: "bg-success/10" },
+  REJETE: { label: "Rejeté", color: "text-destructive", bgColor: "bg-destructive/10" },
+};
 
 export interface Incident {
   id: string;
