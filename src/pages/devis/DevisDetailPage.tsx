@@ -127,7 +127,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
         </Card>
       )}
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader><CardTitle className="text-base">Client</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
