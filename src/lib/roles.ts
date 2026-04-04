@@ -74,9 +74,9 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   ACHATS: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Demandes d'achat", path: "/achats", icon: ShoppingCart },
-    { label: "Fournisseurs", path: "/fournisseurs", icon: Users },
-    { label: "Centre d'aide", path: "/aide", icon: HelpCircle },
+    { label: "Demandes d'achat", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
+    { label: "Fournisseurs", path: "/fournisseurs", icon: Users, category: "SERVICES" },
+    { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   ASSISTANTE: [
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
