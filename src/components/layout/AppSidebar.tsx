@@ -31,7 +31,11 @@ function groupNavItems(items: NavItem[]) {
   return groups;
 }
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onNavigate?: () => void;
+}
+
+export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const { counts } = useSidebarCounts();
@@ -50,6 +54,7 @@ export function AppSidebar() {
       <Link
         key={item.path}
         to={item.path}
+        onClick={onNavigate}
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
           isActive
@@ -74,7 +79,7 @@ export function AppSidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar">
+    <aside className="flex h-full w-60 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <img src={logoImg} alt="Civotech" className="h-8" />
@@ -99,7 +104,7 @@ export function AppSidebar() {
       {/* User footer */}
       <div className="border-t border-sidebar-border p-3">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground shrink-0">
             {user.prenom[0]}{user.nom[0]}
           </div>
           <div className="flex-1 min-w-0">
