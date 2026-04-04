@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil, Download } from "lucide-react";
+import { Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut, TypeRemise } from "@/types/devis";
