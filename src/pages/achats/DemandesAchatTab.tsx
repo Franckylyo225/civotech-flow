@@ -156,9 +156,9 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Référence</TableHead>
