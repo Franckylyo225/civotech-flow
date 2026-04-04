@@ -219,27 +219,28 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
 
       {/* Route card */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">Départ</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full border-2 border-primary bg-primary/20" />
-                  <span className="text-sm font-medium text-foreground">{op.lieuEmbarquement}</span>
-                </div>
+        <CardContent className="p-3 sm:p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Départ</p>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full border-2 border-primary bg-primary/20" />
+                <span className="text-sm font-medium text-foreground">{op.lieuEmbarquement}</span>
               </div>
-              <div className="flex items-center gap-2 px-4">
-                <div className="h-[2px] w-16 bg-border" />
-                <Truck className="h-4 w-4 text-primary" />
-                <div className="h-[2px] w-16 bg-border" />
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">Arrivée</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full border-2 border-success bg-success/20" />
-                  <span className="text-sm font-medium text-foreground">{op.lieuLivraison}</span>
-                </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 px-4">
+              <div className="h-[2px] w-16 bg-border" />
+              <Truck className="h-4 w-4 text-primary" />
+              <div className="h-[2px] w-16 bg-border" />
+            </div>
+            <div className="flex sm:hidden items-center gap-1.5 pl-1">
+              <ArrowRight className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Arrivée</p>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full border-2 border-success bg-success/20" />
+                <span className="text-sm font-medium text-foreground">{op.lieuLivraison}</span>
               </div>
             </div>
           </div>
