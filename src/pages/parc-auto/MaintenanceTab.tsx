@@ -248,7 +248,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v as TypeMaintenance }))}>
