@@ -58,6 +58,14 @@ export default function OperationsModule() {
 
   const dateRange = getDateRange(period);
 
+  const STATUT_ORDER: Record<string, number> = {
+    DEMANDE: 0,
+    EN_COURS: 1,
+    PLANIFIEE: 2,
+    TERMINEE: 3,
+    ARCHIVEE: 4,
+  };
+
   const filtered = operations.filter((o) => {
     const matchSearch =
       o.reference.toLowerCase().includes(search.toLowerCase()) ||
@@ -67,7 +75,7 @@ export default function OperationsModule() {
     const matchTab = activeTab === "ALL" || o.statut === activeTab;
     const matchPeriod = !dateRange || (new Date(o.createdAt) >= dateRange.start && new Date(o.createdAt) <= dateRange.end);
     return matchSearch && matchTab && matchPeriod;
-  });
+  }).sort((a, b) => (STATUT_ORDER[a.statut] ?? 99) - (STATUT_ORDER[b.statut] ?? 99));
 
   const selectedOp = operations.find((o) => o.id === selectedId);
 
