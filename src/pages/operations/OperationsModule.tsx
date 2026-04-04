@@ -1,13 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
-import { Search, Filter, MapPin, ArrowRight, CalendarIcon, X } from "lucide-react";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear } from "date-fns";
+import { useState, useEffect } from "react";
+import { Search, MapPin, ArrowRight, CalendarIcon, ChevronLeft } from "lucide-react";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useAuth } from "@/lib/auth-context";
 import { useOperationsStore } from "@/hooks/use-operations-store";
-import type { Operation, OperationStatut } from "@/types/operations";
+import type { OperationStatut } from "@/types/operations";
 import { OPERATION_STATUT_CONFIG } from "@/types/operations";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import OperationDetail from "./OperationDetail";
@@ -43,13 +43,24 @@ const TABS: { label: string; statut: OperationStatut | "ALL" }[] = [
   { label: "Livrées", statut: "TERMINEE" },
 ];
 
+const STATUT_ORDER: Record<string, number> = {
+  DEMANDE: 0,
+  EN_COURS: 1,
+  PLANIFIEE: 2,
+  TERMINEE: 3,
+  ARCHIVEE: 4,
+};
+
 export default function OperationsModule() {
   const { operations, camions, chauffeurs, loading, updateStatut, affecterOperation, addDepense, planifierOperation, addIncident, toggleIncidentResolu, updateOperation } = useOperationsStore();
   const [selectedId, setSelectedId] = useState<string>("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<OperationStatut | "ALL">("ALL");
   const [period, setPeriod] = useState<PeriodFilter>("ALL");
+  // Mobile: track whether we're showing the detail view
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
 
+  // Auto-select first operation on desktop only
   useEffect(() => {
     if (operations.length > 0 && !selectedId) setSelectedId(operations[0].id);
   }, [operations, selectedId]);
@@ -57,14 +68,6 @@ export default function OperationsModule() {
   if (loading) return <div className="flex items-center justify-center h-full text-muted-foreground">Chargement des opérations...</div>;
 
   const dateRange = getDateRange(period);
-
-  const STATUT_ORDER: Record<string, number> = {
-    DEMANDE: 0,
-    EN_COURS: 1,
-    PLANIFIEE: 2,
-    TERMINEE: 3,
-    ARCHIVEE: 4,
-  };
 
   const baseFiltered = operations.filter((o) => {
     const matchSearch =
@@ -87,118 +90,178 @@ export default function OperationsModule() {
     return baseFiltered.filter((o) => o.statut === statut).length;
   };
 
-  return (
-    <div className="flex h-[calc(100vh-7rem)] gap-0 -m-6">
-      {/* Left panel — operations list */}
-      <div className="w-[340px] shrink-0 border-r border-border bg-card flex flex-col">
-        {/* Search */}
-        <div className="p-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground mb-3">Opérations</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher ici..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-muted border-0"
-            />
-          </div>
-          <div className="mt-2">
-            <Select value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
-              <SelectTrigger className="bg-muted border-0 text-xs h-8">
-                <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PERIOD_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+  const handleSelectOp = (id: string) => {
+    setSelectedId(id);
+    setShowMobileDetail(true);
+  };
 
-        {/* Tabs */}
-        <div className="flex flex-wrap border-b border-border px-3 gap-0.5 py-1">
-          {TABS.map((tab) => {
-            const count = getCounts(tab.statut);
-            const isActive = activeTab === tab.statut;
-            return (
-              <button
-                key={tab.statut}
-                onClick={() => setActiveTab(tab.statut)}
-                className={cn(
-                  "px-2 py-1.5 text-[11px] font-medium rounded-md transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {tab.label} <span className="opacity-70">({count})</span>
-              </button>
-            );
-          })}
-        </div>
+  const handleMobileBack = () => {
+    setShowMobileDetail(false);
+  };
 
-        {/* List */}
-        <div className="flex-1 overflow-y-auto">
-          {filtered.map((op) => {
-            const isSelected = op.id === selectedId;
-            const config = OPERATION_STATUT_CONFIG[op.statut];
-            return (
-              <button
-                key={op.id}
-                onClick={() => setSelectedId(op.id)}
-                className={cn(
-                  "w-full text-left p-4 border-b border-border transition-colors",
-                  isSelected
-                    ? "bg-primary/5 border-l-2 border-l-primary"
-                    : "hover:bg-muted/50 border-l-2 border-l-transparent"
-                )}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-semibold text-foreground">{op.reference}</span>
-                  <Badge variant="outline" className={cn("border-0 text-[10px] font-medium", config.bgColor, config.color)}>
-                    {config.label}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">{op.clientNom}</p>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3 shrink-0" />
-                  <span className="truncate">{op.lieuEmbarquement.split(",")[0]}</span>
-                  <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
-                  <span className="truncate">{op.lieuLivraison.split(",")[0]}</span>
-                </div>
-              </button>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              Aucune opération trouvée
-            </div>
-          )}
+  // --- List panel (shared between mobile and desktop) ---
+  const listPanel = (
+    <div className={cn(
+      "flex flex-col bg-card",
+      // Desktop: fixed width with border
+      "md:w-[340px] md:shrink-0 md:border-r md:border-border",
+      // Mobile: full width
+      "w-full",
+    )}>
+      {/* Search */}
+      <div className="p-3 sm:p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground mb-3">Opérations</h2>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher ici..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-muted border-0"
+          />
+        </div>
+        <div className="mt-2">
+          <Select value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
+            <SelectTrigger className="bg-muted border-0 text-xs h-8">
+              <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIOD_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* Right panel — detail */}
-      <div className="flex-1 overflow-y-auto bg-background">
-        {selectedOp ? (
-          <OperationDetail
-            operation={selectedOp}
-            camions={camions}
-            chauffeurs={chauffeurs}
-            onUpdateStatut={updateStatut}
-            onAffecter={affecterOperation}
-            onAddDepense={addDepense}
-            onPlanifier={planifierOperation}
-            onAddIncident={addIncident}
-            onToggleIncidentResolu={toggleIncidentResolu}
-            onUpdateOperation={updateOperation}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Sélectionnez une opération
+      {/* Tabs */}
+      <div className="flex flex-wrap border-b border-border px-2 sm:px-3 gap-0.5 py-1 overflow-x-auto">
+        {TABS.map((tab) => {
+          const count = getCounts(tab.statut);
+          const isActive = activeTab === tab.statut;
+          return (
+            <button
+              key={tab.statut}
+              onClick={() => setActiveTab(tab.statut)}
+              className={cn(
+                "px-2 py-1.5 text-[11px] font-medium rounded-md transition-colors whitespace-nowrap",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              {tab.label} <span className="opacity-70">({count})</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto">
+        {filtered.map((op) => {
+          const isSelected = op.id === selectedId;
+          const config = OPERATION_STATUT_CONFIG[op.statut];
+          return (
+            <button
+              key={op.id}
+              onClick={() => handleSelectOp(op.id)}
+              className={cn(
+                "w-full text-left p-3 sm:p-4 border-b border-border transition-colors",
+                isSelected
+                  ? "bg-primary/5 border-l-2 border-l-primary"
+                  : "hover:bg-muted/50 border-l-2 border-l-transparent"
+              )}
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-semibold text-foreground">{op.reference}</span>
+                <Badge variant="outline" className={cn("border-0 text-[10px] font-medium", config.bgColor, config.color)}>
+                  {config.label}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">{op.clientNom}</p>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3 shrink-0" />
+                <span className="truncate">{op.lieuEmbarquement.split(",")[0]}</span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+                <span className="truncate">{op.lieuLivraison.split(",")[0]}</span>
+              </div>
+            </button>
+          );
+        })}
+        {filtered.length === 0 && (
+          <div className="p-8 text-center text-sm text-muted-foreground">
+            Aucune opération trouvée
           </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // --- Detail panel ---
+  const detailPanel = (
+    <div className="flex-1 overflow-y-auto bg-background">
+      {selectedOp ? (
+        <OperationDetail
+          operation={selectedOp}
+          camions={camions}
+          chauffeurs={chauffeurs}
+          onUpdateStatut={updateStatut}
+          onAffecter={affecterOperation}
+          onAddDepense={addDepense}
+          onPlanifier={planifierOperation}
+          onAddIncident={addIncident}
+          onToggleIncidentResolu={toggleIncidentResolu}
+          onUpdateOperation={updateOperation}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full text-muted-foreground">
+          Sélectionnez une opération
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="flex h-[calc(100vh-5.5rem)] md:h-[calc(100vh-7rem)] gap-0 -mx-3 sm:-mx-4 md:-mx-6 -my-3 sm:-my-4 md:-my-6">
+      {/* Desktop: side-by-side */}
+      <div className="hidden md:flex w-full">
+        {listPanel}
+        {detailPanel}
+      </div>
+
+      {/* Mobile: toggle between list and detail */}
+      <div className="flex md:hidden w-full">
+        {showMobileDetail && selectedOp ? (
+          <div className="flex flex-col w-full">
+            {/* Back header */}
+            <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border bg-card">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={handleMobileBack}>
+                <ChevronLeft className="h-4 w-4" />
+                Retour
+              </Button>
+              <span className="text-sm font-semibold text-foreground">{selectedOp.reference}</span>
+              <Badge variant="outline" className={cn("border-0 text-[10px] font-medium ml-auto", OPERATION_STATUT_CONFIG[selectedOp.statut].bgColor, OPERATION_STATUT_CONFIG[selectedOp.statut].color)}>
+                {OPERATION_STATUT_CONFIG[selectedOp.statut].label}
+              </Badge>
+            </div>
+            <div className="flex-1 overflow-y-auto bg-background">
+              <OperationDetail
+                operation={selectedOp}
+                camions={camions}
+                chauffeurs={chauffeurs}
+                onUpdateStatut={updateStatut}
+                onAffecter={affecterOperation}
+                onAddDepense={addDepense}
+                onPlanifier={planifierOperation}
+                onAddIncident={addIncident}
+                onToggleIncidentResolu={toggleIncidentResolu}
+                onUpdateOperation={updateOperation}
+              />
+            </div>
+          </div>
+        ) : (
+          listPanel
         )}
       </div>
     </div>
