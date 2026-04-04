@@ -785,7 +785,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             <DialogTitle>Éditer la demande d'opération</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Lieu de récupération *</Label>
                 <Input value={editForm.lieu_embarquement} onChange={(e) => setEditForm(f => ({ ...f, lieu_embarquement: e.target.value }))} />
