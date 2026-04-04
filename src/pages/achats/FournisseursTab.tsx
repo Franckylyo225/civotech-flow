@@ -90,7 +90,7 @@ export default function FournisseursTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { value: fournisseurs.length, label: "Total", icon: Building2 },
           { value: fournisseurs.filter(f => f.actif).length, label: "Actifs", icon: ToggleRight },
