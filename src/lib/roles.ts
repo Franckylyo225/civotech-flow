@@ -80,7 +80,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   ASSISTANTE: [
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
-    { label: "Centre d'aide", path: "/aide", icon: HelpCircle },
+    { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   MAINTENANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
