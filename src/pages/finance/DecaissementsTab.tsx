@@ -141,7 +141,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: CreditCard, value: stats.total, label: "Total", color: "primary" },
           { icon: Clock, value: stats.enAttente, label: "En attente", color: "warning" },
