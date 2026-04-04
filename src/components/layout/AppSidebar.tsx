@@ -6,13 +6,14 @@ import { cn } from "@/lib/utils";
 import { useSidebarCounts } from "@/hooks/use-sidebar-counts";
 import logoImg from "@/assets/logo-civotech.png";
 
-const PATH_COUNT_MAP: Record<string, keyof ReturnType<typeof useSidebarCounts>["counts"]> = {
-  "/approbations": "approbations",
-  "/devis": "devis",
-  "/operations": "operations",
-  "/factures": "factures",
-  "/achats": "achats",
-  "/parc-auto": "parcAuto",
+// Map paths to count keys, with the roles that should see the badge
+const PATH_COUNT_CONFIG: Record<string, { key: keyof ReturnType<typeof useSidebarCounts>["counts"]; roles: string[] }> = {
+  "/approbations": { key: "approbations", roles: ["DG"] },
+  "/devis": { key: "devis", roles: ["DG", "COMMERCIAL"] },
+  "/operations": { key: "operations", roles: ["DG", "LOGISTIQUE"] },
+  "/factures": { key: "factures", roles: ["DG", "FINANCE"] },
+  "/achats": { key: "achats", roles: ["DG", "ACHATS"] },
+  "/parc-auto": { key: "parcAuto", roles: ["DG", "LOGISTIQUE", "MAINTENANCE"] },
 };
 
 export function AppSidebar() {
