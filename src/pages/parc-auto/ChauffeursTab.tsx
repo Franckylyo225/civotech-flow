@@ -221,7 +221,7 @@ export default function ChauffeursTab({ canManage }: Props) {
               <div className="space-y-2"><Label>Prénom *</Label><Input value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Nom *</Label><Input value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Expérience (années)</Label><Input type="number" value={form.experience_annees} onChange={e => setForm(f => ({ ...f, experience_annees: Number(e.target.value) }))} /></div>
             </div>
