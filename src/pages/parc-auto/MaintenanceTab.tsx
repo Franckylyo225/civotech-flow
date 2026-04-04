@@ -173,9 +173,9 @@ export default function MaintenanceTab({ canManage }: Props) {
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Véhicule</TableHead>
