@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent, Incident, TypeIncident, GraviteIncident } from "@/types/operations";
+import type { Operation, OperationStatut, Camion, Chauffeur, LigneDepense, CategorieDepense, TimelineEvent, Incident, TypeIncident, GraviteIncident, StatutDepense } from "@/types/operations";
 
 // Map DB row to app type
 function mapCamion(row: any): Camion {
@@ -66,13 +66,14 @@ export function useOperationsStore() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [opsRes, camRes, chRes, depRes, tlRes, incRes] = await Promise.all([
+    const [opsRes, camRes, chRes, depRes, tlRes, incRes, decRes] = await Promise.all([
       supabase.from("operations").select("*").order("created_at", { ascending: false }),
       supabase.from("camions").select("*"),
       supabase.from("chauffeurs").select("*"),
       supabase.from("depenses").select("*"),
       supabase.from("timeline_events").select("*").order("created_at", { ascending: true }),
       supabase.from("incidents").select("*").order("date_incident", { ascending: false }),
+      supabase.from("decaissements").select("id, depense_id, statut, operation_id").not("depense_id", "is", null),
     ]);
 
     const camionsList = (camRes.data || []).map(mapCamion);
@@ -80,6 +81,7 @@ export function useOperationsStore() {
     const allDepenses = depRes.data || [];
     const allTimeline = tlRes.data || [];
     const allIncidents = incRes.data || [];
+    const allDecaissements = decRes.data || [];
 
     setCamions(camionsList);
     setChauffeurs(chauffeursList);
@@ -87,14 +89,19 @@ export function useOperationsStore() {
     const ops = (opsRes.data || []).map(row => {
       const opDepenses: LigneDepense[] = allDepenses
         .filter(d => d.operation_id === row.id)
-        .map(d => ({
-          id: d.id,
-          operationId: d.operation_id,
-          categorie: d.categorie as CategorieDepense,
-          description: d.description,
-          montant: Number(d.montant),
-          date: d.date,
-        }));
+        .map(d => {
+          const linkedDec = allDecaissements.find((dec: any) => dec.depense_id === d.id);
+          return {
+            id: d.id,
+            operationId: d.operation_id,
+            categorie: d.categorie as CategorieDepense,
+            description: d.description,
+            montant: Number(d.montant),
+            date: d.date,
+            statutDecaissement: (linkedDec?.statut as StatutDepense) || "EN_ATTENTE",
+            decaissementId: linkedDec?.id || undefined,
+          };
+        });
 
       const opTimeline: TimelineEvent[] = allTimeline
         .filter(t => t.operation_id === row.id)
@@ -196,17 +203,18 @@ export function useOperationsStore() {
   }, [fetchAll, camions, chauffeurs]);
 
   const addDepense = useCallback(async (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => {
-    await supabase.from("depenses").insert({
+    const { data: depData } = await supabase.from("depenses").insert({
       operation_id: opId,
       categorie: depense.categorie as any,
       description: depense.description,
       montant: depense.montant,
       date: depense.date,
-    });
-    // Create a decaissement automatically for DG approval
+    }).select("id").single();
+    // Create a decaissement automatically for DG approval, linked to the depense
     const op = operations.find(o => o.id === opId);
     await supabase.from("decaissements").insert({
       operation_id: opId,
+      depense_id: depData?.id || null,
       montant: depense.montant,
       motif: `Dépense mission ${op?.reference || ""} — ${depense.description}`,
       statut: "EN_ATTENTE",

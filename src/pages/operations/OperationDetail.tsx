@@ -9,7 +9,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut, TypeIncident, GraviteIncident } from "@/types/operations";
-import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, TYPE_INCIDENT_CONFIG, GRAVITE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
+import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, TYPE_INCIDENT_CONFIG, GRAVITE_CONFIG, STATUT_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,7 +80,9 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   }, [op]);
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
-  const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
+  const depensesApprouvees = op.depenses.filter(d => d.statutDecaissement === "APPROUVE" || d.statutDecaissement === "PAYE");
+  const totalDepenses = depensesApprouvees.reduce((s, d) => s + d.montant, 0);
+  const totalDepensesAll = op.depenses.reduce((s, d) => s + d.montant, 0);
   const marge = op.montantDevis - totalDepenses;
 
   const handleAffecter = () => {
@@ -424,27 +426,41 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                     <TableHead>Catégorie</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Montant</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {op.depenses.map((dep) => (
-                    <TableRow key={dep.id}>
-                      <TableCell>
-                        <Badge variant="outline" className="border-0 bg-muted text-muted-foreground text-xs">
-                          {CATEGORIE_DEPENSE_CONFIG[dep.categorie].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">{dep.description}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{formatDateShort(dep.date)}</TableCell>
-                      <TableCell className="text-right text-sm font-medium">{formatMontantOp(dep.montant)}</TableCell>
-                    </TableRow>
-                  ))}
+                  {op.depenses.map((dep) => {
+                    const depStatut = dep.statutDecaissement || "EN_ATTENTE";
+                    const depStatutConfig = STATUT_DEPENSE_CONFIG[depStatut];
+                    return (
+                      <TableRow key={dep.id} className={depStatut === "REJETE" ? "opacity-50" : ""}>
+                        <TableCell>
+                          <Badge variant="outline" className="border-0 bg-muted text-muted-foreground text-xs">
+                            {CATEGORIE_DEPENSE_CONFIG[dep.categorie].label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{dep.description}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{formatDateShort(dep.date)}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={cn("border-0 text-xs font-medium", depStatutConfig.bgColor, depStatutConfig.color)}>
+                            {depStatutConfig.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right text-sm font-medium">{formatMontantOp(dep.montant)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
               <div className="mt-4 flex justify-end gap-8 border-t pt-3">
                 <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Total dépenses</p>
+                  <p className="text-xs text-muted-foreground">Total en attente</p>
+                  <p className="text-sm font-medium text-warning">{formatMontantOp(totalDepensesAll - totalDepenses)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total approuvé/payé</p>
                   <p className="text-sm font-semibold text-destructive">{formatMontantOp(totalDepenses)}</p>
                 </div>
                 <div className="text-right">
