@@ -453,6 +453,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           {detailDialog && (() => {
             const op = getOp(detailDialog.operation_id);
             const da = detailDialog.demande_achat_id ? demandes.find(d => d.id === detailDialog.demande_achat_id) : null;
+            const compteSource = detailDialog.compte_source_id ? comptes.find(c => c.id === detailDialog.compte_source_id) : null;
             return (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
