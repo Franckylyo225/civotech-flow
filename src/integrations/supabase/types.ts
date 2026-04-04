@@ -348,6 +348,39 @@ export type Database = {
         }
         Relationships: []
       }
+      comptes_tresorerie: {
+        Row: {
+          actif: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          nom: string
+          solde: number
+          type: Database["public"]["Enums"]["type_compte"]
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom: string
+          solde?: number
+          type: Database["public"]["Enums"]["type_compte"]
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nom?: string
+          solde?: number
+          type?: Database["public"]["Enums"]["type_compte"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       decaissements: {
         Row: {
           commentaire: string | null
@@ -1331,6 +1364,83 @@ export type Database = {
           },
         ]
       }
+      transactions_tresorerie: {
+        Row: {
+          compte_destination_id: string | null
+          compte_source_id: string | null
+          created_at: string
+          created_by: string | null
+          date_transaction: string
+          decaissement_id: string | null
+          description: string | null
+          facture_id: string | null
+          id: string
+          montant: number
+          reference: string
+          type: Database["public"]["Enums"]["type_transaction_tresorerie"]
+          updated_at: string
+        }
+        Insert: {
+          compte_destination_id?: string | null
+          compte_source_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_transaction?: string
+          decaissement_id?: string | null
+          description?: string | null
+          facture_id?: string | null
+          id?: string
+          montant?: number
+          reference?: string
+          type: Database["public"]["Enums"]["type_transaction_tresorerie"]
+          updated_at?: string
+        }
+        Update: {
+          compte_destination_id?: string | null
+          compte_source_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_transaction?: string
+          decaissement_id?: string | null
+          description?: string | null
+          facture_id?: string | null
+          id?: string
+          montant?: number
+          reference?: string
+          type?: Database["public"]["Enums"]["type_transaction_tresorerie"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_tresorerie_compte_destination_id_fkey"
+            columns: ["compte_destination_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_tresorerie"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_tresorerie_compte_source_id_fkey"
+            columns: ["compte_source_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_tresorerie"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_tresorerie_decaissement_id_fkey"
+            columns: ["decaissement_id"]
+            isOneToOne: false
+            referencedRelation: "decaissements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_tresorerie_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -1447,9 +1557,11 @@ export type Database = {
         | "EN_COURS"
         | "TERMINEE"
         | "ARCHIVEE"
+      type_compte: "BANQUE" | "CAISSE"
       type_evenement: "REUNION" | "RDV" | "DEPLACEMENT" | "RAPPEL" | "AUTRE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
       type_maintenance: "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT"
+      type_transaction_tresorerie: "ENCAISSEMENT" | "DECAISSEMENT" | "TRANSFERT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1647,9 +1759,15 @@ export const Constants = {
         "TERMINEE",
         "ARCHIVEE",
       ],
+      type_compte: ["BANQUE", "CAISSE"],
       type_evenement: ["REUNION", "RDV", "DEPLACEMENT", "RAPPEL", "AUTRE"],
       type_incident: ["PANNE", "ACCIDENT", "RETARD", "VOL", "AUTRE"],
       type_maintenance: ["PREVENTIVE", "CORRECTIVE", "REMPLACEMENT"],
+      type_transaction_tresorerie: [
+        "ENCAISSEMENT",
+        "DECAISSEMENT",
+        "TRANSFERT",
+      ],
     },
   },
 } as const
