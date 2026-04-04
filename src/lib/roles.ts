@@ -23,6 +23,7 @@ export interface NavItem {
   label: string;
   path: string;
   icon: LucideIcon;
+  category?: string;
 }
 
 export const roleLabels: Record<UserRole, string> = {
