@@ -44,8 +44,6 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "", compte_source_id: "" });
   const [editDialog, setEditDialog] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
-  const [editDialog, setEditDialog] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
   const [detailDialog, setDetailDialog] = useState<DecaissementRow | null>(null);
 
