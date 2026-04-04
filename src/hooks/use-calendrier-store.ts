@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export interface EvenementCalendrier {
   id: string;
@@ -23,7 +23,6 @@ export type EvenementInput = Omit<EvenementCalendrier, "id" | "created_at" | "up
 export function useCalendrierStore() {
   const [evenements, setEvenements] = useState<EvenementCalendrier[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const fetchEvenements = useCallback(async () => {
     setLoading(true);
@@ -32,12 +31,12 @@ export function useCalendrierStore() {
       .select("*")
       .order("date_debut", { ascending: true });
     if (error) {
-      toast({ title: "Erreur", description: "Impossible de charger les événements", variant: "destructive" });
+      toast.error("Impossible de charger les événements");
     } else {
       setEvenements(data as EvenementCalendrier[]);
     }
     setLoading(false);
-  }, [toast]);
+  }, []);
 
   useEffect(() => { fetchEvenements(); }, [fetchEvenements]);
 
@@ -48,10 +47,10 @@ export function useCalendrierStore() {
       created_by: userData.user?.id || null,
     } as any);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(error.message);
       return false;
     }
-    toast({ title: "Événement ajouté" });
+    toast.success("Événement ajouté");
     await fetchEvenements();
     return true;
   };
@@ -63,10 +62,10 @@ export function useCalendrierStore() {
     }
     const { error } = await supabase.from("evenements_calendrier").update(updateData).eq("id", id);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(error.message);
       return false;
     }
-    toast({ title: "Événement modifié" });
+    toast.success("Événement modifié");
     await fetchEvenements();
     return true;
   };
@@ -74,10 +73,10 @@ export function useCalendrierStore() {
   const deleteEvenement = async (id: string) => {
     const { error } = await supabase.from("evenements_calendrier").delete().eq("id", id);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(error.message);
       return false;
     }
-    toast({ title: "Événement supprimé" });
+    toast.success("Événement supprimé");
     await fetchEvenements();
     return true;
   };
