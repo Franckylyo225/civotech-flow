@@ -481,6 +481,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                   </div>
                 )}
 
+                {detailDialog.commentaire && (
                   <div>
                     <p className="text-xs text-muted-foreground">Commentaire</p>
                     <p className="text-sm">{detailDialog.commentaire}</p>
