@@ -61,6 +61,7 @@ function AppRoutes() {
         <Route path="/rapports" element={<RapportsPage />} />
         <Route path="/parametres" element={<ParametresModule />} />
         <Route path="/profil" element={<ProfilPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
