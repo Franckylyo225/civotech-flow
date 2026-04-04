@@ -306,7 +306,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
             <DialogTitle>Nouvelle Opération</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Lieu de récupération *</Label>
                 <Input
