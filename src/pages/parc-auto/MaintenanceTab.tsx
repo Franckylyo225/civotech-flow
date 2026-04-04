@@ -281,7 +281,7 @@ export default function MaintenanceTab({ canManage }: Props) {
               <Label>Pièces changées</Label>
               <Input value={form.pieces_changees} onChange={e => setForm(f => ({ ...f, pieces_changees: e.target.value }))} placeholder="Filtre à huile, plaquettes..." />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Date prévue</Label><Input type="date" value={form.date_prevue} onChange={e => setForm(f => ({ ...f, date_prevue: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Date début</Label><Input type="date" value={form.date_debut} onChange={e => setForm(f => ({ ...f, date_debut: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Date fin</Label><Input type="date" value={form.date_fin} onChange={e => setForm(f => ({ ...f, date_fin: e.target.value }))} /></div>
