@@ -173,25 +173,25 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-foreground">N° {op.reference}</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">N° {op.reference}</h1>
             <Badge variant="outline" className={cn("border-0 text-xs font-medium", config.bgColor, config.color)}>
               {config.label}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" variant="outline" onClick={() => setShowEditDialog(true)}>
-              <Pencil className="mr-1.5 h-4 w-4" /> Éditer la demande
+              <Pencil className="mr-1.5 h-4 w-4" /> Éditer
             </Button>
           )}
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
-              <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
+              <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier
             </Button>
           )}
           {canManage && op.statut === "PLANIFIEE" && !op.camionId && (
@@ -206,7 +206,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           )}
           {canManage && op.statut === "EN_COURS" && (
             <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowIncidentDialog(true)}>
-              <AlertTriangle className="mr-1.5 h-4 w-4" /> Signaler incident
+              <AlertTriangle className="mr-1.5 h-4 w-4" /> Incident
             </Button>
           )}
           {canManage && op.statut === "EN_COURS" && (
