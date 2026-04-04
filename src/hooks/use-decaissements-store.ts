@@ -18,6 +18,7 @@ export interface DecaissementRow {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  compte_source_id: string | null;
 }
 
 export const STATUT_DECAISSEMENT_CONFIG: Record<StatutDecaissement, { label: string; color: string; bgColor: string }> = {
@@ -49,12 +50,13 @@ export function useDecaissementsStore() {
     await fetchDecaissements();
   }, [fetchDecaissements]);
 
-  const addDecaissement = useCallback(async (data: { montant: number; motif: string; commentaire?: string }) => {
+  const addDecaissement = useCallback(async (data: { montant: number; motif: string; commentaire?: string; compte_source_id?: string }) => {
     const { error } = await supabase.from("decaissements").insert({
       montant: data.montant,
       motif: data.motif,
       commentaire: data.commentaire || "",
       statut: "EN_ATTENTE",
+      compte_source_id: data.compte_source_id || null,
     } as any);
     if (error) throw error;
     await fetchDecaissements();

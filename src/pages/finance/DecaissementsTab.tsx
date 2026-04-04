@@ -8,6 +8,7 @@ import {
   type DecaissementRow, type StatutDecaissement,
 } from "@/hooks/use-decaissements-store";
 import { useDemandesAchatStore } from "@/hooks/use-demandes-achat-store";
+import { useComptesStore } from "@/hooks/use-tresorerie-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,8 @@ interface Props { canManage: boolean; isDG: boolean; }
 export default function DecaissementsTab({ canManage, isDG }: Props) {
   const { decaissements, loading, stats, updateDecaissement, addDecaissement, deleteDecaissement } = useDecaissementsStore();
   const { demandes } = useDemandesAchatStore();
+  const { comptes } = useComptesStore();
+  const comptesActifs = comptes.filter(c => c.actif);
   const [operations, setOperations] = useState<{ id: string; reference: string; client_nom: string; lieu_embarquement: string; lieu_livraison: string }[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDecaissement | "ALL">("ALL");
@@ -38,7 +41,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const [payDialog, setPayDialog] = useState<string | null>(null);
   const [payForm, setPayForm] = useState({ reference_paiement: "", date_paiement: new Date().toISOString().slice(0, 10), commentaire: "" });
   const [showCreate, setShowCreate] = useState(false);
-  const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "" });
+  const [createForm, setCreateForm] = useState({ montant: 0, motif: "", commentaire: "", compte_source_id: "" });
   const [editDialog, setEditDialog] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ montant: 0, motif: "", commentaire: "" });
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
@@ -108,11 +111,12 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const handleCreate = async () => {
     if (createForm.montant <= 0) { toast.error("Le montant doit être supérieur à 0"); return; }
     if (!createForm.motif.trim()) { toast.error("Le motif est obligatoire"); return; }
+    if (!createForm.compte_source_id) { toast.error("Veuillez sélectionner le compte source"); return; }
     try {
-      await addDecaissement(createForm);
+      await addDecaissement({ ...createForm, montant: createForm.montant });
       toast.success("Demande de décaissement créée — en attente d'approbation DG");
       setShowCreate(false);
-      setCreateForm({ montant: 0, motif: "", commentaire: "" });
+      setCreateForm({ montant: 0, motif: "", commentaire: "", compte_source_id: "" });
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
@@ -347,6 +351,19 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               <Input type="number" value={createForm.montant} onChange={e => setCreateForm(f => ({ ...f, montant: Number(e.target.value) }))} />
             </div>
             <div className="space-y-2">
+              <Label>Compte source *</Label>
+              <Select value={createForm.compte_source_id} onValueChange={v => setCreateForm(f => ({ ...f, compte_source_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Sélectionner le compte à débiter" /></SelectTrigger>
+                <SelectContent>
+                  {comptesActifs.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nom} ({c.type}) — {c.solde.toLocaleString()} F
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Commentaire</Label>
               <Textarea value={createForm.commentaire} onChange={e => setCreateForm(f => ({ ...f, commentaire: e.target.value }))} placeholder="Détails supplémentaires..." rows={2} />
             </div>
@@ -436,6 +453,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
           {detailDialog && (() => {
             const op = getOp(detailDialog.operation_id);
             const da = detailDialog.demande_achat_id ? demandes.find(d => d.id === detailDialog.demande_achat_id) : null;
+            const compteSource = detailDialog.compte_source_id ? comptes.find(c => c.id === detailDialog.compte_source_id) : null;
             return (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
@@ -453,6 +471,13 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                   <div>
                     <p className="text-xs text-muted-foreground">Motif</p>
                     <p className="text-sm">{detailDialog.motif}</p>
+                  </div>
+                )}
+
+                {compteSource && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Compte source</p>
+                    <p className="text-sm font-medium">{compteSource.nom} ({compteSource.type})</p>
                   </div>
                 )}
 

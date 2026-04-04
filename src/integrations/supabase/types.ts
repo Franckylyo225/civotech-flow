@@ -384,6 +384,7 @@ export type Database = {
       decaissements: {
         Row: {
           commentaire: string | null
+          compte_source_id: string | null
           created_at: string
           created_by: string | null
           date_paiement: string | null
@@ -401,6 +402,7 @@ export type Database = {
         }
         Insert: {
           commentaire?: string | null
+          compte_source_id?: string | null
           created_at?: string
           created_by?: string | null
           date_paiement?: string | null
@@ -418,6 +420,7 @@ export type Database = {
         }
         Update: {
           commentaire?: string | null
+          compte_source_id?: string | null
           created_at?: string
           created_by?: string | null
           date_paiement?: string | null
@@ -434,6 +437,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "decaissements_compte_source_id_fkey"
+            columns: ["compte_source_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_tresorerie"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "decaissements_demande_achat_id_fkey"
             columns: ["demande_achat_id"]
