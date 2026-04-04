@@ -26,11 +26,11 @@ export function useSidebarCounts() {
       maintRes,
       notifRes,
     ] = await Promise.all([
-      supabase.from("devis").select("id", { count: "exact", head: true }).in("statut", ["BROUILLON", "SOUMIS_DG"]),
+      supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "SOUMIS_DG"),
       supabase.from("operations").select("id", { count: "exact", head: true }).in("statut", ["DEMANDE", "PLANIFIEE", "EN_COURS"]),
       supabase.from("factures").select("id", { count: "exact", head: true }).in("statut", ["ENVOYEE", "PARTIELLEMENT_PAYEE"]),
-      supabase.from("demandes_achat").select("id", { count: "exact", head: true }).in("statut", ["SOUMISE", "DEVIS_EN_COURS", "SOUMISE_DG"]),
-      supabase.from("decaissements").select("id", { count: "exact", head: true }).in("statut", ["EN_ATTENTE", "APPROUVE"]),
+      supabase.from("demandes_achat").select("id", { count: "exact", head: true }).eq("statut", "SOUMISE_DG"),
+      supabase.from("decaissements").select("id", { count: "exact", head: true }).eq("statut", "EN_ATTENTE"),
       supabase.from("maintenances").select("id", { count: "exact", head: true }).in("statut", ["PLANIFIEE", "EN_COURS"]),
       supabase.from("notifications").select("id", { count: "exact", head: true }).eq("lue", false),
     ]);
