@@ -66,22 +66,25 @@ export default function OperationsModule() {
     ARCHIVEE: 4,
   };
 
-  const filtered = operations.filter((o) => {
+  const baseFiltered = operations.filter((o) => {
     const matchSearch =
       o.reference.toLowerCase().includes(search.toLowerCase()) ||
       o.clientNom.toLowerCase().includes(search.toLowerCase()) ||
       o.lieuEmbarquement.toLowerCase().includes(search.toLowerCase()) ||
       o.lieuLivraison.toLowerCase().includes(search.toLowerCase());
-    const matchTab = activeTab === "ALL" || o.statut === activeTab;
     const matchPeriod = !dateRange || (new Date(o.createdAt) >= dateRange.start && new Date(o.createdAt) <= dateRange.end);
-    return matchSearch && matchTab && matchPeriod;
-  }).sort((a, b) => (STATUT_ORDER[a.statut] ?? 99) - (STATUT_ORDER[b.statut] ?? 99));
+    return matchSearch && matchPeriod;
+  });
+
+  const filtered = baseFiltered
+    .filter((o) => activeTab === "ALL" || o.statut === activeTab)
+    .sort((a, b) => (STATUT_ORDER[a.statut] ?? 99) - (STATUT_ORDER[b.statut] ?? 99));
 
   const selectedOp = operations.find((o) => o.id === selectedId);
 
   const getCounts = (statut: OperationStatut | "ALL") => {
-    if (statut === "ALL") return filtered.length;
-    return filtered.filter((o) => o.statut === statut).length;
+    if (statut === "ALL") return baseFiltered.length;
+    return baseFiltered.filter((o) => o.statut === statut).length;
   };
 
   return (
