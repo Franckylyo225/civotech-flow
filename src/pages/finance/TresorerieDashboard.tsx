@@ -1,7 +1,11 @@
+import { useMemo } from "react";
 import { useComptesStore, useTransactionsStore, type TransactionRow } from "@/hooks/use-tresorerie-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Building2, Banknote, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 
 function fmt(v: number) { return v.toLocaleString("fr-FR"); }
 
@@ -20,6 +24,46 @@ export default function TresorerieDashboard() {
   comptes.forEach(c => { comptesMap[c.id] = c.nom; });
 
   const recent = transactions.slice(0, 10);
+
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const months: { start: Date; end: Date; label: string }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const m = subMonths(now, i);
+      months.push({
+        start: startOfMonth(m),
+        end: endOfMonth(m),
+        label: format(m, "MMM yyyy", { locale: fr }),
+      });
+    }
+
+    let cumulSolde = soldeTotal;
+    // Compute net movements per month (from newest to oldest) to work backwards
+    const netPerMonth = months.map(m => {
+      let net = 0;
+      transactions.forEach(t => {
+        try {
+          const d = parseISO(t.date_transaction);
+          if (isWithinInterval(d, { start: m.start, end: m.end })) {
+            if (t.type === "ENCAISSEMENT") net += t.montant;
+            else if (t.type === "DECAISSEMENT") net -= t.montant;
+          }
+        } catch {}
+      });
+      return { ...m, net };
+    });
+
+    // Build chart: work from current month backwards
+    const result: { mois: string; solde: number }[] = [];
+    let runSolde = soldeTotal;
+    for (let i = netPerMonth.length - 1; i >= 0; i--) {
+      result.unshift({ mois: netPerMonth[i].label, solde: runSolde });
+      if (i > 0) {
+        runSolde -= netPerMonth[i].net;
+      }
+    }
+    return result;
+  }, [transactions, soldeTotal]);
 
   const stats = [
     { label: "Solde total", value: fmt(soldeTotal), unit: "FCFA", icon: Wallet, color: "text-primary", bg: "bg-primary/10" },
@@ -45,6 +89,35 @@ export default function TresorerieDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Graphique évolution trésorerie */}
+      <Card className="border border-border shadow-none">
+        <CardHeader><CardTitle className="text-base font-semibold">Évolution de la trésorerie (6 derniers mois)</CardTitle></CardHeader>
+        <CardContent className="pt-0">
+          {loading ? (
+            <div className="h-[250px] flex items-center justify-center text-sm text-muted-foreground">Chargement…</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorSolde" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="mois" tick={{ fontSize: 12 }} className="text-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => fmt(v)} width={80} className="text-muted-foreground" />
+                <Tooltip
+                  formatter={(value: number) => [`${fmt(value)} FCFA`, "Solde"]}
+                  contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--popover))", color: "hsl(var(--popover-foreground))" }}
+                />
+                <Area type="monotone" dataKey="solde" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorSolde)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Comptes */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
