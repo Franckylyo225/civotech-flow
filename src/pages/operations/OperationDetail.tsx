@@ -80,7 +80,9 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   }, [op]);
 
   const config = OPERATION_STATUT_CONFIG[op.statut];
-  const totalDepenses = op.depenses.reduce((s, d) => s + d.montant, 0);
+  const depensesApprouvees = op.depenses.filter(d => d.statutDecaissement === "APPROUVE" || d.statutDecaissement === "PAYE");
+  const totalDepenses = depensesApprouvees.reduce((s, d) => s + d.montant, 0);
+  const totalDepensesAll = op.depenses.reduce((s, d) => s + d.montant, 0);
   const marge = op.montantDevis - totalDepenses;
 
   const handleAffecter = () => {
