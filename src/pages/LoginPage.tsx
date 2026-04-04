@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ArrowRight, Star, TrendingUp, Truck, Users } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { seedDatabase } from "@/lib/seed";
 import { Button } from "@/components/ui/button";
