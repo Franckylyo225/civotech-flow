@@ -233,7 +233,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
               <Label>Description</Label>
               <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Détails des pièces ou services..." rows={2} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Quantité</Label>
                 <Input type="number" min={1} value={form.quantite} onChange={e => setForm(f => ({ ...f, quantite: Number(e.target.value) }))} />

@@ -218,7 +218,7 @@ export default function FournisseursTab({ canManage }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Téléphone</Label>
                 <Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="+221 77 123 45 67" />

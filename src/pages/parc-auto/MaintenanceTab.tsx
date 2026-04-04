@@ -286,7 +286,7 @@ export default function MaintenanceTab({ canManage }: Props) {
               <div className="space-y-2"><Label>Date début</Label><Input type="date" value={form.date_debut} onChange={e => setForm(f => ({ ...f, date_debut: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Date fin</Label><Input type="date" value={form.date_fin} onChange={e => setForm(f => ({ ...f, date_fin: e.target.value }))} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Coût estimé (F)</Label><Input type="number" value={form.cout_estime} onChange={e => setForm(f => ({ ...f, cout_estime: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Coût réel (F)</Label><Input type="number" value={form.cout_reel} onChange={e => setForm(f => ({ ...f, cout_reel: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km déclench.</Label><Input type="number" value={form.km_declenchement} onChange={e => setForm(f => ({ ...f, km_declenchement: Number(e.target.value) }))} /></div>

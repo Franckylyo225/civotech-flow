@@ -206,7 +206,7 @@ export default function VehiculesTab({ canManage }: Props) {
               <div className="space-y-2"><Label>Marque *</Label><Input value={form.marque} onChange={e => setForm(f => ({ ...f, marque: e.target.value }))} placeholder="Renault" /></div>
               <div className="space-y-2"><Label>Modèle *</Label><Input value={form.modele} onChange={e => setForm(f => ({ ...f, modele: e.target.value }))} placeholder="T480" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Capacité (T)</Label><Input type="number" value={form.capacite_tonnes} onChange={e => setForm(f => ({ ...f, capacite_tonnes: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Année</Label><Input type="number" value={form.annee} onChange={e => setForm(f => ({ ...f, annee: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km actuel</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>
