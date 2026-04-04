@@ -248,7 +248,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       </Card>
 
       {/* Info cards row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border border-border shadow-none">
           <CardContent className="p-4 flex flex-col items-center text-center">
             <Weight className="h-5 w-5 text-muted-foreground mb-2" />
