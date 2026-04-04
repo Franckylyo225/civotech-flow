@@ -65,7 +65,7 @@ function NotificationItem({
         </div>
         <p className="text-sm text-muted-foreground">{notification.message}</p>
         <p className="text-xs text-muted-foreground/70">
-          {format(new Date(notification.created_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+          {formatDate(notification.created_at)}
         </p>
       </div>
 
