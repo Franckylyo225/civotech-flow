@@ -230,7 +230,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
 
       <Card>
         <CardHeader><CardTitle className="text-base">Lignes de prestation</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
