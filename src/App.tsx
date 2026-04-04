@@ -19,6 +19,7 @@ import RapportsPage from "@/pages/rapports/RapportsPage";
 import ParametresModule from "@/pages/parametres/ParametresModule";
 import ProfilPage from "@/pages/parametres/ProfilPage";
 import ApprobationsPage from "@/pages/approbations/ApprobationsPage";
+import NotificationsPage from "@/pages/notifications/NotificationsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="/rapports" element={<RapportsPage />} />
         <Route path="/parametres" element={<ParametresModule />} />
         <Route path="/profil" element={<ProfilPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
