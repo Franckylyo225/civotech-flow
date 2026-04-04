@@ -203,17 +203,18 @@ export function useOperationsStore() {
   }, [fetchAll, camions, chauffeurs]);
 
   const addDepense = useCallback(async (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => {
-    await supabase.from("depenses").insert({
+    const { data: depData } = await supabase.from("depenses").insert({
       operation_id: opId,
       categorie: depense.categorie as any,
       description: depense.description,
       montant: depense.montant,
       date: depense.date,
-    });
-    // Create a decaissement automatically for DG approval
+    }).select("id").single();
+    // Create a decaissement automatically for DG approval, linked to the depense
     const op = operations.find(o => o.id === opId);
     await supabase.from("decaissements").insert({
       operation_id: opId,
+      depense_id: depData?.id || null,
       montant: depense.montant,
       motif: `Dépense mission ${op?.reference || ""} — ${depense.description}`,
       statut: "EN_ATTENTE",
