@@ -6,6 +6,7 @@ import DevisCreateDialog from "./DevisCreateDialog";
 import DevisDetailPage from "./DevisDetailPage";
 import GrilleTarifairePage from "./GrilleTarifairePage";
 import { Loader2, FileText, TableProperties } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { DevisStatut } from "@/types/devis";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -29,18 +30,6 @@ export default function DevisModule() {
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  if (selectedDevis) {
-    return (
-      <DevisDetailPage
-        devis={selectedDevis}
-        onUpdateStatut={updateStatut}
-        onUpdateDevis={updateDevis}
-        onCreateOperation={createOperationFromDevis}
-        onBack={() => setSelectedId(null)}
-      />
     );
   }
 
@@ -88,6 +77,20 @@ export default function DevisModule() {
       ) : (
         <GrilleTarifairePage />
       )}
+
+      <Dialog open={!!selectedDevis} onOpenChange={(open) => { if (!open) setSelectedId(null); }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+          {selectedDevis && (
+            <DevisDetailPage
+              devis={selectedDevis}
+              onUpdateStatut={updateStatut}
+              onUpdateDevis={updateDevis}
+              onCreateOperation={createOperationFromDevis}
+              onBack={() => setSelectedId(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
