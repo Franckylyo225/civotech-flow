@@ -103,22 +103,24 @@ export default function VehiculesTab({ canManage }: Props) {
 
       {/* Filters + Add */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les statuts</SelectItem>
-                <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                <SelectItem value="EN_MISSION">En mission</SelectItem>
-                <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tous les statuts</SelectItem>
+                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
+                  <SelectItem value="EN_MISSION">En mission</SelectItem>
+                  <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
