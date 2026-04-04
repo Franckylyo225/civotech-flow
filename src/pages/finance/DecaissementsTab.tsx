@@ -351,6 +351,19 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               <Input type="number" value={createForm.montant} onChange={e => setCreateForm(f => ({ ...f, montant: Number(e.target.value) }))} />
             </div>
             <div className="space-y-2">
+              <Label>Compte source *</Label>
+              <Select value={createForm.compte_source_id} onValueChange={v => setCreateForm(f => ({ ...f, compte_source_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Sélectionner le compte à débiter" /></SelectTrigger>
+                <SelectContent>
+                  {comptesActifs.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nom} ({c.type}) — {c.solde.toLocaleString()} F
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Commentaire</Label>
               <Textarea value={createForm.commentaire} onChange={e => setCreateForm(f => ({ ...f, commentaire: e.target.value }))} placeholder="Détails supplémentaires..." rows={2} />
             </div>
