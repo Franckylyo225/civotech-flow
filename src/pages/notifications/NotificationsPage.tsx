@@ -5,8 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
+
+function formatDate(dateStr: string) {
+  try {
+    const d = new Date(dateStr);
+    if (!isValid(d)) return dateStr;
+    return format(d, "dd MMM yyyy 'à' HH:mm", { locale: fr });
+  } catch {
+    return dateStr;
+  }
+}
 
 const typeConfig: Record<string, { label: string; variant: "default" | "destructive" | "secondary" | "outline" }> = {
   VALIDATION: { label: "Validation", variant: "destructive" },
