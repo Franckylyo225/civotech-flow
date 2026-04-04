@@ -81,6 +81,7 @@ export function useOperationsStore() {
     const allDepenses = depRes.data || [];
     const allTimeline = tlRes.data || [];
     const allIncidents = incRes.data || [];
+    const allDecaissements = decRes.data || [];
 
     setCamions(camionsList);
     setChauffeurs(chauffeursList);
