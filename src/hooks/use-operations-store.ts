@@ -89,14 +89,19 @@ export function useOperationsStore() {
     const ops = (opsRes.data || []).map(row => {
       const opDepenses: LigneDepense[] = allDepenses
         .filter(d => d.operation_id === row.id)
-        .map(d => ({
-          id: d.id,
-          operationId: d.operation_id,
-          categorie: d.categorie as CategorieDepense,
-          description: d.description,
-          montant: Number(d.montant),
-          date: d.date,
-        }));
+        .map(d => {
+          const linkedDec = allDecaissements.find((dec: any) => dec.depense_id === d.id);
+          return {
+            id: d.id,
+            operationId: d.operation_id,
+            categorie: d.categorie as CategorieDepense,
+            description: d.description,
+            montant: Number(d.montant),
+            date: d.date,
+            statutDecaissement: (linkedDec?.statut as StatutDepense) || "EN_ATTENTE",
+            decaissementId: linkedDec?.id || undefined,
+          };
+        });
 
       const opTimeline: TimelineEvent[] = allTimeline
         .filter(t => t.operation_id === row.id)
