@@ -39,11 +39,6 @@ const TESTIMONIALS = [
   },
 ];
 
-const STATS = [
-  { icon: Truck, value: "2 500+", label: "Livraisons gérées" },
-  { icon: Users, value: "150+", label: "Entreprises clientes" },
-  { icon: TrendingUp, value: "35%", label: "Gain de productivité" },
-];
 
 export default function LoginPage() {
   const { login, signup } = useAuth();
