@@ -113,11 +113,12 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   const handleCreate = async () => {
     if (createForm.montant <= 0) { toast.error("Le montant doit être supérieur à 0"); return; }
     if (!createForm.motif.trim()) { toast.error("Le motif est obligatoire"); return; }
+    if (!createForm.compte_source_id) { toast.error("Veuillez sélectionner le compte source"); return; }
     try {
-      await addDecaissement(createForm);
+      await addDecaissement({ ...createForm, montant: createForm.montant });
       toast.success("Demande de décaissement créée — en attente d'approbation DG");
       setShowCreate(false);
-      setCreateForm({ montant: 0, motif: "", commentaire: "" });
+      setCreateForm({ montant: 0, motif: "", commentaire: "", compte_source_id: "" });
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
