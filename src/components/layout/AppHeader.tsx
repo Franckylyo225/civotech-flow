@@ -1,9 +1,10 @@
-import { Search, LogOut, User, Settings } from "lucide-react";
+import { Search, LogOut, User, Settings, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +42,15 @@ export function AppHeader() {
             className="w-64 pl-9 bg-muted border-0"
           />
         </div>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/aide")}>
+              <HelpCircle className="h-5 w-5 text-muted-foreground" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Centre d'aide</TooltipContent>
+        </Tooltip>
 
         <NotificationDropdown />
 
