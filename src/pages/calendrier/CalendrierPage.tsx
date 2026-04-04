@@ -211,7 +211,7 @@ export default function CalendrierPage() {
                       key={key}
                       onClick={() => setSelectedDate(day)}
                       onDoubleClick={() => canManage && openCreateDialog(day)}
-                      className={`bg-background p-1 min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
+                      className={`bg-background p-1 min-h-[60px] sm:min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
                         !isCurrentMonth ? "opacity-40" : ""
                       } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
                     >
