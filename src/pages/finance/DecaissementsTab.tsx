@@ -474,7 +474,13 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
                   </div>
                 )}
 
-                {detailDialog.commentaire && (
+                {compteSource && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Compte source</p>
+                    <p className="text-sm font-medium">{compteSource.nom} ({compteSource.type})</p>
+                  </div>
+                )}
+
                   <div>
                     <p className="text-xs text-muted-foreground">Commentaire</p>
                     <p className="text-sm">{detailDialog.commentaire}</p>
