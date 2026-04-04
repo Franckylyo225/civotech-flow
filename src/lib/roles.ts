@@ -13,6 +13,7 @@ import {
   Wallet,
   Settings,
   ClipboardCheck,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 
