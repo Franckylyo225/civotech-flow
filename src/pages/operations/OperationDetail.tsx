@@ -306,9 +306,9 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       )}
 
       {/* Timeline + Vehicle/Driver */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Timeline */}
-        <Card className="col-span-3 border border-border shadow-none">
+        <Card className="md:col-span-3 border border-border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Suivi de livraison</CardTitle>
           </CardHeader>
