@@ -795,7 +795,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 <Input value={editForm.lieu_livraison} onChange={(e) => setEditForm(f => ({ ...f, lieu_livraison: e.target.value }))} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Poids (kg)</Label>
                 <Input type="number" value={editForm.poids_kg} onChange={(e) => setEditForm(f => ({ ...f, poids_kg: e.target.value }))} />
