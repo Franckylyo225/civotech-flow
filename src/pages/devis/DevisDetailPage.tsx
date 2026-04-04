@@ -97,21 +97,16 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-foreground">{devis.reference}</h1>
-              <DevisStatutBadge statut={devis.statut} />
-            </div>
-            <p className="text-muted-foreground">
-              Créé le {formatDate(devis.createdAt)} · Mis à jour le {formatDate(devis.updatedAt)}
-            </p>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-foreground">{devis.reference}</h1>
+            <DevisStatutBadge statut={devis.statut} />
           </div>
+          <p className="text-muted-foreground text-sm">
+            Créé le {formatDate(devis.createdAt)} · Mis à jour le {formatDate(devis.updatedAt)}
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => generateDevisPdf(devis)}>
           <Download className="mr-2 h-4 w-4" /> Télécharger PDF
