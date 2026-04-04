@@ -238,6 +238,7 @@ export default function FacturesTab({ canManage }: Props) {
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Tous les statuts</SelectItem>
+                <SelectItem value="ECHUE">🔴 Échues</SelectItem>
                 {Object.entries(STATUT_FACTURE_CONFIG).map(([k, v]) => (
                   <SelectItem key={k} value={k}>{v.label}</SelectItem>
                 ))}
