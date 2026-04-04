@@ -43,6 +43,15 @@ export function AppHeader() {
           />
         </div>
 
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/aide")}>
+              <HelpCircle className="h-5 w-5 text-muted-foreground" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Centre d'aide</TooltipContent>
+        </Tooltip>
+
         <NotificationDropdown />
 
         {/* User avatar + dropdown */}
