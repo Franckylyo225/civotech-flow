@@ -83,9 +83,10 @@ export default function FacturesTab({ canManage }: Props) {
     if (!op) return;
     // Get client_id from DB since Operation type uses camelCase without clientId
     const { data: opRow } = await supabase.from("operations").select("client_id").eq("id", op.id).single();
-    const montantHt = op.montantDevis;
-    const montantTva = montantHt * createForm.taux_tva / 100;
-    const montantTtc = montantHt + montantTva;
+    // Le montant du devis est déjà TTC (TVA incluse lors de l'édition du devis)
+    const montantTtc = op.montantDevis;
+    const montantTva = Math.round(montantTtc * createForm.taux_tva / (100 + createForm.taux_tva));
+    const montantHt = montantTtc - montantTva;
     try {
       await addFacture({
         operation_id: op.id,
