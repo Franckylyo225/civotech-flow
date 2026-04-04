@@ -126,9 +126,9 @@ export default function VehiculesTab({ canManage }: Props) {
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Immatriculation</TableHead>
