@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { Search, LogOut, User, Settings, HelpCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, LogOut, User, Settings, HelpCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { roleNavItems, type UserRole } from "@/lib/roles";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import { cn } from "@/lib/utils";
 
 export function AppHeader() {
@@ -23,17 +23,7 @@ export function AppHeader() {
   const [showResults, setShowResults] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
-
-  const navItems = useMemo(() => {
-    const role = (user?.role as UserRole) || "DG";
-    return roleNavItems[role] || [];
-  }, [user?.role]);
-
-  const results = useMemo(() => {
-    if (!search.trim()) return navItems;
-    const q = search.toLowerCase();
-    return navItems.filter((item) => item.label.toLowerCase().includes(q));
-  }, [search, navItems]);
+  const { results, loading } = useGlobalSearch(search);
 
   useEffect(() => setSelectedIndex(0), [results]);
 
@@ -47,6 +37,20 @@ export function AppHeader() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Ctrl+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        const input = searchRef.current?.querySelector("input");
+        input?.focus();
+        setShowResults(true);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
   const handleSelect = (path: string) => {
     navigate(path);
     setSearch("");
@@ -54,6 +58,7 @@ export function AppHeader() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showResults || results.length === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -74,6 +79,14 @@ export function AppHeader() {
     return "Bonsoir";
   };
 
+  // Group results by category
+  const grouped = results.reduce<Record<string, typeof results>>((acc, r) => {
+    (acc[r.category] ??= []).push(r);
+    return acc;
+  }, {});
+
+  let flatIndex = -1;
+
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex items-center gap-2">
@@ -88,35 +101,53 @@ export function AppHeader() {
         <div className="relative hidden md:block" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
           <Input
-            placeholder="Rechercher..."
-            className="w-64 pl-9 bg-muted border-0"
+            placeholder="Rechercher... (Ctrl+K)"
+            className="w-72 pl-9 bg-muted border-0"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
             onFocus={() => setShowResults(true)}
             onKeyDown={handleKeyDown}
           />
-          {showResults && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
-              {results.length > 0 ? results.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => handleSelect(item.path)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-muted transition-colors",
-                      i === selectedIndex && "bg-muted"
-                    )}
-                  >
-                    <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span>{item.label}</span>
-                    {item.category && (
-                      <span className="ml-auto text-[10px] text-muted-foreground">{item.category}</span>
-                    )}
-                  </button>
-                );
-              }) : (
-                <div className="px-3 py-4 text-sm text-muted-foreground text-center">Aucun résultat</div>
+          {showResults && search.trim().length >= 2 && (
+            <div className="absolute top-full left-0 w-96 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Recherche en cours...
+                </div>
+              ) : results.length > 0 ? (
+                Object.entries(grouped).map(([category, items]) => (
+                  <div key={category}>
+                    <div className="px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                      {category}
+                    </div>
+                    {items.map((item) => {
+                      flatIndex++;
+                      const idx = flatIndex;
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleSelect(item.path)}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors",
+                            idx === selectedIndex && "bg-muted"
+                          )}
+                        >
+                          <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 text-left min-w-0">
+                            <span className="font-medium">{item.label}</span>
+                            <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))
+              ) : (
+                <div className="px-3 py-6 text-sm text-muted-foreground text-center">
+                  Aucun résultat pour "{search}"
+                </div>
               )}
             </div>
           )}
