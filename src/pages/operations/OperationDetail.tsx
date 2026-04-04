@@ -456,6 +456,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                   })}
                 </TableBody>
               </Table>
+              </div>
               <div className="mt-4 flex flex-col sm:flex-row justify-end gap-4 sm:gap-8 border-t pt-3">
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Total en attente</p>
