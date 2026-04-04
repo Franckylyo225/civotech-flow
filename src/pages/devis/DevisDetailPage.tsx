@@ -175,6 +175,18 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
               </div>
             )}
 
+            {(role === "COMMERCIAL" || role === "DG") && (devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
+              <div className="space-y-2">
+                <p className="text-sm text-destructive font-medium text-center">✗ Devis refusé</p>
+                <Button variant="outline" className="w-full" onClick={() => setShowEditDialog(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Modifier et corriger
+                </Button>
+                <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis corrigé et resoumis au DG")}>
+                  <Send className="mr-2 h-4 w-4" /> Resoumettre au DG
+                </Button>
+              </div>
+            )}
+
             {role === "DG" && devis.statut === "SOUMIS_DG" && (
               <>
                 <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("APPROUVE_DG", "Devis approuvé")}>
@@ -213,7 +225,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 )}
               </div>
             )}
-            {(devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
+
+            {!(role === "COMMERCIAL" || role === "DG") && (devis.statut === "REFUSE_DG" || devis.statut === "REFUSE_CLIENT") && (
               <p className="text-sm text-destructive font-medium text-center">✗ Devis refusé</p>
             )}
           </CardContent>
