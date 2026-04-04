@@ -112,22 +112,24 @@ export default function FournisseursTab({ canManage }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher un fournisseur..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterCategorie} onValueChange={v => setFilterCategorie(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Toutes" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Toutes catégories</SelectItem>
-                {Object.entries(CATEGORIE_FOURNISSEUR_CONFIG).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Nouveau fournisseur</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterCategorie} onValueChange={v => setFilterCategorie(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[180px]"><SelectValue placeholder="Toutes" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Toutes catégories</SelectItem>
+                  {Object.entries(CATEGORIE_FOURNISSEUR_CONFIG).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouveau</span><span className="sm:hidden">+</span></Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
