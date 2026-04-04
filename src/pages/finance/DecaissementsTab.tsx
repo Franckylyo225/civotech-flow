@@ -8,6 +8,7 @@ import {
   type DecaissementRow, type StatutDecaissement,
 } from "@/hooks/use-decaissements-store";
 import { useDemandesAchatStore } from "@/hooks/use-demandes-achat-store";
+import { useComptesStore } from "@/hooks/use-tresorerie-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
