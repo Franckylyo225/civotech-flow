@@ -9,7 +9,7 @@ export interface Notification {
   message: string;
   type: string;
   lue: boolean;
-  lien: string;
+  lien: string | null;
   created_at: string;
 }
 
