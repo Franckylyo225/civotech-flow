@@ -68,15 +68,15 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestion des Devis</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des Devis</h1>
+          <p className="text-sm text-muted-foreground">
             {filtered.length} devis · {formatMontant(totalCA)} au total
           </p>
         </div>
         {isCommercialOrDG && (
-          <Button onClick={onNewDevis}>
+          <Button onClick={onNewDevis} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Nouveau devis
           </Button>
         )}
