@@ -59,7 +59,7 @@ function ClientFormDialog({
             <Label>Contact (nom du référent)</Label>
             <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Ex: M. Kouassi" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemple.ci" />

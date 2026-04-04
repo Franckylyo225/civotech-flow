@@ -145,7 +145,7 @@ export default function DashboardDG() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="h-[280px]">
+            <div className="h-[220px] sm:h-[280px]">
               {loading ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Chargement...</div>
               ) : (

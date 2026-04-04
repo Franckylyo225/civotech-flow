@@ -79,7 +79,7 @@ export default function DevisModule() {
       )}
 
       <Dialog open={!!selectedDevis} onOpenChange={(open) => { if (!open) setSelectedId(null); }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-3 sm:p-6">
           {selectedDevis && (
             <DevisDetailPage
               devis={selectedDevis}

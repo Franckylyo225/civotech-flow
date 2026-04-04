@@ -214,7 +214,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
         </div>
       ) : (
         /* Table view */
-        <Card>
+        <Card className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
