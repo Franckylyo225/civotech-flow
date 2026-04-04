@@ -202,7 +202,7 @@ export default function VehiculesTab({ canManage }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Marque *</Label><Input value={form.marque} onChange={e => setForm(f => ({ ...f, marque: e.target.value }))} placeholder="Renault" /></div>
               <div className="space-y-2"><Label>Modèle *</Label><Input value={form.modele} onChange={e => setForm(f => ({ ...f, modele: e.target.value }))} placeholder="T480" /></div>
             </div>
