@@ -80,7 +80,7 @@ export default function VehiculesTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Truck, value: stats.total, label: "Total véhicules", color: "primary" },
           { icon: CheckCircle2, value: stats.disponible, label: "Disponibles", color: "success" },
