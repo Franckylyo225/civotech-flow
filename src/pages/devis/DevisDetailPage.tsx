@@ -303,7 +303,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       <Dialog open={showOpDialog} onOpenChange={setShowOpDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Créer une demande d'opération</DialogTitle>
+            <DialogTitle>Nouvelle Opération</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-4">
