@@ -472,7 +472,7 @@ export default function CalendrierPage() {
               <Switch checked={formData.toute_journee} onCheckedChange={(v) => updateField("toute_journee", v)} />
               <Label>Toute la journée</Label>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Début *</Label>
                 <Input
