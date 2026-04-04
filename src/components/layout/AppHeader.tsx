@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, LogOut, User, Settings, HelpCircle, Loader2 } from "lucide-react";
+import { Search, LogOut, User, Settings, HelpCircle, Loader2, Menu } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,11 @@ import {
 import { useGlobalSearch } from "@/hooks/use-global-search";
 import { cn } from "@/lib/utils";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onMobileMenuToggle?: () => void;
+}
+
+export function AppHeader({ onMobileMenuToggle }: AppHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -37,7 +41,6 @@ export function AppHeader() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Ctrl+K shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -79,7 +82,6 @@ export function AppHeader() {
     return "Bonsoir";
   };
 
-  // Group results by category
   const grouped = results.reduce<Record<string, typeof results>>((acc, r) => {
     (acc[r.category] ??= []).push(r);
     return acc;
@@ -88,15 +90,27 @@ export function AppHeader() {
   let flatIndex = -1;
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+    <header className="flex h-14 md:h-16 items-center justify-between border-b border-border bg-card px-3 sm:px-4 md:px-6">
       <div className="flex items-center gap-2">
-        <span className="text-lg">👋</span>
-        <span className="text-base text-foreground">
-          {getGreeting()}, <span className="font-semibold">{user?.prenom} {user?.nom}</span> !
+        {/* Mobile menu button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden shrink-0"
+          onClick={onMobileMenuToggle}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        <span className="text-lg hidden sm:inline">👋</span>
+        <span className="text-sm sm:text-base text-foreground truncate">
+          <span className="hidden sm:inline">{getGreeting()}, </span>
+          <span className="font-semibold">{user?.prenom} {user?.nom}</span>
+          <span className="hidden sm:inline"> !</span>
         </span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Search */}
         <div className="relative hidden md:block" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
@@ -155,7 +169,7 @@ export function AppHeader() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/aide")}>
+            <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex" onClick={() => navigate("/aide")}>
               <HelpCircle className="h-5 w-5 text-muted-foreground" />
             </Button>
           </TooltipTrigger>
@@ -167,7 +181,7 @@ export function AppHeader() {
         {/* User avatar + dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <button className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-primary text-xs sm:text-sm font-semibold text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
               {user?.prenom[0]}{user?.nom[0]}
             </button>
           </DropdownMenuTrigger>
