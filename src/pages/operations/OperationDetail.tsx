@@ -171,27 +171,27 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-foreground">N° {op.reference}</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">N° {op.reference}</h1>
             <Badge variant="outline" className={cn("border-0 text-xs font-medium", config.bgColor, config.color)}>
               {config.label}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" variant="outline" onClick={() => setShowEditDialog(true)}>
-              <Pencil className="mr-1.5 h-4 w-4" /> Éditer la demande
+              <Pencil className="mr-1.5 h-4 w-4" /> Éditer
             </Button>
           )}
           {canManage && op.statut === "DEMANDE" && (
             <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setPlanifLieu(op.lieuEmbarquement || ""); setPlanifDate(op.dateDepart ? new Date(op.dateDepart) : undefined); setPlanifDateLivraison(op.dateLivraisonEstimee ? new Date(op.dateLivraisonEstimee) : undefined); setShowPlanifDialog(true); }}>
-              <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier la mission
+              <CalendarIcon className="mr-1.5 h-4 w-4" /> Planifier
             </Button>
           )}
           {canManage && op.statut === "PLANIFIEE" && !op.camionId && (
@@ -206,7 +206,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           )}
           {canManage && op.statut === "EN_COURS" && (
             <Button size="sm" variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowIncidentDialog(true)}>
-              <AlertTriangle className="mr-1.5 h-4 w-4" /> Signaler incident
+              <AlertTriangle className="mr-1.5 h-4 w-4" /> Incident
             </Button>
           )}
           {canManage && op.statut === "EN_COURS" && (
@@ -219,27 +219,28 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
 
       {/* Route card */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">Départ</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full border-2 border-primary bg-primary/20" />
-                  <span className="text-sm font-medium text-foreground">{op.lieuEmbarquement}</span>
-                </div>
+        <CardContent className="p-3 sm:p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Départ</p>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full border-2 border-primary bg-primary/20" />
+                <span className="text-sm font-medium text-foreground">{op.lieuEmbarquement}</span>
               </div>
-              <div className="flex items-center gap-2 px-4">
-                <div className="h-[2px] w-16 bg-border" />
-                <Truck className="h-4 w-4 text-primary" />
-                <div className="h-[2px] w-16 bg-border" />
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">Arrivée</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full border-2 border-success bg-success/20" />
-                  <span className="text-sm font-medium text-foreground">{op.lieuLivraison}</span>
-                </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 px-4">
+              <div className="h-[2px] w-16 bg-border" />
+              <Truck className="h-4 w-4 text-primary" />
+              <div className="h-[2px] w-16 bg-border" />
+            </div>
+            <div className="flex sm:hidden items-center gap-1.5 pl-1">
+              <ArrowRight className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Arrivée</p>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full border-2 border-success bg-success/20" />
+                <span className="text-sm font-medium text-foreground">{op.lieuLivraison}</span>
               </div>
             </div>
           </div>
@@ -247,7 +248,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       </Card>
 
       {/* Info cards row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border border-border shadow-none">
           <CardContent className="p-4 flex flex-col items-center text-center">
             <Weight className="h-5 w-5 text-muted-foreground mb-2" />
@@ -305,9 +306,9 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       )}
 
       {/* Timeline + Vehicle/Driver */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Timeline */}
-        <Card className="col-span-3 border border-border shadow-none">
+        <Card className="md:col-span-3 border border-border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">Suivi de livraison</CardTitle>
           </CardHeader>
@@ -354,7 +355,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </Card>
 
         {/* Vehicle + Driver */}
-        <div className="col-span-2 space-y-4">
+        <div className="md:col-span-2 space-y-4">
           {/* Vehicle card */}
           <Card className="border border-border shadow-none">
             <CardHeader className="pb-2">
@@ -420,7 +421,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         <CardContent className="pt-0">
           {op.depenses.length > 0 ? (
             <>
-              <Table>
+            <div className="overflow-x-auto">
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Catégorie</TableHead>
@@ -454,7 +456,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                   })}
                 </TableBody>
               </Table>
-              <div className="mt-4 flex justify-end gap-8 border-t pt-3">
+              </div>
+              <div className="mt-4 flex flex-col sm:flex-row justify-end gap-4 sm:gap-8 border-t pt-3">
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Total en attente</p>
                   <p className="text-sm font-medium text-warning">{formatMontantOp(totalDepensesAll - totalDepenses)}</p>
@@ -782,7 +785,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             <DialogTitle>Éditer la demande d'opération</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Lieu de récupération *</Label>
                 <Input value={editForm.lieu_embarquement} onChange={(e) => setEditForm(f => ({ ...f, lieu_embarquement: e.target.value }))} />
@@ -792,7 +795,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 <Input value={editForm.lieu_livraison} onChange={(e) => setEditForm(f => ({ ...f, lieu_livraison: e.target.value }))} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Poids (kg)</Label>
                 <Input type="number" value={editForm.poids_kg} onChange={(e) => setEditForm(f => ({ ...f, poids_kg: e.target.value }))} />
