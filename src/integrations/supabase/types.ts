@@ -355,6 +355,7 @@ export type Database = {
           created_by: string | null
           date_paiement: string | null
           demande_achat_id: string | null
+          depense_id: string | null
           devis_fournisseur_id: string | null
           id: string
           montant: number
@@ -371,6 +372,7 @@ export type Database = {
           created_by?: string | null
           date_paiement?: string | null
           demande_achat_id?: string | null
+          depense_id?: string | null
           devis_fournisseur_id?: string | null
           id?: string
           montant?: number
@@ -387,6 +389,7 @@ export type Database = {
           created_by?: string | null
           date_paiement?: string | null
           demande_achat_id?: string | null
+          depense_id?: string | null
           devis_fournisseur_id?: string | null
           id?: string
           montant?: number
@@ -403,6 +406,13 @@ export type Database = {
             columns: ["demande_achat_id"]
             isOneToOne: false
             referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decaissements_depense_id_fkey"
+            columns: ["depense_id"]
+            isOneToOne: false
+            referencedRelation: "depenses"
             referencedColumns: ["id"]
           },
           {
