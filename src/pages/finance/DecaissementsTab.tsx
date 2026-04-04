@@ -164,8 +164,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 flex-wrap">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher par référence ou motif..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
