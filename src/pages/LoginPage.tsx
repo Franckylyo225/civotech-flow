@@ -273,23 +273,6 @@ export default function LoginPage() {
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/30 to-foreground/10" />
 
-        {/* Stats bar */}
-        <div
-          className={`absolute top-8 left-8 right-8 flex gap-4 transition-all duration-700 delay-700 ease-out ${
-            mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-6"
-          }`}
-        >
-          {STATS.map((stat, i) => (
-            <div
-              key={i}
-              className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 p-4 text-center"
-            >
-              <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary-foreground/80" />
-              <p className="text-xl font-bold text-primary-foreground">{stat.value}</p>
-              <p className="text-xs text-primary-foreground/60">{stat.label}</p>
-            </div>
-          ))}
-        </div>
 
         {/* Testimonial carousel */}
         <div
