@@ -36,8 +36,8 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
-          const countKey = PATH_COUNT_MAP[item.path];
-          const count = countKey ? counts[countKey] : 0;
+          const countConfig = PATH_COUNT_CONFIG[item.path];
+          const count = countConfig && countConfig.roles.includes(user.role) ? counts[countConfig.key] : 0;
 
           return (
             <Link
