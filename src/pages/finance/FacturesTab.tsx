@@ -70,7 +70,12 @@ export default function FacturesTab({ canManage }: Props) {
     const matchSearch = f.reference.toLowerCase().includes(search.toLowerCase()) ||
       getClientNom(f.client_id).toLowerCase().includes(search.toLowerCase()) ||
       getOpRef(f.operation_id).toLowerCase().includes(search.toLowerCase());
-    const matchStatut = filterStatut === "ALL" || f.statut === filterStatut;
+    const isOverdueFilter = filterStatut === "ECHUE";
+    const matchStatut = filterStatut === "ALL"
+      ? true
+      : isOverdueFilter
+        ? f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date()
+        : f.statut === filterStatut;
     const emissionDate = new Date(f.date_emission);
     const matchFrom = !dateFrom || emissionDate >= dateFrom;
     const matchTo = !dateTo || emissionDate <= new Date(dateTo.getTime() + 86400000 - 1);
