@@ -68,15 +68,15 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestion des Devis</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des Devis</h1>
+          <p className="text-sm text-muted-foreground">
             {filtered.length} devis · {formatMontant(totalCA)} au total
           </p>
         </div>
         {isCommercialOrDG && (
-          <Button onClick={onNewDevis}>
+          <Button onClick={onNewDevis} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Nouveau devis
           </Button>
         )}
@@ -102,8 +102,8 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
 
       {/* Filters */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 p-4">
-          <div className="relative flex-1 min-w-[200px]">
+        <CardContent className="flex flex-wrap items-center gap-3 p-3 sm:p-4">
+          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Rechercher par référence ou client..."
@@ -112,44 +112,46 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               className="pl-9"
             />
           </div>
-          <Select value={statutFilter} onValueChange={setStatutFilter}>
-            <SelectTrigger className="w-[200px]">
-              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Tous les statuts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Tous les statuts</SelectItem>
-              {Object.entries(DEVIS_STATUT_CONFIG).map(([key, cfg]) => (
-                <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant={showArchived ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowArchived(!showArchived)}
-            className="gap-1.5"
-          >
-            <Archive className="h-4 w-4" />
-            Archivés
-          </Button>
-          <div className="flex rounded-lg border">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Select value={statutFilter} onValueChange={setStatutFilter}>
+              <SelectTrigger className="flex-1 sm:w-[200px]">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Tous les statuts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tous les statuts</SelectItem>
+                {Object.entries(DEVIS_STATUT_CONFIG).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="icon"
-              className="rounded-r-none"
-              onClick={() => setViewMode("grid")}
+              variant={showArchived ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowArchived(!showArchived)}
+              className="gap-1.5 shrink-0"
             >
-              <LayoutGrid className="h-4 w-4" />
+              <Archive className="h-4 w-4" />
+              <span className="hidden sm:inline">Archivés</span>
             </Button>
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="icon"
-              className="rounded-l-none"
-              onClick={() => setViewMode("table")}
-            >
-              <List className="h-4 w-4" />
-            </Button>
+            <div className="flex rounded-lg border shrink-0">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="icon"
+                className="rounded-r-none"
+                onClick={() => setViewMode("grid")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="icon"
+                className="rounded-l-none"
+                onClick={() => setViewMode("table")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -214,7 +216,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
         </div>
       ) : (
         /* Table view */
-        <Card>
+        <Card className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

@@ -98,17 +98,17 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">{devis.reference}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">{devis.reference}</h1>
             <DevisStatutBadge statut={devis.statut} />
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs sm:text-sm">
             Créé le {formatDate(devis.createdAt)} · Mis à jour le {formatDate(devis.updatedAt)}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => generateDevisPdf(devis)}>
+        <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => generateDevisPdf(devis)}>
           <Download className="mr-2 h-4 w-4" /> Télécharger PDF
         </Button>
       </div>
@@ -127,7 +127,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
         </Card>
       )}
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader><CardTitle className="text-base">Client</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
@@ -230,7 +230,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
 
       <Card>
         <CardHeader><CardTitle className="text-base">Lignes de prestation</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -306,7 +306,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
             <DialogTitle>Nouvelle Opération</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Lieu de récupération *</Label>
                 <Input
@@ -324,7 +324,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Poids (kg)</Label>
                 <Input
