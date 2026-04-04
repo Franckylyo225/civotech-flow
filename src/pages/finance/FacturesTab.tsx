@@ -33,7 +33,7 @@ export default function FacturesTab({ canManage }: Props) {
   const { operations } = useOperationsStore();
   const { clients } = useClientsStore();
   const [search, setSearch] = useState("");
-  const [filterStatut, setFilterStatut] = useState<StatutFacture | "ALL">("ALL");
+  const [filterStatut, setFilterStatut] = useState<StatutFacture | "ALL" | "ECHUE">("ALL");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [showCreate, setShowCreate] = useState(false);
@@ -70,7 +70,12 @@ export default function FacturesTab({ canManage }: Props) {
     const matchSearch = f.reference.toLowerCase().includes(search.toLowerCase()) ||
       getClientNom(f.client_id).toLowerCase().includes(search.toLowerCase()) ||
       getOpRef(f.operation_id).toLowerCase().includes(search.toLowerCase());
-    const matchStatut = filterStatut === "ALL" || f.statut === filterStatut;
+    const isOverdueFilter = filterStatut === "ECHUE";
+    const matchStatut = filterStatut === "ALL"
+      ? true
+      : isOverdueFilter
+        ? f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date()
+        : f.statut === filterStatut;
     const emissionDate = new Date(f.date_emission);
     const matchFrom = !dateFrom || emissionDate >= dateFrom;
     const matchTo = !dateTo || emissionDate <= new Date(dateTo.getTime() + 86400000 - 1);
@@ -233,6 +238,7 @@ export default function FacturesTab({ canManage }: Props) {
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Tous les statuts</SelectItem>
+                <SelectItem value="ECHUE">🔴 Échues</SelectItem>
                 {Object.entries(STATUT_FACTURE_CONFIG).map(([k, v]) => (
                   <SelectItem key={k} value={k}>{v.label}</SelectItem>
                 ))}
