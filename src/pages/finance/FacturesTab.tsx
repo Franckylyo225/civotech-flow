@@ -393,14 +393,15 @@ export default function FacturesTab({ canManage }: Props) {
             {createForm.operation_id && (() => {
               const op = operations.find(o => o.id === createForm.operation_id);
               if (!op) return null;
-              const ht = op.montantDevis;
-              const tva = ht * createForm.taux_tva / 100;
+              const ttc = op.montantDevis;
+              const tva = Math.round(ttc * createForm.taux_tva / (100 + createForm.taux_tva));
+              const ht = ttc - tva;
               return (
                 <div className="p-3 rounded-lg bg-muted/50 border border-border text-sm space-y-1">
                   <div className="flex justify-between"><span className="text-muted-foreground">HT</span><span>{ht.toLocaleString()} F</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">TVA ({createForm.taux_tva}%)</span><span>{Math.round(tva).toLocaleString()} F</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">TVA ({createForm.taux_tva}%)</span><span>{tva.toLocaleString()} F</span></div>
                   <Separator />
-                  <div className="flex justify-between font-semibold"><span>TTC</span><span>{Math.round(ht + tva).toLocaleString()} F</span></div>
+                  <div className="flex justify-between font-semibold"><span>TTC</span><span>{ttc.toLocaleString()} F</span></div>
                 </div>
               );
             })()}
