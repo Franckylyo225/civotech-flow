@@ -126,7 +126,7 @@ export default function MaintenanceTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Wrench, value: stats.total, label: "Total", color: "primary" },
           { icon: Clock, value: stats.planifiee, label: "Planifiées", color: "info" },
@@ -149,31 +149,33 @@ export default function MaintenanceTab({ canManage }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les statuts</SelectItem>
-                <SelectItem value="PLANIFIEE">Planifiée</SelectItem>
-                <SelectItem value="EN_COURS">En cours</SelectItem>
-                <SelectItem value="TERMINEE">Terminée</SelectItem>
-                <SelectItem value="ANNULEE">Annulée</SelectItem>
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Nouvelle maintenance</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tous les statuts</SelectItem>
+                  <SelectItem value="PLANIFIEE">Planifiée</SelectItem>
+                  <SelectItem value="EN_COURS">En cours</SelectItem>
+                  <SelectItem value="TERMINEE">Terminée</SelectItem>
+                  <SelectItem value="ANNULEE">Annulée</SelectItem>
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouvelle maintenance</span><span className="sm:hidden">Ajouter</span></Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Véhicule</TableHead>
@@ -246,7 +248,7 @@ export default function MaintenanceTab({ canManage }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v as TypeMaintenance }))}>
@@ -279,12 +281,12 @@ export default function MaintenanceTab({ canManage }: Props) {
               <Label>Pièces changées</Label>
               <Input value={form.pieces_changees} onChange={e => setForm(f => ({ ...f, pieces_changees: e.target.value }))} placeholder="Filtre à huile, plaquettes..." />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Date prévue</Label><Input type="date" value={form.date_prevue} onChange={e => setForm(f => ({ ...f, date_prevue: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Date début</Label><Input type="date" value={form.date_debut} onChange={e => setForm(f => ({ ...f, date_debut: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Date fin</Label><Input type="date" value={form.date_fin} onChange={e => setForm(f => ({ ...f, date_fin: e.target.value }))} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Coût estimé (F)</Label><Input type="number" value={form.cout_estime} onChange={e => setForm(f => ({ ...f, cout_estime: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Coût réel (F)</Label><Input type="number" value={form.cout_reel} onChange={e => setForm(f => ({ ...f, cout_reel: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km déclench.</Label><Input type="number" value={form.km_declenchement} onChange={e => setForm(f => ({ ...f, km_declenchement: Number(e.target.value) }))} /></div>

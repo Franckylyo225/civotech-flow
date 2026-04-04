@@ -145,10 +145,10 @@ export default function CalendrierPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Calendrier DG</h1>
-          <p className="text-muted-foreground">Agenda de la Direction Générale</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Calendrier DG</h1>
+          <p className="text-sm text-muted-foreground">Agenda de la Direction Générale</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex border rounded-lg overflow-hidden">
@@ -158,7 +158,7 @@ export default function CalendrierPage() {
               onClick={() => setViewMode("mois")}
               className={viewMode === "mois" ? "bg-primary hover:bg-primary/90" : ""}
             >
-              <LayoutGrid className="h-4 w-4 mr-1" /> Mois
+              <LayoutGrid className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Mois</span>
             </Button>
             <Button
               variant={viewMode === "agenda" ? "default" : "ghost"}
@@ -166,12 +166,12 @@ export default function CalendrierPage() {
               onClick={() => setViewMode("agenda")}
               className={viewMode === "agenda" ? "bg-primary hover:bg-primary/90" : ""}
             >
-              <List className="h-4 w-4 mr-1" /> Agenda
+              <List className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Agenda</span>
             </Button>
           </div>
           {canManage && (
             <Button onClick={() => openCreateDialog()} className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" /> Nouvel événement
+              <Plus className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Nouvel événement</span>
             </Button>
           )}
         </div>
@@ -211,7 +211,7 @@ export default function CalendrierPage() {
                       key={key}
                       onClick={() => setSelectedDate(day)}
                       onDoubleClick={() => canManage && openCreateDialog(day)}
-                      className={`bg-background p-1 min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
+                      className={`bg-background p-1 min-h-[60px] sm:min-h-[80px] cursor-pointer transition-colors hover:bg-accent/50 ${
                         !isCurrentMonth ? "opacity-40" : ""
                       } ${isSelected ? "ring-2 ring-primary ring-inset" : ""}`}
                     >
@@ -472,7 +472,7 @@ export default function CalendrierPage() {
               <Switch checked={formData.toute_journee} onCheckedChange={(v) => updateField("toute_journee", v)} />
               <Label>Toute la journée</Label>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <Label>Début *</Label>
                 <Input

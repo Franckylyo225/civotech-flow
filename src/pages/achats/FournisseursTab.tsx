@@ -90,7 +90,7 @@ export default function FournisseursTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { value: fournisseurs.length, label: "Total", icon: Building2 },
           { value: fournisseurs.filter(f => f.actif).length, label: "Actifs", icon: ToggleRight },
@@ -112,30 +112,32 @@ export default function FournisseursTab({ canManage }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher un fournisseur..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterCategorie} onValueChange={v => setFilterCategorie(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Toutes" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Toutes catégories</SelectItem>
-                {Object.entries(CATEGORIE_FOURNISSEUR_CONFIG).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Nouveau fournisseur</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterCategorie} onValueChange={v => setFilterCategorie(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[180px]"><SelectValue placeholder="Toutes" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Toutes catégories</SelectItem>
+                  {Object.entries(CATEGORIE_FOURNISSEUR_CONFIG).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouveau</span><span className="sm:hidden">+</span></Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Nom</TableHead>
@@ -199,7 +201,7 @@ export default function FournisseursTab({ canManage }: Props) {
               <Label>Nom / Raison sociale *</Label>
               <Input value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} placeholder="Ex: Auto Pièces Dakar" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Contact</Label>
                 <Input value={form.contact} onChange={e => setForm(f => ({ ...f, contact: e.target.value }))} placeholder="Nom du contact" />
@@ -216,7 +218,7 @@ export default function FournisseursTab({ canManage }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Téléphone</Label>
                 <Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="+221 77 123 45 67" />

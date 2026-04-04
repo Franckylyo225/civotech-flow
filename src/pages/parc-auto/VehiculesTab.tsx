@@ -80,7 +80,7 @@ export default function VehiculesTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Truck, value: stats.total, label: "Total véhicules", color: "primary" },
           { icon: CheckCircle2, value: stats.disponible, label: "Disponibles", color: "success" },
@@ -103,30 +103,32 @@ export default function VehiculesTab({ canManage }: Props) {
 
       {/* Filters + Add */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les statuts</SelectItem>
-                <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                <SelectItem value="EN_MISSION">En mission</SelectItem>
-                <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tous les statuts</SelectItem>
+                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
+                  <SelectItem value="EN_MISSION">En mission</SelectItem>
+                  <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Immatriculation</TableHead>
@@ -183,7 +185,7 @@ export default function VehiculesTab({ canManage }: Props) {
         <DialogContent>
           <DialogHeader><DialogTitle>{editingId ? "Modifier le véhicule" : "Ajouter un véhicule"}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Immatriculation *</Label>
                 <Input value={form.immatriculation} onChange={e => setForm(f => ({ ...f, immatriculation: e.target.value }))} placeholder="AB-1234-CI" />
@@ -200,11 +202,11 @@ export default function VehiculesTab({ canManage }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Marque *</Label><Input value={form.marque} onChange={e => setForm(f => ({ ...f, marque: e.target.value }))} placeholder="Renault" /></div>
               <div className="space-y-2"><Label>Modèle *</Label><Input value={form.modele} onChange={e => setForm(f => ({ ...f, modele: e.target.value }))} placeholder="T480" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Capacité (T)</Label><Input type="number" value={form.capacite_tonnes} onChange={e => setForm(f => ({ ...f, capacite_tonnes: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Année</Label><Input type="number" value={form.annee} onChange={e => setForm(f => ({ ...f, annee: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Km actuel</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>

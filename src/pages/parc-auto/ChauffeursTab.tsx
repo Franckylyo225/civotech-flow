@@ -97,7 +97,7 @@ export default function ChauffeursTab({ canManage }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Users, value: stats.total, label: "Total chauffeurs", color: "primary" },
           { icon: Users, value: stats.disponible, label: "Disponibles", color: "success" },
@@ -120,31 +120,33 @@ export default function ChauffeursTab({ canManage }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les statuts</SelectItem>
-                <SelectItem value="DISPONIBLE">Disponible</SelectItem>
-                <SelectItem value="EN_MISSION">En mission</SelectItem>
-                <SelectItem value="EN_REPOS">En repos</SelectItem>
-                <SelectItem value="INDISPONIBLE">Indisponible</SelectItem>
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tous les statuts</SelectItem>
+                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
+                  <SelectItem value="EN_MISSION">En mission</SelectItem>
+                  <SelectItem value="EN_REPOS">En repos</SelectItem>
+                  <SelectItem value="INDISPONIBLE">Indisponible</SelectItem>
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Chauffeur</TableHead>
@@ -215,15 +217,15 @@ export default function ChauffeursTab({ canManage }: Props) {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingId ? "Modifier le chauffeur" : "Ajouter un chauffeur"}</DialogTitle></DialogHeader>
           <div className="grid gap-4 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Prénom *</Label><Input value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Nom *</Label><Input value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Expérience (années)</Label><Input type="number" value={form.experience_annees} onChange={e => setForm(f => ({ ...f, experience_annees: Number(e.target.value) }))} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>N° Permis</Label><Input value={form.numero_permis} onChange={e => setForm(f => ({ ...f, numero_permis: e.target.value }))} /></div>
               <div className="space-y-2">
                 <Label>Type permis</Label>

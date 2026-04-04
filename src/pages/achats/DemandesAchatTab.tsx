@@ -110,7 +110,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: ShoppingCart, value: stats.total, label: "Total", color: "primary" },
           { icon: Clock, value: stats.enCours, label: "En cours", color: "info" },
@@ -133,30 +133,32 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Rechercher par référence ou désignation..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-              <SelectTrigger className="w-[200px]"><SelectValue placeholder="Tous" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tous les statuts</SelectItem>
-                {Object.entries(STATUT_DA_CONFIG).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {canManage && <Button onClick={openAdd}><Plus className="mr-1.5 h-4 w-4" />Nouvelle demande</Button>}
+            <div className="flex items-center gap-2">
+              <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
+                <SelectTrigger className="flex-1 sm:w-[180px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tous les statuts</SelectItem>
+                  {Object.entries(STATUT_DA_CONFIG).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouvelle demande</span><span className="sm:hidden">Ajouter</span></Button>}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Référence</TableHead>
@@ -231,7 +233,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
               <Label>Description</Label>
               <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Détails des pièces ou services..." rows={2} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Quantité</Label>
                 <Input type="number" min={1} value={form.quantite} onChange={e => setForm(f => ({ ...f, quantite: Number(e.target.value) }))} />

@@ -141,7 +141,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: CreditCard, value: stats.total, label: "Total", color: "primary" },
           { icon: Clock, value: stats.enAttente, label: "En attente", color: "warning" },
@@ -164,9 +164,9 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-[200px]">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher par référence ou motif..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
@@ -231,9 +231,9 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
       </Card>
 
       {/* Table */}
-      <Card className="border border-border shadow-none">
+      <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[750px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Référence</TableHead>
