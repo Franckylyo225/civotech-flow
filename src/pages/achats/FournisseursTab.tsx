@@ -201,7 +201,7 @@ export default function FournisseursTab({ canManage }: Props) {
               <Label>Nom / Raison sociale *</Label>
               <Input value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} placeholder="Ex: Auto Pièces Dakar" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Contact</Label>
                 <Input value={form.contact} onChange={e => setForm(f => ({ ...f, contact: e.target.value }))} placeholder="Nom du contact" />
