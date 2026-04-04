@@ -18,6 +18,7 @@ export interface DecaissementRow {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  compte_source_id: string | null;
 }
 
 export const STATUT_DECAISSEMENT_CONFIG: Record<StatutDecaissement, { label: string; color: string; bgColor: string }> = {
