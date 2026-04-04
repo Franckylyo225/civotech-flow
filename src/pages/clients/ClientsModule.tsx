@@ -259,8 +259,8 @@ export default function ClientsModule() {
         </CardContent>
       </Card>
 
-      <Card>
-        <Table>
+      <Card className="overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead>Nom</TableHead>
