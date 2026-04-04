@@ -421,7 +421,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         <CardContent className="pt-0">
           {op.depenses.length > 0 ? (
             <>
-              <Table>
+            <div className="overflow-x-auto">
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Catégorie</TableHead>
