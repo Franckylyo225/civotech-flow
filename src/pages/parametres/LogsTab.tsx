@@ -47,9 +47,9 @@ export default function LogsTab() {
 
   const filtered = logs.filter(l => {
     const term = search.toLowerCase();
-    return l.user_nom.toLowerCase().includes(term) ||
-      l.action.toLowerCase().includes(term) ||
-      l.table_cible.toLowerCase().includes(term);
+    return (l.user_nom || "").toLowerCase().includes(term) ||
+      (l.action || "").toLowerCase().includes(term) ||
+      (l.table_cible || "").toLowerCase().includes(term);
   });
 
   return (
