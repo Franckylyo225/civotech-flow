@@ -414,6 +414,39 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_roles: {
+        Row: {
+          actif: boolean
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          nom: string
+          role_base: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          nom: string
+          role_base?: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          nom?: string
+          role_base?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       decaissements: {
         Row: {
           commentaire: string | null
@@ -1304,6 +1337,33 @@ export type Database = {
           telephone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          module: string
+          permissions: string[]
+          role_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module: string
+          permissions?: string[]
+          role_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module?: string
+          permissions?: string[]
+          role_key?: string
+          updated_at?: string
         }
         Relationships: []
       }
