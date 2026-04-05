@@ -13,6 +13,7 @@ const PATH_COUNT_CONFIG: Record<string, { key: keyof ReturnType<typeof useSideba
   "/factures": { key: "factures", roles: ["DG", "FINANCE"] },
   "/achats": { key: "achats", roles: ["DG", "ACHATS"] },
   "/parc-auto": { key: "parcAuto", roles: ["DG", "LOGISTIQUE", "MAINTENANCE"] },
+  "/annonces": { key: "annonces", roles: ["DG", "COMMERCIAL", "LOGISTIQUE", "FINANCE", "ACHATS", "ASSISTANTE", "MAINTENANCE", "ADMIN"] },
 };
 
 function groupNavItems(items: NavItem[]) {
