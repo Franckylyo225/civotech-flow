@@ -1,23 +1,22 @@
+## Plan : Gestion dynamique des rôles et permissions
 
-## Module Trésorerie & Flux Financiers
+### Architecture
+Les rôles de base (DG, COMMERCIAL, etc.) restent pour la sécurité DB (RLS). Les permissions applicatives sont gérées dans une table `role_permissions` consultée côté app.
 
-### 1. Migration DB
-- Table `comptes_tresorerie` (id, nom, type [BANQUE/CAISSE], solde, actif, created_by, timestamps)
-- Table `transactions_tresorerie` (id, reference, type [ENCAISSEMENT/DECAISSEMENT/TRANSFERT], montant, date_transaction, compte_source_id, compte_destination_id, facture_id, decaissement_id, description, created_by, timestamps)
-- Trigger pour auto-update des soldes à chaque INSERT sur transactions
-- RLS: DG + FINANCE full access, others read-only
+### Étape 1 — Migration DB
+- Table `role_permissions` : stocke les permissions par rôle et module (ex: rôle "COMMERCIAL", module "Devis", permissions ["lecture","creation","modification"])
+- Table `custom_roles` : stocke les rôles personnalisés (nom, description, rôle_base pour le RLS)
+- Pré-remplir `role_permissions` avec les permissions actuelles des 8 rôles de base
 
-### 2. Hooks/Store
-- `use-tresorerie-store.ts` — CRUD comptes + transactions, calculs soldes
+### Étape 2 — UI dans l'onglet Rôles & Permissions
+- Bouton "Nouveau rôle" : dialog pour créer un rôle personnalisé (nom, description, rôle de base pour la sécurité)
+- Matrice de permissions éditable : checkboxes pour chaque combinaison rôle × module × permission
+- Bouton sauvegarder pour persister les changements
 
-### 3. Pages UI
-- Refonte `FinanceModule.tsx` — ajouter onglet "Trésorerie"
-- `TresorerieDashboard.tsx` — KPIs (solde total, banque, caisse, entrées, sorties) + dernières transactions
-- `TransactionsTab.tsx` — liste filtrable (date, type, compte) avec couleurs vert/rouge
-- `ComptesTab.tsx` — gestion des comptes banque/caisse
-- Dialog transfert banque → caisse
+### Étape 3 — Hook & intégration
+- Hook `use-role-permissions` pour charger/modifier les permissions
+- Les rôles personnalisés héritent d'un rôle de base pour le RLS (sécurité DB)
 
-### 4. Intégrations existantes
-- Lors du paiement facture → auto-créer encaissement
-- Lors du décaissement validé → auto-créer transaction sortie
-- Pas de duplication de logique de validation
+### Limites
+- Les politiques RLS restent basées sur les 8 rôles de base (sécurité côté serveur)
+- Les rôles personnalisés sont des "profils de permissions" applicatifs mappés à un rôle de base
