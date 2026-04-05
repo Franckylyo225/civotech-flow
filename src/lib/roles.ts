@@ -61,6 +61,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
+  ],
   LOGISTIQUE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
@@ -85,6 +86,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   ],
   ASSISTANTE: [
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   MAINTENANCE: [
