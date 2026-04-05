@@ -95,6 +95,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
+  ADMIN: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Devis", path: "/devis", icon: FileText, category: "SERVICES" },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
@@ -102,6 +103,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },
     { label: "Paramètres", path: "/parametres", icon: Settings, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
