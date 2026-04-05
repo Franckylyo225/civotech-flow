@@ -14,6 +14,7 @@ import {
   Settings,
   ClipboardCheck,
   HelpCircle,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
