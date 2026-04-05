@@ -92,9 +92,9 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
   MAINTENANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
-  ADMIN: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Devis", path: "/devis", icon: FileText, category: "SERVICES" },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
