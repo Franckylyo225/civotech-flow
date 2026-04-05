@@ -9,11 +9,12 @@ export interface SidebarCounts {
   achats: number;
   parcAuto: number;
   notifications: number;
+  annonces: number;
 }
 
 export function useSidebarCounts() {
   const [counts, setCounts] = useState<SidebarCounts>({
-    approbations: 0, devis: 0, operations: 0, factures: 0, achats: 0, parcAuto: 0, notifications: 0,
+    approbations: 0, devis: 0, operations: 0, factures: 0, achats: 0, parcAuto: 0, notifications: 0, annonces: 0,
   });
 
   const fetchCounts = useCallback(async () => {
@@ -25,6 +26,7 @@ export function useSidebarCounts() {
       decRes,
       maintRes,
       notifRes,
+      annoncesRes,
     ] = await Promise.all([
       supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "SOUMIS_DG"),
       supabase.from("operations").select("id", { count: "exact", head: true }).in("statut", ["DEMANDE", "PLANIFIEE", "EN_COURS"]),
@@ -33,6 +35,7 @@ export function useSidebarCounts() {
       supabase.from("decaissements").select("id", { count: "exact", head: true }).eq("statut", "EN_ATTENTE"),
       supabase.from("maintenances").select("id", { count: "exact", head: true }).in("statut", ["PLANIFIEE", "EN_COURS"]),
       supabase.from("notifications").select("id", { count: "exact", head: true }).eq("lue", false),
+      supabase.from("annonces").select("id", { count: "exact", head: true }).eq("statut", "actif").gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
     ]);
 
     setCounts({
@@ -43,6 +46,7 @@ export function useSidebarCounts() {
       achats: daRes.count || 0,
       parcAuto: maintRes.count || 0,
       notifications: notifRes.count || 0,
+      annonces: annoncesRes.count || 0,
     });
   }, []);
 
