@@ -53,6 +53,39 @@ export type Database = {
         }
         Relationships: []
       }
+      annonces: {
+        Row: {
+          auteur_id: string
+          contenu: string
+          created_at: string
+          id: string
+          image_url: string | null
+          statut: string
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          auteur_id: string
+          contenu?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          statut?: string
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          auteur_id?: string
+          contenu?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          statut?: string
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       camions: {
         Row: {
           annee: number

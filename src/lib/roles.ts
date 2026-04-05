@@ -14,6 +14,7 @@ import {
   Settings,
   ClipboardCheck,
   HelpCircle,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,6 +49,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },
     { label: "Paramètres", path: "/parametres", icon: Settings, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
@@ -57,12 +59,14 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Devis", path: "/devis", icon: FileText, category: "SERVICES" },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   LOGISTIQUE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   FINANCE: [
@@ -70,21 +74,25 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   ACHATS: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Demandes d'achat", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
     { label: "Fournisseurs", path: "/fournisseurs", icon: Users, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   ASSISTANTE: [
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   MAINTENANCE: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   ADMIN: [
@@ -95,6 +103,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },
     { label: "Paramètres", path: "/parametres", icon: Settings, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
