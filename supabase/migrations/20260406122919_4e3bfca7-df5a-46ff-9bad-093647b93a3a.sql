@@ -1,0 +1,1 @@
+ALTER TABLE public.clients ADD COLUMN conditions_paiement text DEFAULT 'Net 30 jours';
