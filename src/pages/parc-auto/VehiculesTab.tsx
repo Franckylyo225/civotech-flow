@@ -88,7 +88,7 @@ export default function VehiculesTab({ canManage }: Props) {
 
   const openMaintDialog = (camion: CamionRow) => {
     setMaintCamion(camion);
-    setMaintForm({ type: "CORRECTIVE", description: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
+    setMaintForm({ type: "CORRECTIVE", description: "", pieces_changees: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
   };
 
   const handleSendToMaint = async () => {
