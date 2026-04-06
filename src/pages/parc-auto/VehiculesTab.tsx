@@ -273,6 +273,58 @@ export default function VehiculesTab({ canManage }: Props) {
       </Dialog>
 
       <VehiculeDetailDialog camion={detailCamion} open={!!detailCamion} onOpenChange={o => { if (!o) setDetailCamion(null); }} />
+
+      {/* Send to maintenance dialog */}
+      <Dialog open={!!maintCamion} onOpenChange={o => { if (!o) setMaintCamion(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-warning" />
+              Envoyer en maintenance
+            </DialogTitle>
+          </DialogHeader>
+          {maintCamion && (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border p-3 bg-muted/30">
+                <p className="text-sm font-medium text-foreground">{maintCamion.immatriculation}</p>
+                <p className="text-xs text-muted-foreground">{maintCamion.marque} {maintCamion.modele} · {((maintCamion as any).km_actuel || 0).toLocaleString()} km</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type de maintenance</Label>
+                <Select value={maintForm.type} onValueChange={v => setMaintForm(f => ({ ...f, type: v as any }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PREVENTIVE">Préventive</SelectItem>
+                    <SelectItem value="CORRECTIVE">Corrective</SelectItem>
+                    <SelectItem value="REMPLACEMENT">Remplacement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description *</Label>
+                <Textarea value={maintForm.description} onChange={e => setMaintForm(f => ({ ...f, description: e.target.value }))} placeholder="Décrivez l'intervention nécessaire..." rows={3} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date prévue</Label>
+                  <Input type="date" value={maintForm.date_prevue} onChange={e => setMaintForm(f => ({ ...f, date_prevue: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Coût estimé (F)</Label>
+                  <Input type="number" value={maintForm.cout_estime} onChange={e => setMaintForm(f => ({ ...f, cout_estime: Number(e.target.value) }))} />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMaintCamion(null)}>Annuler</Button>
+            <Button onClick={handleSendToMaint} className="gap-1.5">
+              <Wrench className="h-4 w-4" />
+              Envoyer en maintenance
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
