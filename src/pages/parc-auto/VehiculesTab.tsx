@@ -39,6 +39,7 @@ export default function VehiculesTab({ canManage }: Props) {
   const [maintForm, setMaintForm] = useState({
     type: "CORRECTIVE" as "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT",
     description: "",
+    pieces_changees: "",
     date_prevue: new Date().toISOString().slice(0, 10),
     cout_estime: 0,
   });
