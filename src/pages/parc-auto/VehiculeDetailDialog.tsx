@@ -59,6 +59,7 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
   const [operations, setOperations] = useState<OperationRow[]>([]);
   const [maintenances, setMaintenances] = useState<MaintenanceRow[]>([]);
   const [chauffeurs, setChauffeurs] = useState<ChauffeurMin[]>([]);
+  const [coutDecaisseParMaint, setCoutDecaisseParMaint] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -70,10 +71,38 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
       supabase.from("maintenances").select("id, type, description, pieces_changees, cout_estime, cout_reel, date_prevue, date_fin, statut")
         .eq("camion_id", camion.id).order("date_prevue", { ascending: false }).limit(50),
       supabase.from("chauffeurs").select("id, nom, prenom"),
-    ]).then(([opsRes, maintRes, chaufRes]) => {
+    ]).then(async ([opsRes, maintRes, chaufRes]) => {
       setOperations((opsRes.data || []) as OperationRow[]);
-      setMaintenances((maintRes.data || []) as MaintenanceRow[]);
+      const maints = (maintRes.data || []) as MaintenanceRow[];
+      setMaintenances(maints);
       setChauffeurs((chaufRes.data || []) as ChauffeurMin[]);
+
+      // Fetch paid décaissements linked to these maintenances via demandes_achat
+      if (maints.length > 0) {
+        const maintIds = maints.map(m => m.id);
+        const { data: das } = await supabase
+          .from("demandes_achat")
+          .select("id, maintenance_id")
+          .in("maintenance_id", maintIds);
+        if (das && das.length > 0) {
+          const daMap: Record<string, string> = {};
+          das.forEach((da: any) => { daMap[da.id] = da.maintenance_id; });
+          const daIds = das.map((da: any) => da.id);
+          const { data: decs } = await supabase
+            .from("decaissements")
+            .select("demande_achat_id, montant, statut")
+            .in("demande_achat_id", daIds)
+            .eq("statut", "PAYE");
+          const costMap: Record<string, number> = {};
+          (decs || []).forEach((d: any) => {
+            const mId = daMap[d.demande_achat_id];
+            if (mId) costMap[mId] = (costMap[mId] || 0) + d.montant;
+          });
+          setCoutDecaisseParMaint(costMap);
+        } else {
+          setCoutDecaisseParMaint({});
+        }
+      }
       setLoading(false);
     });
   }, [camion, open]);
