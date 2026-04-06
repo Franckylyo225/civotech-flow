@@ -101,7 +101,7 @@ export default function VehiculesTab({ canManage }: Props) {
         date_prevue: maintForm.date_prevue,
         cout_estime: maintForm.cout_estime,
         cout_reel: null,
-        pieces_changees: null,
+        pieces_changees: maintForm.pieces_changees || null,
         date_debut: null,
         date_fin: null,
         statut: "PLANIFIEE",
