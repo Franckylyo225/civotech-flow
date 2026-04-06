@@ -187,9 +187,9 @@ export default function MaintenanceTab({ canManage }: Props) {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tous les statuts</SelectItem>
                   <SelectItem value="PLANIFIEE">Planifiée</SelectItem>
@@ -198,6 +198,44 @@ export default function MaintenanceTab({ canManage }: Props) {
                   <SelectItem value="ANNULEE">Annulée</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="default" className={cn("gap-1.5", filterPeriod !== "ALL" && "border-primary text-primary")}>
+                    <Filter className="h-4 w-4" />
+                    {PERIOD_LABELS[filterPeriod]}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 space-y-3" align="end">
+                  <p className="text-sm font-medium text-foreground">Filtrer par période</p>
+                  <div className="flex flex-col gap-1">
+                    {(["ALL", "WEEK", "30DAYS", "90DAYS", "CUSTOM"] as PeriodFilter[]).map(p => (
+                      <Button
+                        key={p}
+                        variant={filterPeriod === p ? "default" : "ghost"}
+                        size="sm"
+                        className="justify-start"
+                        onClick={() => setFilterPeriod(p)}
+                      >
+                        {PERIOD_LABELS[p]}
+                      </Button>
+                    ))}
+                  </div>
+                  {filterPeriod === "CUSTOM" && (
+                    <div className="space-y-2 pt-1 border-t border-border">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Du</Label>
+                        <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Au</Label>
+                        <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} />
+                      </div>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+
               {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouvelle maintenance</span><span className="sm:hidden">Ajouter</span></Button>}
             </div>
           </div>
