@@ -39,6 +39,7 @@ export default function VehiculesTab({ canManage }: Props) {
   const [maintForm, setMaintForm] = useState({
     type: "CORRECTIVE" as "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT",
     description: "",
+    pieces_changees: "",
     date_prevue: new Date().toISOString().slice(0, 10),
     cout_estime: 0,
   });
@@ -87,7 +88,7 @@ export default function VehiculesTab({ canManage }: Props) {
 
   const openMaintDialog = (camion: CamionRow) => {
     setMaintCamion(camion);
-    setMaintForm({ type: "CORRECTIVE", description: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
+    setMaintForm({ type: "CORRECTIVE", description: "", pieces_changees: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
   };
 
   const handleSendToMaint = async () => {
@@ -100,7 +101,7 @@ export default function VehiculesTab({ canManage }: Props) {
         date_prevue: maintForm.date_prevue,
         cout_estime: maintForm.cout_estime,
         cout_reel: null,
-        pieces_changees: null,
+        pieces_changees: maintForm.pieces_changees || null,
         date_debut: null,
         date_fin: null,
         statut: "PLANIFIEE",
@@ -303,6 +304,10 @@ export default function VehiculesTab({ canManage }: Props) {
               <div className="space-y-2">
                 <Label>Description *</Label>
                 <Textarea value={maintForm.description} onChange={e => setMaintForm(f => ({ ...f, description: e.target.value }))} placeholder="Décrivez l'intervention nécessaire..." rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>Pièces à remplacer / corriger</Label>
+                <Input value={maintForm.pieces_changees} onChange={e => setMaintForm(f => ({ ...f, pieces_changees: e.target.value }))} placeholder="Filtre à huile, plaquettes de frein..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
