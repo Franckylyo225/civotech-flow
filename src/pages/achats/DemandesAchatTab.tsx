@@ -138,6 +138,45 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
         ))}
       </div>
 
+      {/* Alerte maintenances en attente de DA */}
+      {pendingMaintenances.length > 0 && (
+        <Card className="border border-warning/40 bg-warning/5 shadow-none">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-warning" />
+              <span className="font-semibold text-sm text-foreground">
+                {pendingMaintenances.length} maintenance{pendingMaintenances.length > 1 ? "s" : ""} en attente de demande d'achat
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pendingMaintenances.map(m => (
+                <Button
+                  key={m.id}
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-warning/30 text-sm"
+                  onClick={() => {
+                    setEditingId(null);
+                    setForm({
+                      maintenance_id: m.id,
+                      designation: `Pièces maintenance — ${m.description.slice(0, 50)}`,
+                      description: `Maintenance ${TYPE_MAINTENANCE_CONFIG[m.type].label} pour ${getCamionImmat(m.camion_id)}.${m.pieces_changees ? ` Pièces : ${m.pieces_changees}` : ""}`,
+                      quantite: 1,
+                      montant_estime: m.cout_estime,
+                      urgence: "HAUTE",
+                    });
+                    setShowForm(true);
+                  }}
+                >
+                  <Plus className="h-3 w-3" />
+                  {getCamionImmat(m.camion_id)} — {TYPE_MAINTENANCE_CONFIG[m.type].label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters */}
       <Card className="border border-border shadow-none">
         <CardContent className="p-3 sm:p-4">
