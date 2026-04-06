@@ -34,8 +34,9 @@ export function useClientsStore() {
     const { error } = await supabase.from("clients").insert({
       nom: d.nom, email: d.email || null, telephone: d.telephone || null,
       adresse: d.adresse || null, contact: d.contact || null,
+      conditions_paiement: d.conditions_paiement || "Net 30 jours",
       created_by: session.session?.user.id || null,
-    });
+    } as any);
     if (error) { toast.error("Erreur: " + error.message); return false; }
     await fetchClients();
     return true;
@@ -45,7 +46,8 @@ export function useClientsStore() {
     const { error } = await supabase.from("clients").update({
       nom: d.nom, email: d.email || null, telephone: d.telephone || null,
       adresse: d.adresse || null, contact: d.contact || null,
-    }).eq("id", id);
+      conditions_paiement: (d as any).conditions_paiement || null,
+    } as any).eq("id", id);
     if (error) { toast.error("Erreur: " + error.message); return false; }
     await fetchClients();
     return true;
