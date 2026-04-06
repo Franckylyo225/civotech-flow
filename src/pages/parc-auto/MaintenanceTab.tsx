@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Wrench, Plus, Search, Pencil, Trash2, Clock,
-  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart,
+  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart, Filter,
 } from "lucide-react";
 import { useMaintenancesStore, STATUT_MAINTENANCE_CONFIG, TYPE_MAINTENANCE_CONFIG, type MaintenanceRow, type TypeMaintenance, type StatutMaintenance } from "@/hooks/use-maintenances-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
@@ -14,12 +14,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, subDays, subWeeks, isAfter, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+
+type PeriodFilter = "ALL" | "WEEK" | "30DAYS" | "90DAYS" | "CUSTOM";
+const PERIOD_LABELS: Record<PeriodFilter, string> = {
+  ALL: "Toutes les périodes",
+  WEEK: "Cette semaine",
+  "30DAYS": "30 derniers jours",
+  "90DAYS": "90 derniers jours",
+  CUSTOM: "Personnalisé",
+};
 
 const EMPTY_FORM = {
   camion_id: "", type: "PREVENTIVE" as TypeMaintenance,
@@ -39,6 +49,9 @@ export default function MaintenanceTab({ canManage }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [filterPeriod, setFilterPeriod] = useState<PeriodFilter>("ALL");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [daByMaintenance, setDaByMaintenance] = useState<Record<string, { reference: string; statut: StatutDemandeAchat }>>({});
 
@@ -60,11 +73,30 @@ export default function MaintenanceTab({ canManage }: Props) {
     return c ? `${c.immatriculation} — ${c.marque} ${c.modele}` : "—";
   };
 
+  const periodStart = useMemo(() => {
+    const now = new Date();
+    if (filterPeriod === "WEEK") return subWeeks(now, 1);
+    if (filterPeriod === "30DAYS") return subDays(now, 30);
+    if (filterPeriod === "90DAYS") return subDays(now, 90);
+    if (filterPeriod === "CUSTOM" && customFrom) return parseISO(customFrom);
+    return null;
+  }, [filterPeriod, customFrom]);
+
+  const periodEnd = useMemo(() => {
+    if (filterPeriod === "CUSTOM" && customTo) return parseISO(customTo);
+    return null;
+  }, [filterPeriod, customTo]);
+
   const filtered = maintenances.filter(m => {
     const matchSearch = m.description.toLowerCase().includes(search.toLowerCase()) ||
       getCamionLabel(m.camion_id).toLowerCase().includes(search.toLowerCase());
     const matchStatut = filterStatut === "ALL" || m.statut === filterStatut;
-    return matchSearch && matchStatut;
+    let matchPeriod = true;
+    if (periodStart) {
+      const d = parseISO(m.date_prevue);
+      matchPeriod = isAfter(d, periodStart) && (!periodEnd || d <= periodEnd);
+    }
+    return matchSearch && matchStatut && matchPeriod;
   });
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
@@ -155,9 +187,9 @@ export default function MaintenanceTab({ canManage }: Props) {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tous les statuts</SelectItem>
                   <SelectItem value="PLANIFIEE">Planifiée</SelectItem>
@@ -166,6 +198,44 @@ export default function MaintenanceTab({ canManage }: Props) {
                   <SelectItem value="ANNULEE">Annulée</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="default" className={cn("gap-1.5", filterPeriod !== "ALL" && "border-primary text-primary")}>
+                    <Filter className="h-4 w-4" />
+                    {PERIOD_LABELS[filterPeriod]}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 space-y-3" align="end">
+                  <p className="text-sm font-medium text-foreground">Filtrer par période</p>
+                  <div className="flex flex-col gap-1">
+                    {(["ALL", "WEEK", "30DAYS", "90DAYS", "CUSTOM"] as PeriodFilter[]).map(p => (
+                      <Button
+                        key={p}
+                        variant={filterPeriod === p ? "default" : "ghost"}
+                        size="sm"
+                        className="justify-start"
+                        onClick={() => setFilterPeriod(p)}
+                      >
+                        {PERIOD_LABELS[p]}
+                      </Button>
+                    ))}
+                  </div>
+                  {filterPeriod === "CUSTOM" && (
+                    <div className="space-y-2 pt-1 border-t border-border">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Du</Label>
+                        <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Au</Label>
+                        <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} />
+                      </div>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+
               {canManage && <Button onClick={openAdd} className="shrink-0"><Plus className="mr-1.5 h-4 w-4" /><span className="hidden sm:inline">Nouvelle maintenance</span><span className="sm:hidden">Ajouter</span></Button>}
             </div>
           </div>
