@@ -4,12 +4,14 @@ import {
   Wrench, Navigation, Package, Calendar, Hash, Gauge,
 } from "lucide-react";
 import { useParcAutoStore, STATUT_CAMION_CONFIG, type CamionRow, type StatutCamion } from "@/hooks/use-parc-auto-store";
+import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
 import VehiculeDetailDialog from "./VehiculeDetailDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -25,6 +27,7 @@ interface Props { canManage: boolean; }
 
 export default function VehiculesTab({ canManage }: Props) {
   const { camions, loading, stats, addCamion, updateCamion, deleteCamion } = useParcAutoStore();
+  const { addMaintenance } = useMaintenancesStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutCamion | "ALL">("ALL");
   const [showDialog, setShowDialog] = useState(false);
@@ -32,6 +35,13 @@ export default function VehiculesTab({ canManage }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [detailCamion, setDetailCamion] = useState<CamionRow | null>(null);
+  const [maintCamion, setMaintCamion] = useState<CamionRow | null>(null);
+  const [maintForm, setMaintForm] = useState({
+    type: "CORRECTIVE" as "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT",
+    description: "",
+    date_prevue: new Date().toISOString().slice(0, 10),
+    cout_estime: 0,
+  });
 
   const filtered = camions.filter(c => {
     const matchSearch =
@@ -73,6 +83,32 @@ export default function VehiculesTab({ canManage }: Props) {
   const handleDelete = async (id: string) => {
     try { await deleteCamion(id); toast.success("Véhicule supprimé"); setDeleteConfirm(null); }
     catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
+  const openMaintDialog = (camion: CamionRow) => {
+    setMaintCamion(camion);
+    setMaintForm({ type: "CORRECTIVE", description: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
+  };
+
+  const handleSendToMaint = async () => {
+    if (!maintCamion || !maintForm.description) { toast.error("Veuillez renseigner la description"); return; }
+    try {
+      await addMaintenance({
+        camion_id: maintCamion.id,
+        type: maintForm.type,
+        description: maintForm.description,
+        date_prevue: maintForm.date_prevue,
+        cout_estime: maintForm.cout_estime,
+        cout_reel: null,
+        pieces_changees: null,
+        date_debut: null,
+        date_fin: null,
+        statut: "PLANIFIEE",
+        km_declenchement: (maintCamion as any).km_actuel || null,
+      });
+      toast.success(`${maintCamion.immatriculation} envoyé en maintenance`);
+      setMaintCamion(null);
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
@@ -164,8 +200,13 @@ export default function VehiculesTab({ canManage }: Props) {
                     {canManage && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(camion)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(camion.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          {camion.statut !== "EN_MAINTENANCE" && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" title="Envoyer en maintenance" onClick={(e) => { e.stopPropagation(); openMaintDialog(camion); }}>
+                              <Wrench className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openEdit(camion); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(camion.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>
                       </TableCell>
                     )}
@@ -232,6 +273,58 @@ export default function VehiculesTab({ canManage }: Props) {
       </Dialog>
 
       <VehiculeDetailDialog camion={detailCamion} open={!!detailCamion} onOpenChange={o => { if (!o) setDetailCamion(null); }} />
+
+      {/* Send to maintenance dialog */}
+      <Dialog open={!!maintCamion} onOpenChange={o => { if (!o) setMaintCamion(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-warning" />
+              Envoyer en maintenance
+            </DialogTitle>
+          </DialogHeader>
+          {maintCamion && (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border p-3 bg-muted/30">
+                <p className="text-sm font-medium text-foreground">{maintCamion.immatriculation}</p>
+                <p className="text-xs text-muted-foreground">{maintCamion.marque} {maintCamion.modele} · {((maintCamion as any).km_actuel || 0).toLocaleString()} km</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type de maintenance</Label>
+                <Select value={maintForm.type} onValueChange={v => setMaintForm(f => ({ ...f, type: v as any }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PREVENTIVE">Préventive</SelectItem>
+                    <SelectItem value="CORRECTIVE">Corrective</SelectItem>
+                    <SelectItem value="REMPLACEMENT">Remplacement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description *</Label>
+                <Textarea value={maintForm.description} onChange={e => setMaintForm(f => ({ ...f, description: e.target.value }))} placeholder="Décrivez l'intervention nécessaire..." rows={3} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date prévue</Label>
+                  <Input type="date" value={maintForm.date_prevue} onChange={e => setMaintForm(f => ({ ...f, date_prevue: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Coût estimé (F)</Label>
+                  <Input type="number" value={maintForm.cout_estime} onChange={e => setMaintForm(f => ({ ...f, cout_estime: Number(e.target.value) }))} />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMaintCamion(null)}>Annuler</Button>
+            <Button onClick={handleSendToMaint} className="gap-1.5">
+              <Wrench className="h-4 w-4" />
+              Envoyer en maintenance
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
