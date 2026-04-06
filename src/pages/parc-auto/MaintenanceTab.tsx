@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Wrench, Plus, Search, Pencil, Trash2, Clock,
-  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart,
+  CheckCircle2, AlertTriangle, Ban, Calendar, ShoppingCart, Filter,
 } from "lucide-react";
 import { useMaintenancesStore, STATUT_MAINTENANCE_CONFIG, TYPE_MAINTENANCE_CONFIG, type MaintenanceRow, type TypeMaintenance, type StatutMaintenance } from "@/hooks/use-maintenances-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
@@ -14,12 +14,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, subDays, subWeeks, isAfter, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+
+type PeriodFilter = "ALL" | "WEEK" | "30DAYS" | "90DAYS" | "CUSTOM";
+const PERIOD_LABELS: Record<PeriodFilter, string> = {
+  ALL: "Toutes les périodes",
+  WEEK: "Cette semaine",
+  "30DAYS": "30 derniers jours",
+  "90DAYS": "90 derniers jours",
+  CUSTOM: "Personnalisé",
+};
 
 const EMPTY_FORM = {
   camion_id: "", type: "PREVENTIVE" as TypeMaintenance,
