@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Client } from "@/types/devis";
 import { toast } from "sonner";
 
-function mapClient(row: any): Client {
-  return { id: row.id, nom: row.nom, email: row.email, telephone: row.telephone, adresse: row.adresse, contact: row.contact, created_at: row.created_at };
+function mapClient(row: any): Client & { conditions_paiement?: string } {
+  return { id: row.id, nom: row.nom, email: row.email, telephone: row.telephone, adresse: row.adresse, contact: row.contact, created_at: row.created_at, conditions_paiement: row.conditions_paiement };
 }
 
 export interface CreateClientData {
@@ -13,6 +13,7 @@ export interface CreateClientData {
   telephone?: string;
   adresse?: string;
   contact?: string;
+  conditions_paiement?: string;
 }
 
 export function useClientsStore() {
