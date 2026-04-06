@@ -258,7 +258,12 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
                             <TableCell className="text-sm max-w-[180px] truncate">{m.description}</TableCell>
                             <TableCell className="text-sm text-muted-foreground max-w-[120px] truncate">{m.pieces_changees || "—"}</TableCell>
                             <TableCell className="text-sm text-muted-foreground">{formatDate(m.date_prevue)}</TableCell>
-                            <TableCell className="text-sm font-medium">{(m.cout_reel || m.cout_estime).toLocaleString()} F</TableCell>
+                            <TableCell className="text-sm font-medium">
+                              {coutDecaisseParMaint[m.id]
+                                ? <span className="text-success">{coutDecaisseParMaint[m.id].toLocaleString()} F</span>
+                                : <span className="text-muted-foreground">{m.cout_estime.toLocaleString()} F <span className="text-[10px]">(estimé)</span></span>
+                              }
+                            </TableCell>
                             <TableCell><Badge variant="outline" className={cn("border-0 text-xs", statutCfg.bgColor, statutCfg.color)}>{statutCfg.label}</Badge></TableCell>
                           </TableRow>
                         );
