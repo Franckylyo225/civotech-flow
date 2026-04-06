@@ -59,6 +59,7 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
   const [operations, setOperations] = useState<OperationRow[]>([]);
   const [maintenances, setMaintenances] = useState<MaintenanceRow[]>([]);
   const [chauffeurs, setChauffeurs] = useState<ChauffeurMin[]>([]);
+  const [coutDecaisseParMaint, setCoutDecaisseParMaint] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -70,10 +71,38 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
       supabase.from("maintenances").select("id, type, description, pieces_changees, cout_estime, cout_reel, date_prevue, date_fin, statut")
         .eq("camion_id", camion.id).order("date_prevue", { ascending: false }).limit(50),
       supabase.from("chauffeurs").select("id, nom, prenom"),
-    ]).then(([opsRes, maintRes, chaufRes]) => {
+    ]).then(async ([opsRes, maintRes, chaufRes]) => {
       setOperations((opsRes.data || []) as OperationRow[]);
-      setMaintenances((maintRes.data || []) as MaintenanceRow[]);
+      const maints = (maintRes.data || []) as MaintenanceRow[];
+      setMaintenances(maints);
       setChauffeurs((chaufRes.data || []) as ChauffeurMin[]);
+
+      // Fetch paid décaissements linked to these maintenances via demandes_achat
+      if (maints.length > 0) {
+        const maintIds = maints.map(m => m.id);
+        const { data: das } = await supabase
+          .from("demandes_achat")
+          .select("id, maintenance_id")
+          .in("maintenance_id", maintIds);
+        if (das && das.length > 0) {
+          const daMap: Record<string, string> = {};
+          das.forEach((da: any) => { daMap[da.id] = da.maintenance_id; });
+          const daIds = das.map((da: any) => da.id);
+          const { data: decs } = await supabase
+            .from("decaissements")
+            .select("demande_achat_id, montant, statut")
+            .in("demande_achat_id", daIds)
+            .eq("statut", "PAYE");
+          const costMap: Record<string, number> = {};
+          (decs || []).forEach((d: any) => {
+            const mId = daMap[d.demande_achat_id];
+            if (mId) costMap[mId] = (costMap[mId] || 0) + d.montant;
+          });
+          setCoutDecaisseParMaint(costMap);
+        } else {
+          setCoutDecaisseParMaint({});
+        }
+      }
       setLoading(false);
     });
   }, [camion, open]);
@@ -92,7 +121,7 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
     try { return format(new Date(d), "dd/MM/yyyy", { locale: fr }); } catch { return "—"; }
   };
 
-  const totalCoutMaintenance = maintenances.reduce((s, m) => s + (m.cout_reel || m.cout_estime), 0);
+  const totalCoutMaintenance = maintenances.reduce((s, m) => s + (coutDecaisseParMaint[m.id] || m.cout_reel || 0), 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -229,7 +258,12 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
                             <TableCell className="text-sm max-w-[180px] truncate">{m.description}</TableCell>
                             <TableCell className="text-sm text-muted-foreground max-w-[120px] truncate">{m.pieces_changees || "—"}</TableCell>
                             <TableCell className="text-sm text-muted-foreground">{formatDate(m.date_prevue)}</TableCell>
-                            <TableCell className="text-sm font-medium">{(m.cout_reel || m.cout_estime).toLocaleString()} F</TableCell>
+                            <TableCell className="text-sm font-medium">
+                              {coutDecaisseParMaint[m.id]
+                                ? <span className="text-success">{coutDecaisseParMaint[m.id].toLocaleString()} F</span>
+                                : <span className="text-muted-foreground">{m.cout_estime.toLocaleString()} F <span className="text-[10px]">(estimé)</span></span>
+                              }
+                            </TableCell>
                             <TableCell><Badge variant="outline" className={cn("border-0 text-xs", statutCfg.bgColor, statutCfg.color)}>{statutCfg.label}</Badge></TableCell>
                           </TableRow>
                         );
