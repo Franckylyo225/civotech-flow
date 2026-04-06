@@ -1,13 +1,14 @@
 import { useState } from "react";
 import {
   Plus, Search, ShoppingCart, Clock, CheckCircle2, AlertTriangle,
-  Eye, Pencil, Trash2, Send,
+  Eye, Pencil, Trash2, Send, Wrench,
 } from "lucide-react";
 import {
   useDemandesAchatStore, STATUT_DA_CONFIG, URGENCE_OPTIONS,
   type DemandeAchatRow, type StatutDemandeAchat,
 } from "@/hooks/use-demandes-achat-store";
-import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
+import { useMaintenancesStore, TYPE_MAINTENANCE_CONFIG } from "@/hooks/use-maintenances-store";
+import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,12 @@ interface Props {
 export default function DemandesAchatTab({ canManage, isDG }: Props) {
   const { demandes, loading, stats, addDemande, updateDemande, deleteDemande } = useDemandesAchatStore();
   const { maintenances } = useMaintenancesStore();
+  const { camions } = useParcAutoStore();
+  const getCamionImmat = (id: string) => camions.find(c => c.id === id)?.immatriculation || "—";
+
+  // Maintenances actives sans DA liée
+  const maintenanceIdsWithDA = new Set(demandes.filter(d => d.maintenance_id).map(d => d.maintenance_id));
+  const pendingMaintenances = maintenances.filter(m => (m.statut === "PLANIFIEE" || m.statut === "EN_COURS") && !maintenanceIdsWithDA.has(m.id));
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDemandeAchat | "ALL">("ALL");
   const [showForm, setShowForm] = useState(false);
@@ -130,6 +137,45 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
           </Card>
         ))}
       </div>
+
+      {/* Alerte maintenances en attente de DA */}
+      {pendingMaintenances.length > 0 && (
+        <Card className="border border-warning/40 bg-warning/5 shadow-none">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-warning" />
+              <span className="font-semibold text-sm text-foreground">
+                {pendingMaintenances.length} maintenance{pendingMaintenances.length > 1 ? "s" : ""} en attente de demande d'achat
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pendingMaintenances.map(m => (
+                <Button
+                  key={m.id}
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-warning/30 text-sm"
+                  onClick={() => {
+                    setEditingId(null);
+                    setForm({
+                      maintenance_id: m.id,
+                      designation: `Pièces maintenance — ${m.description.slice(0, 50)}`,
+                      description: `Maintenance ${TYPE_MAINTENANCE_CONFIG[m.type].label} pour ${getCamionImmat(m.camion_id)}.${m.pieces_changees ? ` Pièces : ${m.pieces_changees}` : ""}`,
+                      quantite: 1,
+                      montant_estime: m.cout_estime,
+                      urgence: "HAUTE",
+                    });
+                    setShowForm(true);
+                  }}
+                >
+                  <Plus className="h-3 w-3" />
+                  {getCamionImmat(m.camion_id)} — {TYPE_MAINTENANCE_CONFIG[m.type].label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card className="border border-border shadow-none">
