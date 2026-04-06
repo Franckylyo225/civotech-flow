@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User, TrendingUp, UserPlus, DollarSign, AlertTriangle, CalendarDays } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Building2, Loader2, Phone, Mail, MapPin, User, TrendingUp, UserPlus, AlertTriangle, Eye, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useClientsStore, type CreateClientData } from "@/hooks/use-clients-store";
 import type { Client } from "@/types/devis";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import ClientDetailDialog from "./ClientDetailDialog";
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat("fr-FR", { style: "decimal", maximumFractionDigits: 0 }).format(n) + " FCFA";
@@ -22,21 +24,22 @@ function ClientFormDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  initialData?: Client;
-  onSave: (data: CreateClientData) => Promise<boolean>;
+  initialData?: Client & { conditions_paiement?: string };
+  onSave: (data: CreateClientData & { conditions_paiement?: string }) => Promise<boolean>;
 }) {
   const [nom, setNom] = useState(initialData?.nom || "");
   const [email, setEmail] = useState(initialData?.email || "");
   const [telephone, setTelephone] = useState(initialData?.telephone || "");
   const [adresse, setAdresse] = useState(initialData?.adresse || "");
   const [contact, setContact] = useState(initialData?.contact || "");
+  const [conditionsPaiement, setConditionsPaiement] = useState((initialData as any)?.conditions_paiement || "Net 30 jours");
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nom.trim()) { toast.error("Le nom est requis"); return; }
     setSaving(true);
-    const ok = await onSave({ nom: nom.trim(), email: email.trim(), telephone: telephone.trim(), adresse: adresse.trim(), contact: contact.trim() });
+    const ok = await onSave({ nom: nom.trim(), email: email.trim(), telephone: telephone.trim(), adresse: adresse.trim(), contact: contact.trim(), conditions_paiement: conditionsPaiement.trim() });
     setSaving(false);
     if (ok) {
       toast.success(initialData ? "Client modifié" : "Client ajouté");
@@ -73,6 +76,19 @@ function ClientFormDialog({
             <Label>Adresse</Label>
             <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse complète" />
           </div>
+          <div className="space-y-2">
+            <Label>Conditions de paiement</Label>
+            <Select value={conditionsPaiement} onValueChange={setConditionsPaiement}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Net 30 jours">Net 30 jours</SelectItem>
+                <SelectItem value="Net 15 jours">Net 15 jours</SelectItem>
+                <SelectItem value="Net 60 jours">Net 60 jours</SelectItem>
+                <SelectItem value="Comptant">Comptant</SelectItem>
+                <SelectItem value="50% avance">50% avance</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
             <Button type="submit" disabled={saving}>
@@ -85,34 +101,8 @@ function ClientFormDialog({
   );
 }
 
-type PeriodFilter = "this_month" | "last_month" | "this_quarter" | "this_year" | "all";
-
-function getPeriodRange(period: PeriodFilter): { start: Date | null; end: Date } {
-  const now = new Date();
-  const end = now;
-  switch (period) {
-    case "this_month":
-      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end };
-    case "last_month":
-      return { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end: new Date(now.getFullYear(), now.getMonth(), 0) };
-    case "this_quarter": {
-      const q = Math.floor(now.getMonth() / 3);
-      return { start: new Date(now.getFullYear(), q * 3, 1), end };
-    }
-    case "this_year":
-      return { start: new Date(now.getFullYear(), 0, 1), end };
-    case "all":
-      return { start: null, end };
-  }
-}
-
-const periodLabels: Record<PeriodFilter, string> = {
-  this_month: "Ce mois-ci",
-  last_month: "Mois dernier",
-  this_quarter: "Ce trimestre",
-  this_year: "Cette année",
-  all: "Tout",
-};
+type SortField = "nom" | "ca" | "impayes";
+type SortDir = "asc" | "desc";
 
 export default function ClientsModule() {
   const { user } = useAuth();
@@ -121,51 +111,69 @@ export default function ClientsModule() {
   const [showCreate, setShowCreate] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [period, setPeriod] = useState<PeriodFilter>("this_month");
-  const [stats, setStats] = useState({ caTotal: 0, impayes: 0 });
+  const [detailClient, setDetailClient] = useState<Client | null>(null);
+  const [sortField, setSortField] = useState<SortField>("nom");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // CA per client from devis VALIDE_CLIENT + impayés from ENVOYE_CLIENT
+  const [caByClient, setCaByClient] = useState<Record<string, { ca: number; impayes: number }>>({});
 
   const canManage = user?.role === "DG" || user?.role === "COMMERCIAL";
 
-  const { start: periodStart } = getPeriodRange(period);
-
-  // New clients count for selected period
-  const newClientsCount = useMemo(() => {
-    if (!periodStart) return clients.length;
-    return clients.filter((c) => {
-      const created = new Date((c as any).created_at || 0);
-      return created >= periodStart;
-    }).length;
-  }, [clients, periodStart]);
-
   useEffect(() => {
-    async function fetchStats() {
-      const { supabase } = await import("@/integrations/supabase/client");
-      
-      // CA = montant des devis VALIDE_CLIENT
-      const { data: devisValides } = await supabase
-        .from("devis")
-        .select("montant")
-        .eq("statut", "VALIDE_CLIENT");
-
-      // Impayés = devis ENVOYE_CLIENT (envoyé mais pas encore validé/payé)
-      const { data: devisEnvoyes } = await supabase
-        .from("devis")
-        .select("montant")
-        .eq("statut", "ENVOYE_CLIENT");
-
-      const caTotal = (devisValides || []).reduce((s, d) => s + Number(d.montant || 0), 0);
-      const impayes = (devisEnvoyes || []).reduce((s, d) => s + Number(d.montant || 0), 0);
-      
-      setStats({ caTotal, impayes });
+    async function fetchCA() {
+      const [valRes, envRes] = await Promise.all([
+        supabase.from("devis").select("client_id, montant").eq("statut", "VALIDE_CLIENT"),
+        supabase.from("devis").select("client_id, montant").eq("statut", "ENVOYE_CLIENT"),
+      ]);
+      const map: Record<string, { ca: number; impayes: number }> = {};
+      for (const d of valRes.data || []) {
+        if (!d.client_id) continue;
+        if (!map[d.client_id]) map[d.client_id] = { ca: 0, impayes: 0 };
+        map[d.client_id].ca += Number(d.montant || 0);
+      }
+      for (const d of envRes.data || []) {
+        if (!d.client_id) continue;
+        if (!map[d.client_id]) map[d.client_id] = { ca: 0, impayes: 0 };
+        map[d.client_id].impayes += Number(d.montant || 0);
+      }
+      setCaByClient(map);
     }
-    if (!loading) fetchStats();
+    if (!loading) fetchCA();
   }, [loading]);
 
-  const filtered = clients.filter((c) =>
-    c.nom.toLowerCase().includes(search.toLowerCase()) ||
-    (c.contact || "").toLowerCase().includes(search.toLowerCase()) ||
-    (c.email || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const caTotal = Object.values(caByClient).reduce((s, v) => s + v.ca, 0);
+  const impayesTotal = Object.values(caByClient).reduce((s, v) => s + v.impayes, 0);
+
+  const filtered = useMemo(() => {
+    let list = clients.filter((c) =>
+      c.nom.toLowerCase().includes(search.toLowerCase()) ||
+      (c.contact || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.email || "").toLowerCase().includes(search.toLowerCase())
+    );
+
+    list.sort((a, b) => {
+      if (sortField === "nom") {
+        return sortDir === "asc" ? a.nom.localeCompare(b.nom) : b.nom.localeCompare(a.nom);
+      }
+      const aData = caByClient[a.id] || { ca: 0, impayes: 0 };
+      const bData = caByClient[b.id] || { ca: 0, impayes: 0 };
+      const aVal = sortField === "ca" ? aData.ca : aData.impayes;
+      const bVal = sortField === "ca" ? bData.ca : bData.impayes;
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+    });
+
+    return list;
+  }, [clients, search, sortField, sortDir, caByClient]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -178,23 +186,11 @@ export default function ClientsModule() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des Clients</h1>
           <p className="text-sm text-muted-foreground">{clients.length} client(s) enregistré(s)</p>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Select value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
-            <SelectTrigger className="flex-1 sm:w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(periodLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {canManage && (
-            <Button onClick={() => setShowCreate(true)} className="shrink-0">
-              <Plus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Nouveau client</span><span className="sm:hidden">Ajouter</span>
-            </Button>
-          )}
-        </div>
+        {canManage && (
+          <Button onClick={() => setShowCreate(true)} className="shrink-0">
+            <Plus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Nouveau client</span><span className="sm:hidden">Ajouter</span>
+          </Button>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -212,23 +208,12 @@ export default function ClientsModule() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
-              <UserPlus className="h-5 w-5 text-info" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{newClientsCount}</p>
-              <p className="text-xs text-muted-foreground">Nouveaux clients</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
               <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{formatFCFA(stats.caTotal)}</p>
-              <p className="text-xs text-muted-foreground">Chiffre d'affaires</p>
+              <p className="text-2xl font-bold text-foreground">{formatFCFA(caTotal)}</p>
+              <p className="text-xs text-muted-foreground">CA total réalisé</p>
             </div>
           </CardContent>
         </Card>
@@ -238,8 +223,19 @@ export default function ClientsModule() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{formatFCFA(stats.impayes)}</p>
-              <p className="text-xs text-muted-foreground">Impayés</p>
+              <p className="text-2xl font-bold text-foreground">{formatFCFA(impayesTotal)}</p>
+              <p className="text-xs text-muted-foreground">Impayés total</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <UserPlus className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{clients.length > 0 ? formatFCFA(Math.round(caTotal / clients.length)) : "0 FCFA"}</p>
+              <p className="text-xs text-muted-foreground">CA moyen / client</p>
             </div>
           </CardContent>
         </Card>
@@ -260,75 +256,83 @@ export default function ClientsModule() {
       </Card>
 
       <Card className="overflow-x-auto">
-        <Table className="min-w-[600px]">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
-              <TableHead>Nom</TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("nom")}>
+                <span className="flex items-center gap-1">Nom <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Téléphone</TableHead>
-              <TableHead>Adresse</TableHead>
-              {canManage && <TableHead className="w-24">Actions</TableHead>}
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("ca")}>
+                <span className="flex items-center gap-1">CA réalisé <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("impayes")}>
+                <span className="flex items-center gap-1">Impayés <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((client) => (
-              <TableRow key={client.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    {client.nom}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {client.contact ? (
-                    <div className="flex items-center gap-1 text-sm">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      {client.contact}
-                    </div>
-                  ) : <span className="text-muted-foreground">—</span>}
-                </TableCell>
-                <TableCell>
-                  {client.email ? (
-                    <div className="flex items-center gap-1 text-sm">
-                      <Mail className="h-3 w-3 text-muted-foreground" />
-                      {client.email}
-                    </div>
-                  ) : <span className="text-muted-foreground">—</span>}
-                </TableCell>
-                <TableCell>
-                  {client.telephone ? (
-                    <div className="flex items-center gap-1 text-sm">
-                      <Phone className="h-3 w-3 text-muted-foreground" />
-                      {client.telephone}
-                    </div>
-                  ) : <span className="text-muted-foreground">—</span>}
-                </TableCell>
-                <TableCell>
-                  {client.adresse ? (
-                    <div className="flex items-center gap-1 text-sm">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      <span className="truncate max-w-[200px]">{client.adresse}</span>
-                    </div>
-                  ) : <span className="text-muted-foreground">—</span>}
-                </TableCell>
-                {canManage && (
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => setEditClient(client)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(client.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+            {filtered.map((client) => {
+              const data = caByClient[client.id] || { ca: 0, impayes: 0 };
+              return (
+                <TableRow key={client.id} className="cursor-pointer" onClick={() => setDetailClient(client)}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      {client.nom}
                     </div>
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
+                  <TableCell>
+                    {client.contact ? (
+                      <div className="flex items-center gap-1 text-sm">
+                        <User className="h-3 w-3 text-muted-foreground" />
+                        {client.contact}
+                      </div>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </TableCell>
+                  <TableCell>
+                    {client.telephone ? (
+                      <div className="flex items-center gap-1 text-sm">
+                        <Phone className="h-3 w-3 text-muted-foreground" />
+                        {client.telephone}
+                      </div>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </TableCell>
+                  <TableCell>
+                    <span className={data.ca > 0 ? "font-semibold text-success" : "text-muted-foreground"}>
+                      {formatFCFA(data.ca)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className={data.impayes > 0 ? "font-semibold text-destructive" : "text-muted-foreground"}>
+                      {formatFCFA(data.impayes)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" onClick={() => setDetailClient(client)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {canManage && (
+                        <>
+                          <Button variant="ghost" size="icon" onClick={() => setEditClient(client)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(client.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={canManage ? 6 : 5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   Aucun client trouvé
                 </TableCell>
               </TableRow>
@@ -336,6 +340,15 @@ export default function ClientsModule() {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Detail dialog */}
+      {detailClient && (
+        <ClientDetailDialog
+          client={detailClient}
+          open={!!detailClient}
+          onOpenChange={(v) => { if (!v) setDetailClient(null); }}
+        />
+      )}
 
       {/* Create dialog */}
       <ClientFormDialog
