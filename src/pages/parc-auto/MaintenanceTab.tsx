@@ -73,11 +73,30 @@ export default function MaintenanceTab({ canManage }: Props) {
     return c ? `${c.immatriculation} — ${c.marque} ${c.modele}` : "—";
   };
 
+  const periodStart = useMemo(() => {
+    const now = new Date();
+    if (filterPeriod === "WEEK") return subWeeks(now, 1);
+    if (filterPeriod === "30DAYS") return subDays(now, 30);
+    if (filterPeriod === "90DAYS") return subDays(now, 90);
+    if (filterPeriod === "CUSTOM" && customFrom) return parseISO(customFrom);
+    return null;
+  }, [filterPeriod, customFrom]);
+
+  const periodEnd = useMemo(() => {
+    if (filterPeriod === "CUSTOM" && customTo) return parseISO(customTo);
+    return null;
+  }, [filterPeriod, customTo]);
+
   const filtered = maintenances.filter(m => {
     const matchSearch = m.description.toLowerCase().includes(search.toLowerCase()) ||
       getCamionLabel(m.camion_id).toLowerCase().includes(search.toLowerCase());
     const matchStatut = filterStatut === "ALL" || m.statut === filterStatut;
-    return matchSearch && matchStatut;
+    let matchPeriod = true;
+    if (periodStart) {
+      const d = parseISO(m.date_prevue);
+      matchPeriod = isAfter(d, periodStart) && (!periodEnd || d <= periodEnd);
+    }
+    return matchSearch && matchStatut && matchPeriod;
   });
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
