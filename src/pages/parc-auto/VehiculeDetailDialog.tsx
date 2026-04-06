@@ -121,7 +121,7 @@ export default function VehiculeDetailDialog({ camion, open, onOpenChange }: Pro
     try { return format(new Date(d), "dd/MM/yyyy", { locale: fr }); } catch { return "—"; }
   };
 
-  const totalCoutMaintenance = maintenances.reduce((s, m) => s + (m.cout_reel || m.cout_estime), 0);
+  const totalCoutMaintenance = maintenances.reduce((s, m) => s + (coutDecaisseParMaint[m.id] || m.cout_reel || 0), 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
