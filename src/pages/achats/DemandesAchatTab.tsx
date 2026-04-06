@@ -40,6 +40,12 @@ interface Props {
 export default function DemandesAchatTab({ canManage, isDG }: Props) {
   const { demandes, loading, stats, addDemande, updateDemande, deleteDemande } = useDemandesAchatStore();
   const { maintenances } = useMaintenancesStore();
+  const { camions } = useParcAutoStore();
+  const getCamionImmat = (id: string) => camions.find(c => c.id === id)?.immatriculation || "—";
+
+  // Maintenances actives sans DA liée
+  const maintenanceIdsWithDA = new Set(demandes.filter(d => d.maintenance_id).map(d => d.maintenance_id));
+  const pendingMaintenances = maintenances.filter(m => (m.statut === "PLANIFIEE" || m.statut === "EN_COURS") && !maintenanceIdsWithDA.has(m.id));
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDemandeAchat | "ALL">("ALL");
   const [showForm, setShowForm] = useState(false);
