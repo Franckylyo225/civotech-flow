@@ -1,13 +1,14 @@
 import { useState } from "react";
 import {
   Plus, Search, ShoppingCart, Clock, CheckCircle2, AlertTriangle,
-  Eye, Pencil, Trash2, Send,
+  Eye, Pencil, Trash2, Send, Wrench,
 } from "lucide-react";
 import {
   useDemandesAchatStore, STATUT_DA_CONFIG, URGENCE_OPTIONS,
   type DemandeAchatRow, type StatutDemandeAchat,
 } from "@/hooks/use-demandes-achat-store";
-import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
+import { useMaintenancesStore, TYPE_MAINTENANCE_CONFIG } from "@/hooks/use-maintenances-store";
+import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
