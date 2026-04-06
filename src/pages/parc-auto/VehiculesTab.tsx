@@ -27,6 +27,7 @@ interface Props { canManage: boolean; }
 
 export default function VehiculesTab({ canManage }: Props) {
   const { camions, loading, stats, addCamion, updateCamion, deleteCamion } = useParcAutoStore();
+  const { addMaintenance } = useMaintenancesStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutCamion | "ALL">("ALL");
   const [showDialog, setShowDialog] = useState(false);
@@ -34,6 +35,13 @@ export default function VehiculesTab({ canManage }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [detailCamion, setDetailCamion] = useState<CamionRow | null>(null);
+  const [maintCamion, setMaintCamion] = useState<CamionRow | null>(null);
+  const [maintForm, setMaintForm] = useState({
+    type: "CORRECTIVE" as "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT",
+    description: "",
+    date_prevue: new Date().toISOString().slice(0, 10),
+    cout_estime: 0,
+  });
 
   const filtered = camions.filter(c => {
     const matchSearch =
