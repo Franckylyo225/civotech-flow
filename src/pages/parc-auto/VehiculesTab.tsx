@@ -305,6 +305,10 @@ export default function VehiculesTab({ canManage }: Props) {
                 <Label>Description *</Label>
                 <Textarea value={maintForm.description} onChange={e => setMaintForm(f => ({ ...f, description: e.target.value }))} placeholder="Décrivez l'intervention nécessaire..." rows={3} />
               </div>
+              <div className="space-y-2">
+                <Label>Pièces à remplacer / corriger</Label>
+                <Input value={maintForm.pieces_changees} onChange={e => setMaintForm(f => ({ ...f, pieces_changees: e.target.value }))} placeholder="Filtre à huile, plaquettes de frein..." />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Date prévue</Label>
