@@ -49,6 +49,9 @@ export default function MaintenanceTab({ canManage }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [filterPeriod, setFilterPeriod] = useState<PeriodFilter>("ALL");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [daByMaintenance, setDaByMaintenance] = useState<Record<string, { reference: string; statut: StatutDemandeAchat }>>({});
 
