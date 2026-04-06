@@ -200,8 +200,13 @@ export default function VehiculesTab({ canManage }: Props) {
                     {canManage && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(camion)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(camion.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          {camion.statut !== "EN_MAINTENANCE" && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" title="Envoyer en maintenance" onClick={(e) => { e.stopPropagation(); openMaintDialog(camion); }}>
+                              <Wrench className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openEdit(camion); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(camion.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>
                       </TableCell>
                     )}
