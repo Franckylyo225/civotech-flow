@@ -85,6 +85,32 @@ export default function VehiculesTab({ canManage }: Props) {
     catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
+  const openMaintDialog = (camion: CamionRow) => {
+    setMaintCamion(camion);
+    setMaintForm({ type: "CORRECTIVE", description: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
+  };
+
+  const handleSendToMaint = async () => {
+    if (!maintCamion || !maintForm.description) { toast.error("Veuillez renseigner la description"); return; }
+    try {
+      await addMaintenance({
+        camion_id: maintCamion.id,
+        type: maintForm.type,
+        description: maintForm.description,
+        date_prevue: maintForm.date_prevue,
+        cout_estime: maintForm.cout_estime,
+        cout_reel: null,
+        pieces_changees: null,
+        date_debut: null,
+        date_fin: null,
+        statut: "PLANIFIEE",
+        km_declenchement: (maintCamion as any).km_actuel || null,
+      });
+      toast.success(`${maintCamion.immatriculation} envoyé en maintenance`);
+      setMaintCamion(null);
+    } catch (err: any) { toast.error(err.message || "Erreur"); }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
   return (
