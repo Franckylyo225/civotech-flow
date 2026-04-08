@@ -65,9 +65,9 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
   const devisDuMois = devisList.filter(d => d.createdAt >= monthStart && d.createdAt <= monthEnd && d.statut !== "ARCHIVE");
-  const volumeDevisMois = devisDuMois.length;
+  const volumeDevisMois = devisDuMois.reduce((s, d) => s + d.montantTotal, 0);
   const caMois = devisList
-    .filter(d => d.statut === "VALIDE_CLIENT" && d.updatedAt >= monthStart && d.updatedAt <= monthEnd)
+    .filter(d => d.statut === "ARCHIVE" && d.updatedAt >= monthStart && d.updatedAt <= monthEnd)
     .reduce((s, d) => s + d.montantTotal, 0);
   const devisEnCours = devisList.filter(d => ["SOUMIS_DG", "APPROUVE_DG", "ENVOYE_CLIENT"].includes(d.statut)).length;
 
@@ -82,7 +82,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   }, [monthStart, monthEnd]);
 
   const statsCards = [
-    { label: "Devis du mois", value: volumeDevisMois, icon: FileText, color: "text-primary" },
+    { label: "Devis du mois", value: formatMontant(volumeDevisMois), icon: FileText, color: "text-primary" },
     { label: "CA du mois", value: formatMontant(caMois), icon: TrendingUp, color: "text-success" },
     { label: "Opérations du mois", value: operationsMois, icon: Truck, color: "text-info" },
     { label: "Devis en cours", value: devisEnCours, icon: Clock, color: "text-warning" },
