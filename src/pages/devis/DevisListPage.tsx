@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil, Archive } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, LayoutGrid, List, Search, Filter, Send, CheckCircle2, XCircle, Mail, UserCheck, Eye, Pencil, Archive, FileText, TrendingUp, Truck, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import type { Devis, DevisStatut } from "@/types/devis";
 import { DEVIS_STATUT_CONFIG, formatMontant, formatDate } from "@/types/devis";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
