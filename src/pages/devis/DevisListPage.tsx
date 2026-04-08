@@ -46,6 +46,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   const [showArchived, setShowArchived] = useState(false);
 
   const filtered = devisList.filter((d) => {
+    if (showArchived && d.statut !== "ARCHIVE") return false;
     if (!showArchived && d.statut === "ARCHIVE") return false;
     const matchSearch =
       d.reference.toLowerCase().includes(search.toLowerCase()) ||
