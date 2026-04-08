@@ -59,14 +59,34 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   const totalCA = filtered.reduce((s, d) => s + d.montantTotal, 0);
   const isCommercialOrDG = user?.role === "COMMERCIAL" || user?.role === "DG";
 
-  // Stats
-  const stats = {
-    total: devisList.length,
-    brouillon: devisList.filter(d => d.statut === "BROUILLON").length,
-    enCours: devisList.filter(d => ["SOUMIS_DG", "APPROUVE_DG", "ENVOYE_CLIENT"].includes(d.statut)).length,
-    valides: devisList.filter(d => d.statut === "VALIDE_CLIENT").length,
-    refuses: devisList.filter(d => d.statut === "REFUSE_DG" || d.statut === "REFUSE_CLIENT").length,
-  };
+  // Monthly stats
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+  const devisDuMois = devisList.filter(d => d.createdAt >= monthStart && d.createdAt <= monthEnd && d.statut !== "ARCHIVE");
+  const volumeDevisMois = devisDuMois.length;
+  const caMois = devisList
+    .filter(d => d.statut === "VALIDE_CLIENT" && d.updatedAt >= monthStart && d.updatedAt <= monthEnd)
+    .reduce((s, d) => s + d.montantTotal, 0);
+  const devisEnCours = devisList.filter(d => ["SOUMIS_DG", "APPROUVE_DG", "ENVOYE_CLIENT"].includes(d.statut)).length;
+
+  const [operationsMois, setOperationsMois] = useState(0);
+  useEffect(() => {
+    supabase
+      .from("operations")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", monthStart)
+      .lte("created_at", monthEnd)
+      .then(({ count }) => setOperationsMois(count || 0));
+  }, [monthStart, monthEnd]);
+
+  const statsCards = [
+    { label: "Devis du mois", value: volumeDevisMois, icon: FileText, color: "text-primary" },
+    { label: "CA du mois", value: formatMontant(caMois), icon: TrendingUp, color: "text-success" },
+    { label: "Opérations du mois", value: operationsMois, icon: Truck, color: "text-info" },
+    { label: "Devis en cours", value: devisEnCours, icon: Clock, color: "text-warning" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -85,21 +105,23 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {[
-          { label: "Total", value: stats.total, color: "text-foreground" },
-          { label: "Brouillons", value: stats.brouillon, color: "text-muted-foreground" },
-          { label: "En cours", value: stats.enCours, color: "text-primary" },
-          { label: "Validés", value: stats.valides, color: "text-success" },
-          { label: "Refusés", value: stats.refuses, color: "text-destructive" },
-        ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-4 text-center">
-              <p className={cn("text-2xl font-bold", s.color)}>{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {statsCards.map((s) => {
+          const Icon = s.icon;
+          return (
+            <Card key={s.label}>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted", s.color)}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className={cn("text-xl font-bold", s.color)}>{s.value}</p>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Filters */}
