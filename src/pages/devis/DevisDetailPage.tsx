@@ -94,10 +94,12 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      bon_commande_file: bonCommandeFile,
     });
     setCreatingOp(false);
     if (ok) {
       setShowOpDialog(false);
+      setBonCommandeFile(null);
       toast.success("Demande d'opération créée avec succès");
       navigate("/operations");
     }
