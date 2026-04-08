@@ -81,6 +81,10 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       toast.error("Les lieux de récupération et de livraison sont obligatoires");
       return;
     }
+    if (!bonCommandeFile) {
+      toast.error("Le bon de commande du client est obligatoire");
+      return;
+    }
     setCreatingOp(true);
     const ok = await onCreateOperation(devis, {
       lieu_embarquement: opForm.lieu_embarquement.trim(),
