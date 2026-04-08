@@ -28,6 +28,7 @@ interface DevisDetailPageProps {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    bon_commande_file?: File | null;
   }) => Promise<boolean>;
   onBack: () => void;
 }
