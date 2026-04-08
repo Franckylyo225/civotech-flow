@@ -82,7 +82,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
   }, [monthStart, monthEnd]);
 
   const statsCards = [
-    { label: "Devis du mois", value: volumeDevisMois, icon: FileText, color: "text-primary" },
+    { label: "Devis du mois", value: formatMontant(volumeDevisMois), icon: FileText, color: "text-primary" },
     { label: "CA du mois", value: formatMontant(caMois), icon: TrendingUp, color: "text-success" },
     { label: "Opérations du mois", value: operationsMois, icon: Truck, color: "text-info" },
     { label: "Devis en cours", value: devisEnCours, icon: Clock, color: "text-warning" },
