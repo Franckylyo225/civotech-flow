@@ -480,6 +480,27 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
         </CardContent>
       </Card>
 
+      {/* Bon de commande client */}
+      {op.bonCommandeUrl && (
+        <Card className="border border-border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Bon de commande client</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center gap-3 rounded-lg bg-primary/5 border border-primary/20 p-3">
+              <Receipt className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Bon de commande</p>
+                <p className="text-xs text-muted-foreground truncate max-w-md">{op.bonCommandeUrl.split("/").pop()}</p>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <a href={op.bonCommandeUrl} target="_blank" rel="noopener noreferrer">Télécharger</a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Bon de livraison */}
       {(op.statut === "EN_COURS" || op.statut === "TERMINEE") && (
         <Card className="border border-border shadow-none">
