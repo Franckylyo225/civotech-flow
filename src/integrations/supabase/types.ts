@@ -1199,6 +1199,7 @@ export type Database = {
       }
       operations: {
         Row: {
+          bon_commande_url: string | null
           bon_livraison_url: string | null
           camion_id: string | null
           chauffeur_id: string | null
@@ -1226,6 +1227,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bon_commande_url?: string | null
           bon_livraison_url?: string | null
           camion_id?: string | null
           chauffeur_id?: string | null
@@ -1253,6 +1255,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bon_commande_url?: string | null
           bon_livraison_url?: string | null
           camion_id?: string | null
           chauffeur_id?: string | null
