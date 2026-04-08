@@ -50,6 +50,7 @@ function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], time
     precautions: row.precautions || undefined,
     commentaires: row.commentaires || undefined,
     bonLivraisonUrl: row.bon_livraison_url || undefined,
+    bonCommandeUrl: (row as any).bon_commande_url || undefined,
     depenses,
     incidents,
     createdAt: row.created_at,
