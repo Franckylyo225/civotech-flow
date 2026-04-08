@@ -379,6 +379,45 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 rows={3}
               />
             </div>
+            <div className="space-y-2">
+              <Label>Bon de commande du client *</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setBonCommandeFile(file);
+                }}
+              />
+              {bonCommandeFile ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
+                  <FileUp className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm text-foreground truncate flex-1">{bonCommandeFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0"
+                    onClick={() => { setBonCommandeFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-center gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  Joindre le bon de commande
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">PDF, image ou document Word accepté</p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowOpDialog(false)}>Annuler</Button>
