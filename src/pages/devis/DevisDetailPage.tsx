@@ -41,6 +41,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
   const [showOpDialog, setShowOpDialog] = useState(false);
+  const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [opForm, setOpForm] = useState({
     lieu_embarquement: "",
     lieu_livraison: "",
