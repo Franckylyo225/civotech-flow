@@ -192,9 +192,29 @@ export function useDevisStore() {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    bon_commande_file?: File | null;
   }) => {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
+
+    // Upload bon de commande if provided
+    let bonCommandeUrl: string | null = null;
+    if (extras?.bon_commande_file) {
+      const file = extras.bon_commande_file;
+      const ext = file.name.split(".").pop() || "pdf";
+      const filePath = `${devis.reference}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("bon-commande")
+        .upload(filePath, file);
+      if (uploadError) {
+        toast.error("Erreur upload bon de commande: " + uploadError.message);
+        return false;
+      }
+      const { data: urlData } = supabase.storage
+        .from("bon-commande")
+        .getPublicUrl(filePath);
+      bonCommandeUrl = urlData.publicUrl;
+    }
 
     const { error } = await supabase.from("operations").insert({
       reference: "",
@@ -210,9 +230,10 @@ export function useDevisStore() {
       nature_marchandise: extras?.nature_marchandise || "",
       precautions: extras?.precautions || "",
       commentaires: extras?.commentaires || "",
+      bon_commande_url: bonCommandeUrl,
       statut: "DEMANDE" as any,
       created_by: userId || null,
-    });
+    } as any);
 
     if (error) { toast.error("Erreur création opération: " + error.message); return false; }
 

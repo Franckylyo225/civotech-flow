@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil, Download } from "lucide-react";
+import { useState, useRef } from "react";
+import { Send, CheckCircle2, XCircle, Mail, UserCheck, UserX, MessageSquare, Truck, Pencil, Download, Upload, FileUp, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import type { Devis, DevisStatut, TypeRemise } from "@/types/devis";
@@ -28,6 +28,7 @@ interface DevisDetailPageProps {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    bon_commande_file?: File | null;
   }) => Promise<boolean>;
   onBack: () => void;
 }
@@ -40,6 +41,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [refusType, setRefusType] = useState<"DG" | "CLIENT">("DG");
   const [showOpDialog, setShowOpDialog] = useState(false);
+  const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [opForm, setOpForm] = useState({
     lieu_embarquement: "",
     lieu_livraison: "",
@@ -78,6 +81,10 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       toast.error("Les lieux de récupération et de livraison sont obligatoires");
       return;
     }
+    if (!bonCommandeFile) {
+      toast.error("Le bon de commande du client est obligatoire");
+      return;
+    }
     setCreatingOp(true);
     const ok = await onCreateOperation(devis, {
       lieu_embarquement: opForm.lieu_embarquement.trim(),
@@ -87,10 +94,12 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      bon_commande_file: bonCommandeFile,
     });
     setCreatingOp(false);
     if (ok) {
       setShowOpDialog(false);
+      setBonCommandeFile(null);
       toast.success("Demande d'opération créée avec succès");
       navigate("/operations");
     }
@@ -369,6 +378,45 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 placeholder="Informations complémentaires..."
                 rows={3}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Bon de commande du client *</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setBonCommandeFile(file);
+                }}
+              />
+              {bonCommandeFile ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
+                  <FileUp className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm text-foreground truncate flex-1">{bonCommandeFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0"
+                    onClick={() => { setBonCommandeFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-center gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  Joindre le bon de commande
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">PDF, image ou document Word accepté</p>
             </div>
           </div>
           <DialogFooter>

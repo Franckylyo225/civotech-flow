@@ -70,6 +70,7 @@ export interface Operation {
   dureeEstimeeHeures?: number;
   statut: OperationStatut;
   bonLivraisonUrl?: string;
+  bonCommandeUrl?: string;
   depenses: LigneDepense[];
   montantDevis: number;
   poidsKg?: number;
