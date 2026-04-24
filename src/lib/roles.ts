@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Megaphone,
   ClipboardList,
+  FileSignature,
   type LucideIcon,
 } from "lucide-react";
 
