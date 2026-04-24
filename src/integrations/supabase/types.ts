@@ -1548,6 +1548,68 @@ export type Database = {
           },
         ]
       }
+      stock_bureau_demandes: {
+        Row: {
+          categorie: Database["public"]["Enums"]["categorie_stock_bureau"]
+          commentaire_dg: string
+          created_at: string
+          created_by: string | null
+          decaissement_id: string | null
+          description: string
+          designation: string
+          id: string
+          justificatif_url: string | null
+          montant: number
+          quantite: number
+          reference: string
+          statut: Database["public"]["Enums"]["statut_stock_bureau"]
+          updated_at: string
+          urgence: string
+        }
+        Insert: {
+          categorie?: Database["public"]["Enums"]["categorie_stock_bureau"]
+          commentaire_dg?: string
+          created_at?: string
+          created_by?: string | null
+          decaissement_id?: string | null
+          description?: string
+          designation: string
+          id?: string
+          justificatif_url?: string | null
+          montant?: number
+          quantite?: number
+          reference?: string
+          statut?: Database["public"]["Enums"]["statut_stock_bureau"]
+          updated_at?: string
+          urgence?: string
+        }
+        Update: {
+          categorie?: Database["public"]["Enums"]["categorie_stock_bureau"]
+          commentaire_dg?: string
+          created_at?: string
+          created_by?: string | null
+          decaissement_id?: string | null
+          description?: string
+          designation?: string
+          id?: string
+          justificatif_url?: string | null
+          montant?: number
+          quantite?: number
+          reference?: string
+          statut?: Database["public"]["Enums"]["statut_stock_bureau"]
+          updated_at?: string
+          urgence?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_bureau_demandes_decaissement_id_fkey"
+            columns: ["decaissement_id"]
+            isOneToOne: false
+            referencedRelation: "decaissements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_invoice_history: {
         Row: {
           ancien_statut:
@@ -1885,6 +1947,13 @@ export type Database = {
         | "PNEUMATIQUES"
         | "SERVICES"
         | "AUTRE"
+      categorie_stock_bureau:
+        | "BUREAUTIQUE"
+        | "CONSOMMABLES"
+        | "MOBILIER"
+        | "INFORMATIQUE"
+        | "ENTRETIEN"
+        | "AUTRE"
       gravite_incident: "FAIBLE" | "MOYENNE" | "CRITIQUE"
       payment_method_supplier: "cheque" | "virement"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
@@ -1927,6 +1996,12 @@ export type Database = {
         | "TERMINEE"
         | "ARCHIVEE"
         | "CONSOLIDEE"
+      statut_stock_bureau:
+        | "BROUILLON"
+        | "SOUMISE_DG"
+        | "VALIDEE_DG"
+        | "REFUSEE_DG"
+        | "PAYEE"
       statut_supplier_invoice:
         | "received"
         | "processing"
@@ -2094,6 +2169,14 @@ export const Constants = {
         "SERVICES",
         "AUTRE",
       ],
+      categorie_stock_bureau: [
+        "BUREAUTIQUE",
+        "CONSOMMABLES",
+        "MOBILIER",
+        "INFORMATIQUE",
+        "ENTRETIEN",
+        "AUTRE",
+      ],
       gravite_incident: ["FAIBLE", "MOYENNE", "CRITIQUE"],
       payment_method_supplier: ["cheque", "virement"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
@@ -2140,6 +2223,13 @@ export const Constants = {
         "TERMINEE",
         "ARCHIVEE",
         "CONSOLIDEE",
+      ],
+      statut_stock_bureau: [
+        "BROUILLON",
+        "SOUMISE_DG",
+        "VALIDEE_DG",
+        "REFUSEE_DG",
+        "PAYEE",
       ],
       statut_supplier_invoice: [
         "received",
