@@ -52,6 +52,8 @@ export default function StockBureauPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateDebut, setDateDebut] = useState("");
   const [dateFin, setDateFin] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const isDG = user?.role === "DG";
   const isAssistante = user?.role === "ASSISTANTE";
