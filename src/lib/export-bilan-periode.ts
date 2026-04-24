@@ -246,5 +246,5 @@ export function exportBilanExcel({ rows, stats, periodeLabel, from, to, company 
   ];
   XLSX.utils.book_append_sheet(wb, wsDetail, "Détail");
 
-  XLSX.writeFile(wb, `bilan-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.xlsx`);
+  XLSX.writeFile(wb, `flux-operations-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.xlsx`);
 }
