@@ -257,6 +257,44 @@ export default function StockBureauPage() {
             })}
           </TableBody>
         </Table>
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Lignes par page :</span>
+              <Select value={pageSize.toString()} onValueChange={(v) => setPageSize(Number(v))}>
+                <SelectTrigger className="h-8 w-[72px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 100].map((n) => (
+                    <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">
+                Page {currentPage} / {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" /> Précédent
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Suivant <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
 
       <CreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
