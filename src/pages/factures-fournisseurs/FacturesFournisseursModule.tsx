@@ -417,10 +417,11 @@ export default function FacturesFournisseursModule() {
 
 /* ================= Sous-composants ================= */
 
-function KpiCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: any; accent?: "primary" | "warning" | "info" }) {
+function KpiCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: any; accent?: "primary" | "warning" | "info" | "destructive" }) {
   const accentClass = accent === "warning" ? "text-warning bg-warning/10"
     : accent === "info" ? "text-info bg-info/10"
     : accent === "primary" ? "text-primary bg-primary/10"
+    : accent === "destructive" ? "text-destructive bg-destructive/10"
     : "text-muted-foreground bg-muted";
   return (
     <Card>
