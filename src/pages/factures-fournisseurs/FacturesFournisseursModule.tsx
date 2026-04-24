@@ -154,9 +154,36 @@ export default function FacturesFournisseursModule() {
         )}
       </div>
 
+      {/* Banner alerte échéances */}
+      {(stats.enRetard > 0 || stats.bientotEchues > 0) && (
+        <Card className={cn("border-l-4", stats.enRetard > 0 ? "border-l-destructive bg-destructive/5" : "border-l-warning bg-warning/5")}>
+          <CardContent className="p-4 flex items-center gap-3 flex-wrap">
+            <AlertTriangle className={cn("h-5 w-5 shrink-0", stats.enRetard > 0 ? "text-destructive" : "text-warning")} />
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm font-semibold text-foreground">
+                {stats.enRetard > 0 && <>{stats.enRetard} facture{stats.enRetard > 1 ? "s" : ""} en retard ({fmt(stats.montantRetard)})</>}
+                {stats.enRetard > 0 && stats.bientotEchues > 0 && " — "}
+                {stats.bientotEchues > 0 && <>{stats.bientotEchues} échéance{stats.bientotEchues > 1 ? "s" : ""} dans les 3 prochains jours</>}
+              </p>
+              <p className="text-xs text-muted-foreground">À traiter en priorité.</p>
+            </div>
+            {stats.enRetard > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setActiveTab("all"); setEcheanceFilter("overdue"); setStatusFilter("all"); }}
+              >
+                Voir les retards
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <KpiCard label="Total factures" value={stats.total} icon={FileText} />
+        <KpiCard label="En retard" value={stats.enRetard} icon={AlertTriangle} accent="destructive" />
         <KpiCard label="En attente DG" value={stats.enAttenteDG} icon={ClipboardCheck} accent="warning" />
         <KpiCard label="À payer" value={stats.aPayer} icon={CreditCard} accent="primary" />
         <KpiCard label="Chèques à remettre" value={stats.chequesARemettre} icon={FileCheck} accent="info" />
