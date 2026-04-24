@@ -253,7 +253,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(d => {
+              {pagination.paginated.map(d => {
                 const statutCfg = STATUT_DECAISSEMENT_CONFIG[d.statut];
                 return (
                   <TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailDialog(d)}>
