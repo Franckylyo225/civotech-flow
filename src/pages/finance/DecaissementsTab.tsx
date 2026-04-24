@@ -71,6 +71,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
     return matchSearch && matchStatut && matchFrom && matchTo;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterStatut, dateFrom, dateTo]);
+
   const handleApprouver = async (id: string) => {
     try {
       await updateDecaissement(id, { statut: "APPROUVE" as any });
