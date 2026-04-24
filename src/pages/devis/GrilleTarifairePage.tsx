@@ -51,6 +51,8 @@ export default function GrilleTarifairePage() {
     return matchSearch && matchCat;
   });
 
+  const pagination = usePagination(filtered, 25, [search, catFilter]);
+
   const openCreate = () => {
     setEditingTarif(null);
     setForm({ designation: "", unite: "FORFAIT", prixUnitaire: 0, categorie: "TRANSPORT" });
