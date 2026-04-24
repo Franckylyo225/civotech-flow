@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useFournisseursStore } from "@/hooks/use-fournisseurs-store";
 import { useSupplierInvoicesStore } from "@/hooks/use-supplier-invoices-store";
 import { useDemandesAchatStore } from "@/hooks/use-demandes-achat-store";
-import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
 
 interface Props {
   open: boolean;
@@ -19,7 +18,6 @@ export function SupplierInvoiceCreateDialog({ open, onOpenChange }: Props) {
   const { fournisseurs } = useFournisseursStore();
   const { create } = useSupplierInvoicesStore();
   const demandes = useTryDemandes();
-  const maintenances = useTryMaintenances();
 
   const [supplierId, setSupplierId] = useState("");
   const [amount, setAmount] = useState<number>(0);
@@ -27,13 +25,12 @@ export function SupplierInvoiceCreateDialog({ open, onOpenChange }: Props) {
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [demandeId, setDemandeId] = useState<string>("none");
-  const [maintenanceId, setMaintenanceId] = useState<string>("none");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const reset = () => {
     setSupplierId(""); setAmount(0); setInvoiceDate(new Date().toISOString().slice(0, 10));
-    setDueDate(""); setDescription(""); setDemandeId("none"); setMaintenanceId("none"); setFile(null);
+    setDueDate(""); setDescription(""); setDemandeId("none"); setFile(null);
   };
 
   const handleSubmit = async () => {
@@ -46,7 +43,7 @@ export function SupplierInvoiceCreateDialog({ open, onOpenChange }: Props) {
       due_date: dueDate || null,
       description,
       demande_achat_id: demandeId === "none" ? null : demandeId,
-      maintenance_id: maintenanceId === "none" ? null : maintenanceId,
+      maintenance_id: null,
       file,
     });
     setSubmitting(false);
@@ -103,20 +100,6 @@ export function SupplierInvoiceCreateDialog({ open, onOpenChange }: Props) {
               </Select>
             </div>
           )}
-          {maintenances.length > 0 && (
-            <div>
-              <Label>Maintenance liée (optionnel)</Label>
-              <Select value={maintenanceId} onValueChange={setMaintenanceId}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— Aucune —</SelectItem>
-                  {maintenances.map((m: any) => (
-                    <SelectItem key={m.id} value={m.id}>{m.description?.slice(0, 40) || m.id.slice(0, 8)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
           <div>
             <Label>Fichier (PDF, image)</Label>
             <Input type="file" accept="application/pdf,image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
@@ -133,16 +116,10 @@ export function SupplierInvoiceCreateDialog({ open, onOpenChange }: Props) {
   );
 }
 
-// Wrappers résilients (au cas où ces hooks renvoient des shapes différents)
+// Wrapper résilient
 function useTryDemandes() {
   try {
     const r: any = useDemandesAchatStore();
     return r.demandes || r.demandesAchat || [];
-  } catch { return []; }
-}
-function useTryMaintenances() {
-  try {
-    const r: any = useMaintenancesStore();
-    return r.maintenances || [];
   } catch { return []; }
 }
