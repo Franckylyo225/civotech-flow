@@ -469,10 +469,24 @@ export function InvoiceTable({ rows, loading, supplierMap, onRowClick, actions, 
       <TableBody>
         {rows.map(inv => {
           const cfg = STATUS_CONFIG[inv.status as SupplierInvoiceStatus];
+          const lvl = getEcheanceLevel(inv.due_date, inv.status);
+          const isOverdue = lvl === "overdue";
+          const isDueSoon = lvl === "due_soon";
+          let daysLabel: string | null = null;
+          if (inv.due_date && (isOverdue || isDueSoon)) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const due = new Date(inv.due_date); due.setHours(0, 0, 0, 0);
+            const diff = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+            daysLabel = isOverdue ? `${Math.abs(diff)}j retard` : diff === 0 ? "Aujourd'hui" : `${diff}j`;
+          }
           return (
             <TableRow
               key={inv.id}
-              className={onRowClick ? "cursor-pointer" : ""}
+              className={cn(
+                onRowClick ? "cursor-pointer" : "",
+                isOverdue && "bg-destructive/5 hover:bg-destructive/10",
+                isDueSoon && !isOverdue && "bg-warning/5 hover:bg-warning/10"
+              )}
               onClick={() => onRowClick?.(inv.id)}
             >
               {selectable && (
@@ -483,7 +497,21 @@ export function InvoiceTable({ rows, loading, supplierMap, onRowClick, actions, 
               <TableCell className="font-mono text-xs">{inv.reference}</TableCell>
               <TableCell className="font-medium">{supplierMap[inv.supplier_id] || "—"}</TableCell>
               <TableCell>{fmtDate(inv.invoice_date)}</TableCell>
-              <TableCell>{fmtDate(inv.due_date)}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={cn(isOverdue && "text-destructive font-semibold")}>{fmtDate(inv.due_date)}</span>
+                  {isOverdue && (
+                    <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-[10px] gap-0.5">
+                      <AlertTriangle className="h-2.5 w-2.5" /> {daysLabel}
+                    </Badge>
+                  )}
+                  {isDueSoon && (
+                    <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px] gap-0.5">
+                      <Clock className="h-2.5 w-2.5" /> {daysLabel}
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="text-right font-medium">{fmt(inv.amount)}</TableCell>
               <TableCell>
                 <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
