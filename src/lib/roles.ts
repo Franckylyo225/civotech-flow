@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Megaphone,
   ClipboardList,
+  FileSignature,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +52,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
+    { label: "Factures Fournisseurs", path: "/factures-fournisseurs", icon: FileSignature, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },
@@ -77,6 +79,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
+    { label: "Factures Fournisseurs", path: "/factures-fournisseurs", icon: FileSignature, category: "SERVICES" },
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
@@ -88,7 +91,9 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
   ASSISTANTE: [
+    { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Calendrier DG", path: "/calendrier", icon: Calendar },
+    { label: "Factures Fournisseurs", path: "/factures-fournisseurs", icon: FileSignature, category: "SERVICES" },
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
@@ -113,6 +118,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
+    { label: "Factures Fournisseurs", path: "/factures-fournisseurs", icon: FileSignature, category: "SERVICES" },
     { label: "Gestion du Parc", path: "/parc-auto", icon: Package, category: "SERVICES" },
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },

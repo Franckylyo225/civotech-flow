@@ -1548,6 +1548,148 @@ export type Database = {
           },
         ]
       }
+      supplier_invoice_history: {
+        Row: {
+          ancien_statut:
+            | Database["public"]["Enums"]["statut_supplier_invoice"]
+            | null
+          commentaire: string | null
+          created_at: string
+          id: string
+          nouveau_statut: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_invoice_id: string
+          user_id: string | null
+          user_nom: string | null
+        }
+        Insert: {
+          ancien_statut?:
+            | Database["public"]["Enums"]["statut_supplier_invoice"]
+            | null
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          nouveau_statut: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_invoice_id: string
+          user_id?: string | null
+          user_nom?: string | null
+        }
+        Update: {
+          ancien_statut?:
+            | Database["public"]["Enums"]["statut_supplier_invoice"]
+            | null
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          nouveau_statut?: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_invoice_id?: string
+          user_id?: string | null
+          user_nom?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_invoice_history_supplier_invoice_id_fkey"
+            columns: ["supplier_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          decaissement_id: string | null
+          demande_achat_id: string | null
+          description: string | null
+          due_date: string | null
+          file_url: string | null
+          id: string
+          invoice_date: string
+          maintenance_id: string | null
+          payment_batch_id: string | null
+          payment_method:
+            | Database["public"]["Enums"]["payment_method_supplier"]
+            | null
+          reference: string
+          status: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          decaissement_id?: string | null
+          demande_achat_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          file_url?: string | null
+          id?: string
+          invoice_date?: string
+          maintenance_id?: string | null
+          payment_batch_id?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["payment_method_supplier"]
+            | null
+          reference: string
+          status?: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          decaissement_id?: string | null
+          demande_achat_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          file_url?: string | null
+          id?: string
+          invoice_date?: string
+          maintenance_id?: string | null
+          payment_batch_id?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["payment_method_supplier"]
+            | null
+          reference?: string
+          status?: Database["public"]["Enums"]["statut_supplier_invoice"]
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_invoices_decaissement_id_fkey"
+            columns: ["decaissement_id"]
+            isOneToOne: false
+            referencedRelation: "decaissements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_demande_achat_id_fkey"
+            columns: ["demande_achat_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_maintenance_id_fkey"
+            columns: ["maintenance_id"]
+            isOneToOne: false
+            referencedRelation: "maintenances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_invoices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "fournisseurs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_events: {
         Row: {
           created_at: string
@@ -1744,6 +1886,7 @@ export type Database = {
         | "SERVICES"
         | "AUTRE"
       gravite_incident: "FAIBLE" | "MOYENNE" | "CRITIQUE"
+      payment_method_supplier: "cheque" | "virement"
       statut_camion: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE"
       statut_chauffeur:
         | "DISPONIBLE"
@@ -1784,6 +1927,15 @@ export type Database = {
         | "TERMINEE"
         | "ARCHIVEE"
         | "CONSOLIDEE"
+      statut_supplier_invoice:
+        | "received"
+        | "processing"
+        | "pending_DG"
+        | "approved_for_payment"
+        | "cheque_ready"
+        | "paid"
+        | "delivered"
+        | "archived"
       type_compte: "BANQUE" | "CAISSE"
       type_evenement: "REUNION" | "RDV" | "DEPLACEMENT" | "RAPPEL" | "AUTRE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
@@ -1943,6 +2095,7 @@ export const Constants = {
         "AUTRE",
       ],
       gravite_incident: ["FAIBLE", "MOYENNE", "CRITIQUE"],
+      payment_method_supplier: ["cheque", "virement"],
       statut_camion: ["DISPONIBLE", "EN_MISSION", "EN_MAINTENANCE"],
       statut_chauffeur: [
         "DISPONIBLE",
@@ -1987,6 +2140,16 @@ export const Constants = {
         "TERMINEE",
         "ARCHIVEE",
         "CONSOLIDEE",
+      ],
+      statut_supplier_invoice: [
+        "received",
+        "processing",
+        "pending_DG",
+        "approved_for_payment",
+        "cheque_ready",
+        "paid",
+        "delivered",
+        "archived",
       ],
       type_compte: ["BANQUE", "CAISSE"],
       type_evenement: ["REUNION", "RDV", "DEPLACEMENT", "RAPPEL", "AUTRE"],
