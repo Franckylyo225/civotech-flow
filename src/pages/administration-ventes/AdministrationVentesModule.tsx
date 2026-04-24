@@ -14,11 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package } from "lucide-react";
+import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package, Receipt } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import FacturesTab from "@/pages/finance/FacturesTab";
 
 type Periode = "WEEK" | "MONTH" | "QUARTER" | "CUSTOM";
 
@@ -30,6 +32,8 @@ const STATUT_VALIDATION_CONFIG: Record<string, { label: string; color: string; b
 };
 
 export default function AdministrationVentesModule() {
+  const { user } = useAuth();
+  const canManageFactures = user?.role === "DG" || user?.role === "FINANCE" || user?.role === "ADMIN_VENTES" || user?.role === "ADMIN";
   const { operations, loading: opsLoading } = useOperationsStore();
   const { consolidations, depenses, loading: consLoading, addDepense, deleteDepense, terminerConsolidation } = useConsolidationsStore();
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
@@ -120,12 +124,13 @@ export default function AdministrationVentesModule() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Administration des Ventes</h1>
-        <p className="text-sm text-muted-foreground">Consolidation et bilan des opérations livrées</p>
+        <p className="text-sm text-muted-foreground">Consolidation, facturation et bilan des opérations</p>
       </div>
 
       <Tabs defaultValue="consolidation" className="space-y-4">
         <TabsList>
           <TabsTrigger value="consolidation">Consolidation</TabsTrigger>
+          <TabsTrigger value="factures" className="gap-1.5"><Receipt className="h-3.5 w-3.5" />Factures</TabsTrigger>
           <TabsTrigger value="bilan">Bilan par période</TabsTrigger>
         </TabsList>
 
@@ -372,6 +377,11 @@ export default function AdministrationVentesModule() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* === ONGLET FACTURES === */}
+        <TabsContent value="factures" className="space-y-4">
+          <FacturesTab canManage={canManageFactures} />
         </TabsContent>
       </Tabs>
     </div>
