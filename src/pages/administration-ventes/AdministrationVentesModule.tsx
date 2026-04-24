@@ -34,14 +34,41 @@ const STATUT_VALIDATION_CONFIG: Record<string, { label: string; color: string; b
 
 export default function AdministrationVentesModule() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const canManageFactures = user?.role === "DG" || user?.role === "FINANCE" || user?.role === "ADMIN_VENTES" || user?.role === "ADMIN";
   const { operations, loading: opsLoading } = useOperationsStore();
   const { consolidations, depenses, loading: consLoading, addDepense, deleteDepense, terminerConsolidation } = useConsolidationsStore();
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") || "consolidation");
   const [periode, setPeriode] = useState<Periode>("MONTH");
   const [customRange, setCustomRange] = useState<{ from?: Date; to?: Date }>({});
   const [showAddDepense, setShowAddDepense] = useState(false);
   const [newDep, setNewDep] = useState({ libelle: "", categorie: "AUTRE" as CategorieDepense, montant: 0, date: new Date().toISOString().slice(0, 10), commentaire: "" });
+
+  // Sync with URL params (notifications deep-linking)
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const opParam = searchParams.get("op");
+    if (tabParam && tabParam !== activeTab) setActiveTab(tabParam);
+    if (opParam && opParam !== selectedOpId) setSelectedOpId(opParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", val);
+    if (val !== "consolidation") next.delete("op");
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleSelectOp = (id: string) => {
+    setSelectedOpId(id);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", "consolidation");
+    next.set("op", id);
+    setSearchParams(next, { replace: true });
+  };
 
   // Opérations livrées ou consolidées
   const operationsLivrees = useMemo(
