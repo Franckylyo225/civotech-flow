@@ -141,15 +141,28 @@ export default function AdministrationVentesModule() {
     };
   });
 
-  const handleExportPdf = () => {
+  const companyInfo = useMemo(() => companySettings ? {
+    nom: companySettings.nom,
+    logo_url: companySettings.logo_url,
+    adresse: companySettings.adresse,
+    telephone: companySettings.telephone,
+    email: companySettings.email,
+    site_web: companySettings.site_web,
+  } : undefined, [companySettings]);
+
+  const handleExportPdf = async () => {
     if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
-    exportBilanPdf({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
-    toast.success("Export PDF généré");
+    try {
+      await exportBilanPdf({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to, company: companyInfo });
+      toast.success("Export PDF généré");
+    } catch (e: any) {
+      toast.error(e?.message || "Erreur export PDF");
+    }
   };
 
   const handleExportExcel = () => {
     if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
-    exportBilanExcel({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
+    exportBilanExcel({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to, company: companyInfo });
     toast.success("Export Excel généré");
   };
 
