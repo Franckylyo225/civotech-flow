@@ -242,6 +242,24 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
             </div>
           )}
         </div>
+        {filtered.length > 0 && (
+          <Card>
+            <DataTablePagination
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              totalPages={pagination.totalPages}
+              startIdx={pagination.startIdx}
+              endIdx={pagination.endIdx}
+              onPageChange={pagination.setPage}
+              onPageSizeChange={pagination.setPageSize}
+              pageSizeOptions={[6, 12, 24, 48]}
+              itemLabel="devis"
+              className="border-t-0"
+            />
+          </Card>
+        )}
+        </>
       ) : (
         /* Table view */
         <Card className="overflow-x-auto">
