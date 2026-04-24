@@ -83,6 +83,8 @@ export default function FacturesTab({ canManage }: Props) {
     return matchSearch && matchStatut && matchFrom && matchTo;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterStatut, dateFrom, dateTo]);
+
   const handleCreate = async () => {
     if (!createForm.operation_id) { toast.error("Sélectionnez une opération"); return; }
     const op = operations.find(o => o.id === createForm.operation_id);
