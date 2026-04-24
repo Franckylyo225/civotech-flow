@@ -82,9 +82,18 @@ export default function StockBureauPage() {
     setSearchTerm("");
     setDateDebut("");
     setDateFin("");
+    setPage(1);
   };
 
   const hasActiveFilters = statutFilter !== "ALL" || searchTerm || dateDebut || dateFin;
+
+  // Reset page when filters or page size change
+  useMemo(() => { setPage(1); }, [statutFilter, searchTerm, dateDebut, dateFin, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIdx = (currentPage - 1) * pageSize;
+  const paginated = filtered.slice(startIdx, startIdx + pageSize);
 
   const stats = useMemo(() => ({
     total: items.length,
