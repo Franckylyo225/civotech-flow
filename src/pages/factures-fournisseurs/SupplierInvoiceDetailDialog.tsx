@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, FileText, History } from "lucide-react";
+import {
+  ExternalLink, FileText, History, FilePlus, Send, Layers,
+  CheckCircle2, Banknote, FileCheck, PackageCheck, Archive, ArrowRight,
+} from "lucide-react";
 import {
   useSupplierInvoicesStore,
   useSupplierInvoiceHistory,
@@ -10,6 +13,17 @@ import {
   type SupplierInvoiceStatus,
 } from "@/hooks/use-supplier-invoices-store";
 import { cn } from "@/lib/utils";
+
+const EVENT_META: Record<SupplierInvoiceStatus, { icon: typeof FilePlus; label: string; description: string }> = {
+  received:             { icon: FilePlus,     label: "Facture créée",            description: "Réception de la facture fournisseur" },
+  processing:           { icon: Send,         label: "Transmise comptabilité",   description: "Transmise au service comptabilité pour traitement" },
+  pending_DG:           { icon: Layers,       label: "Lot soumis au DG",         description: "Intégrée à un lot de paiement, en attente de validation DG" },
+  approved_for_payment: { icon: CheckCircle2, label: "Approuvée par le DG",      description: "Validée pour paiement par la Direction Générale" },
+  cheque_ready:         { icon: FileCheck,    label: "Chèque préparé",           description: "Décaissement enregistré, chèque prêt à remettre" },
+  paid:                 { icon: Banknote,     label: "Virement effectué",        description: "Paiement par virement enregistré, trésorerie débitée" },
+  delivered:            { icon: PackageCheck, label: "Chèque remis",             description: "Remise du chèque au fournisseur confirmée" },
+  archived:             { icon: Archive,      label: "Archivée",                 description: "Dossier clôturé et archivé" },
+};
 
 interface Props {
   invoiceId: string | null;
