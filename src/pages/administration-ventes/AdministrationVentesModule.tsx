@@ -22,6 +22,7 @@ import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { useCompanySettings } from "@/hooks/use-company-settings";
 import FacturesTab from "@/pages/finance/FacturesTab";
 
 type Periode = "WEEK" | "MONTH" | "QUARTER" | "CUSTOM";
