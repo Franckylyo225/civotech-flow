@@ -23,17 +23,50 @@ export interface BilanStats {
   marge: number;
 }
 
+export interface BilanCompanyInfo {
+  nom?: string;
+  logo_url?: string;
+  adresse?: string;
+  telephone?: string;
+  email?: string;
+  site_web?: string;
+}
+
 export interface BilanExportOptions {
   rows: BilanRow[];
   stats: BilanStats;
   periodeLabel: string;
   from?: Date;
   to?: Date;
+  company?: BilanCompanyInfo;
 }
 
 function periodeRange({ from, to }: { from?: Date; to?: Date }) {
   if (!from || !to) return "Toutes périodes";
   return `${format(from, "dd/MM/yyyy", { locale: fr })} → ${format(to, "dd/MM/yyyy", { locale: fr })}`;
+}
+
+async function loadImageAsDataUrl(src: string): Promise<{ data: string; w: number; h: number } | null> {
+  try {
+    const res = await fetch(src);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const data: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onloadend = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const dims = await new Promise<{ w: number; h: number }>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.width, h: img.height });
+      img.onerror = () => resolve({ w: 0, h: 0 });
+      img.src = data;
+    });
+    return { data, w: dims.w, h: dims.h };
+  } catch {
+    return null;
+  }
 }
 
 export function exportBilanPdf({ rows, stats, periodeLabel, from, to }: BilanExportOptions) {
