@@ -121,7 +121,7 @@ export default function TransactionsTab({ canManage }: Props) {
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune transaction</TableCell></TableRow>
-            ) : filtered.map(t => {
+            ) : pagination.paginated.map(t => {
               const cfg = TYPE_CONFIG[t.type];
               return (
                 <TableRow key={t.id}>
