@@ -276,7 +276,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((devis) => {
+              {pagination.paginated.map((devis) => {
                 const actions = getQuickActions(devis.statut, user?.role);
                 return (
                   <TableRow key={devis.id}>
