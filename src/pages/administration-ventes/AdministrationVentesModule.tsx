@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useOperationsStore } from "@/hooks/use-operations-store";
 import { useConsolidationsStore, type DepenseConsolidation } from "@/hooks/use-consolidations-store";
 import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateShort, type CategorieDepense } from "@/types/operations";
@@ -33,14 +34,41 @@ const STATUT_VALIDATION_CONFIG: Record<string, { label: string; color: string; b
 
 export default function AdministrationVentesModule() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const canManageFactures = user?.role === "DG" || user?.role === "FINANCE" || user?.role === "ADMIN_VENTES" || user?.role === "ADMIN";
   const { operations, loading: opsLoading } = useOperationsStore();
   const { consolidations, depenses, loading: consLoading, addDepense, deleteDepense, terminerConsolidation } = useConsolidationsStore();
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") || "consolidation");
   const [periode, setPeriode] = useState<Periode>("MONTH");
   const [customRange, setCustomRange] = useState<{ from?: Date; to?: Date }>({});
   const [showAddDepense, setShowAddDepense] = useState(false);
   const [newDep, setNewDep] = useState({ libelle: "", categorie: "AUTRE" as CategorieDepense, montant: 0, date: new Date().toISOString().slice(0, 10), commentaire: "" });
+
+  // Sync with URL params (notifications deep-linking)
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const opParam = searchParams.get("op");
+    if (tabParam && tabParam !== activeTab) setActiveTab(tabParam);
+    if (opParam && opParam !== selectedOpId) setSelectedOpId(opParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", val);
+    if (val !== "consolidation") next.delete("op");
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleSelectOp = (id: string) => {
+    setSelectedOpId(id);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", "consolidation");
+    next.set("op", id);
+    setSearchParams(next, { replace: true });
+  };
 
   // Opérations livrées ou consolidées
   const operationsLivrees = useMemo(
@@ -127,7 +155,7 @@ export default function AdministrationVentesModule() {
         <p className="text-sm text-muted-foreground">Consolidation, facturation et bilan des opérations</p>
       </div>
 
-      <Tabs defaultValue="consolidation" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="consolidation">Consolidation</TabsTrigger>
           <TabsTrigger value="factures" className="gap-1.5"><Receipt className="h-3.5 w-3.5" />Factures</TabsTrigger>
@@ -151,7 +179,7 @@ export default function AdministrationVentesModule() {
                   return (
                     <button
                       key={op.id}
-                      onClick={() => setSelectedOpId(op.id)}
+                      onClick={() => handleSelectOp(op.id)}
                       className={cn(
                         "w-full text-left px-4 py-3 border-b border-border transition-colors",
                         isSel ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/50 border-l-2 border-l-transparent"
@@ -361,7 +389,7 @@ export default function AdministrationVentesModule() {
                       const m = op.montantDevis - dt - dc;
                       const cfg = OPERATION_STATUT_CONFIG[op.statut];
                       return (
-                        <TableRow key={op.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setSelectedOpId(op.id)}>
+                        <TableRow key={op.id} className="cursor-pointer hover:bg-muted/30" onClick={() => handleSelectOp(op.id)}>
                           <TableCell className="text-xs font-medium">{op.reference}</TableCell>
                           <TableCell className="text-xs">{op.clientNom}</TableCell>
                           <TableCell className="text-xs">{op.dateLivraisonReelle ? formatDateShort(op.dateLivraisonReelle) : "—"}</TableCell>
