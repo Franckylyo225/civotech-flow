@@ -50,6 +50,8 @@ export default function TransactionsTab({ canManage }: Props) {
     return true;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterType, filterCompte]);
+
   const comptesMap: Record<string, string> = {};
   comptes.forEach(c => { comptesMap[c.id] = c.nom; });
 
