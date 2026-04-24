@@ -130,7 +130,7 @@ export default function GrilleTarifairePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((tarif) => (
+            {pagination.paginated.map((tarif) => (
               <TableRow key={tarif.id} className={cn(!tarif.actif && "opacity-50")}>
                 <TableCell className="font-medium">{tarif.designation}</TableCell>
                 <TableCell>
