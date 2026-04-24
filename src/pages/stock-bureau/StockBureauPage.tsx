@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Plus, Send, Check, X, Trash2, FileText, Download, Eye, Search, RotateCcw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Send, Check, X, Trash2, FileText, Download, Eye, Search, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,8 @@ export default function StockBureauPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateDebut, setDateDebut] = useState("");
   const [dateFin, setDateFin] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const isDG = user?.role === "DG";
   const isAssistante = user?.role === "ASSISTANTE";
@@ -80,9 +82,18 @@ export default function StockBureauPage() {
     setSearchTerm("");
     setDateDebut("");
     setDateFin("");
+    setPage(1);
   };
 
   const hasActiveFilters = statutFilter !== "ALL" || searchTerm || dateDebut || dateFin;
+
+  // Reset page when filters or page size change
+  useEffect(() => { setPage(1); }, [statutFilter, searchTerm, dateDebut, dateFin, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIdx = (currentPage - 1) * pageSize;
+  const paginated = filtered.slice(startIdx, startIdx + pageSize);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -169,6 +180,7 @@ export default function StockBureauPage() {
         </div>
         <p className="text-xs text-muted-foreground mt-3">
           {filtered.length} demande{filtered.length > 1 ? "s" : ""} {hasActiveFilters && `(sur ${items.length})`}
+          {filtered.length > 0 && ` — affichage ${startIdx + 1}-${Math.min(startIdx + pageSize, filtered.length)}`}
         </p>
       </Card>
 
@@ -193,7 +205,7 @@ export default function StockBureauPage() {
               <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune demande</TableCell></TableRow>
-            ) : filtered.map((it) => {
+            ) : paginated.map((it) => {
               const cfg = STOCK_BUREAU_STATUT_CONFIG[it.statut];
               return (
                 <TableRow key={it.id} className="hover:bg-muted/30">
@@ -245,6 +257,44 @@ export default function StockBureauPage() {
             })}
           </TableBody>
         </Table>
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Lignes par page :</span>
+              <Select value={pageSize.toString()} onValueChange={(v) => setPageSize(Number(v))}>
+                <SelectTrigger className="h-8 w-[72px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 100].map((n) => (
+                    <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">
+                Page {currentPage} / {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" /> Précédent
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Suivant <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
 
       <CreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
