@@ -18,11 +18,14 @@ const SB_STATUT: Record<string, { label: string; class: string }> = {
 };
 
 const SI_STATUT: Record<string, { label: string; class: string }> = {
-  EN_ATTENTE: { label: "À traiter", class: "bg-warning/10 text-warning" },
-  VALIDEE_DG: { label: "Validée", class: "bg-primary/10 text-primary" },
-  PROGRAMMEE: { label: "Programmée", class: "bg-info/10 text-info" },
-  PAYEE: { label: "Payée", class: "bg-success/10 text-success" },
-  REJETEE: { label: "Rejetée", class: "bg-destructive/10 text-destructive" },
+  received: { label: "Reçue", class: "bg-muted text-muted-foreground" },
+  pending_DG: { label: "En attente DG", class: "bg-warning/10 text-warning" },
+  approved_for_payment: { label: "À payer", class: "bg-primary/10 text-primary" },
+  cheque_ready: { label: "Chèque prêt", class: "bg-info/10 text-info" },
+  processing: { label: "En traitement", class: "bg-info/10 text-info" },
+  paid: { label: "Payée", class: "bg-success/10 text-success" },
+  delivered: { label: "Remise", class: "bg-success/10 text-success" },
+  archived: { label: "Archivée", class: "bg-muted text-muted-foreground" },
 };
 
 const TYPE_EVT_COLOR: Record<string, string> = {
