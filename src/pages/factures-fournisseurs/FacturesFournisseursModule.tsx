@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Inbox, Send, ClipboardCheck, CreditCard, FileCheck, FileText } from "lucide-react";
+import { Inbox, Send, ClipboardCheck, CreditCard, FileCheck, FileText, AlertTriangle, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useSupplierInvoicesStore, STATUS_CONFIG, type SupplierInvoiceStatus } from "@/hooks/use-supplier-invoices-store";
 import { useFournisseursStore } from "@/hooks/use-fournisseurs-store";
@@ -16,10 +16,27 @@ import { SupplierInvoiceDetailDialog } from "./SupplierInvoiceDetailDialog";
 import { PaymentBatchDialog } from "./PaymentBatchDialog";
 import { DGApprovalDialog } from "./DGApprovalDialog";
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
+
+// Statuts considérés comme "ouverts" : on calcule l'urgence d'échéance dessus uniquement
+const OPEN_STATUSES: SupplierInvoiceStatus[] = ["received", "processing", "pending_DG", "approved_for_payment", "cheque_ready"];
+
+type EcheanceLevel = "overdue" | "due_soon" | "ok" | "none" | "closed";
+
+export function getEcheanceLevel(dueDate: string | null | undefined, status: string): EcheanceLevel {
+  if (!OPEN_STATUSES.includes(status as SupplierInvoiceStatus)) return "closed";
+  if (!dueDate) return "none";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate); due.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (diffDays < 0) return "overdue";
+  if (diffDays <= 3) return "due_soon";
+  return "ok";
+}
 
 export default function FacturesFournisseursModule() {
   const { user } = useAuth();
