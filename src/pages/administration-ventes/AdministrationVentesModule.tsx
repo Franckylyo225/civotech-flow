@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package, Receipt } from "lucide-react";
+import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package, Receipt, FileText, FileSpreadsheet } from "lucide-react";
+import { exportBilanPdf, exportBilanExcel, type BilanRow } from "@/lib/export-bilan-periode";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -116,6 +117,39 @@ export default function AdministrationVentesModule() {
       nbConsolidees: opsBilan.filter(o => o.statut === "CONSOLIDEE").length,
     };
   }, [opsBilan, depenses]);
+
+  const periodeLabel = useMemo(() => {
+    if (periode === "WEEK") return "Cette semaine";
+    if (periode === "MONTH") return "Ce mois";
+    if (periode === "QUARTER") return "Ce trimestre";
+    return "Période personnalisée";
+  }, [periode]);
+
+  const buildBilanRows = (): BilanRow[] => opsBilan.map(op => {
+    const dt = op.depenses.reduce((s, d) => s + d.montant, 0);
+    const dc = depenses.filter(d => d.operationId === op.id).reduce((s, d) => s + d.montant, 0);
+    return {
+      reference: op.reference,
+      clientNom: op.clientNom,
+      dateLivraisonReelle: op.dateLivraisonReelle ?? null,
+      statut: op.statut as any,
+      recettes: op.montantDevis,
+      depenses: dt + dc,
+      marge: op.montantDevis - dt - dc,
+    };
+  });
+
+  const handleExportPdf = () => {
+    if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
+    exportBilanPdf({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
+    toast.success("Export PDF généré");
+  };
+
+  const handleExportExcel = () => {
+    if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
+    exportBilanExcel({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
+    toast.success("Export Excel généré");
+  };
 
   const handleAddDepense = async () => {
     if (!selectedOp) return;
@@ -358,6 +392,12 @@ export default function AdministrationVentesModule() {
                     </PopoverContent>
                   </Popover>
                 )}
+                <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={opsBilan.length === 0} className="gap-1.5">
+                  <FileText className="h-3.5 w-3.5" /> PDF
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={opsBilan.length === 0} className="gap-1.5">
+                  <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
