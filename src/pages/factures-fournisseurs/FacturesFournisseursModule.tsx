@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Inbox, Send, ClipboardCheck, CreditCard, FileCheck, FileText } from "lucide-react";
+import { Inbox, Send, ClipboardCheck, CreditCard, FileCheck, FileText, AlertTriangle, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useSupplierInvoicesStore, STATUS_CONFIG, type SupplierInvoiceStatus } from "@/hooks/use-supplier-invoices-store";
 import { useFournisseursStore } from "@/hooks/use-fournisseurs-store";
@@ -16,10 +16,27 @@ import { SupplierInvoiceDetailDialog } from "./SupplierInvoiceDetailDialog";
 import { PaymentBatchDialog } from "./PaymentBatchDialog";
 import { DGApprovalDialog } from "./DGApprovalDialog";
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
+
+// Statuts considérés comme "ouverts" : on calcule l'urgence d'échéance dessus uniquement
+const OPEN_STATUSES: SupplierInvoiceStatus[] = ["received", "processing", "pending_DG", "approved_for_payment", "cheque_ready"];
+
+type EcheanceLevel = "overdue" | "due_soon" | "ok" | "none" | "closed";
+
+export function getEcheanceLevel(dueDate: string | null | undefined, status: string): EcheanceLevel {
+  if (!OPEN_STATUSES.includes(status as SupplierInvoiceStatus)) return "closed";
+  if (!dueDate) return "none";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate); due.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (diffDays < 0) return "overdue";
+  if (diffDays <= 3) return "due_soon";
+  return "ok";
+}
 
 export default function FacturesFournisseursModule() {
   const { user } = useAuth();
@@ -41,6 +58,7 @@ export default function FacturesFournisseursModule() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [supplierFilter, setSupplierFilter] = useState<string>("all");
+  const [echeanceFilter, setEcheanceFilter] = useState<string>("all"); // all | overdue | due_soon | open
 
   const [createOpen, setCreateOpen] = useState(false);
   const [batchOpen, setBatchOpen] = useState(false);
@@ -59,6 +77,12 @@ export default function FacturesFournisseursModule() {
     return invoices.filter(i => {
       if (statusFilter !== "all" && i.status !== statusFilter) return false;
       if (supplierFilter !== "all" && i.supplier_id !== supplierFilter) return false;
+      if (echeanceFilter !== "all") {
+        const lvl = getEcheanceLevel(i.due_date, i.status);
+        if (echeanceFilter === "overdue" && lvl !== "overdue") return false;
+        if (echeanceFilter === "due_soon" && lvl !== "due_soon") return false;
+        if (echeanceFilter === "open" && !["overdue", "due_soon", "ok"].includes(lvl)) return false;
+      }
       if (search) {
         const s = search.toLowerCase();
         const supName = (supplierMap[i.supplier_id] || "").toLowerCase();
@@ -66,7 +90,7 @@ export default function FacturesFournisseursModule() {
       }
       return true;
     });
-  }, [invoices, search, statusFilter, supplierFilter, supplierMap]);
+  }, [invoices, search, statusFilter, supplierFilter, echeanceFilter, supplierMap]);
 
   // Sous-ensembles métier
   const inProcessing = invoices.filter(i => i.status === "processing");
@@ -74,11 +98,23 @@ export default function FacturesFournisseursModule() {
   const approvedToPay = invoices.filter(i => i.status === "approved_for_payment");
   const chequesReady = invoices.filter(i => i.status === "cheque_ready");
 
+  const overdueInvoices = useMemo(
+    () => invoices.filter(i => getEcheanceLevel(i.due_date, i.status) === "overdue"),
+    [invoices]
+  );
+  const dueSoonInvoices = useMemo(
+    () => invoices.filter(i => getEcheanceLevel(i.due_date, i.status) === "due_soon"),
+    [invoices]
+  );
+
   const stats = {
     total: invoices.length,
     enAttenteDG: pendingDG.length,
     aPayer: approvedToPay.length,
     chequesARemettre: chequesReady.length,
+    enRetard: overdueInvoices.length,
+    bientotEchues: dueSoonInvoices.length,
+    montantRetard: overdueInvoices.reduce((s, i) => s + Number(i.amount || 0), 0),
   };
 
   const openDetail = (id: string) => {
@@ -118,9 +154,36 @@ export default function FacturesFournisseursModule() {
         )}
       </div>
 
+      {/* Banner alerte échéances */}
+      {(stats.enRetard > 0 || stats.bientotEchues > 0) && (
+        <Card className={cn("border-l-4", stats.enRetard > 0 ? "border-l-destructive bg-destructive/5" : "border-l-warning bg-warning/5")}>
+          <CardContent className="p-4 flex items-center gap-3 flex-wrap">
+            <AlertTriangle className={cn("h-5 w-5 shrink-0", stats.enRetard > 0 ? "text-destructive" : "text-warning")} />
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm font-semibold text-foreground">
+                {stats.enRetard > 0 && <>{stats.enRetard} facture{stats.enRetard > 1 ? "s" : ""} en retard ({fmt(stats.montantRetard)})</>}
+                {stats.enRetard > 0 && stats.bientotEchues > 0 && " — "}
+                {stats.bientotEchues > 0 && <>{stats.bientotEchues} échéance{stats.bientotEchues > 1 ? "s" : ""} dans les 3 prochains jours</>}
+              </p>
+              <p className="text-xs text-muted-foreground">À traiter en priorité.</p>
+            </div>
+            {stats.enRetard > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setActiveTab("all"); setEcheanceFilter("overdue"); setStatusFilter("all"); }}
+              >
+                Voir les retards
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <KpiCard label="Total factures" value={stats.total} icon={FileText} />
+        <KpiCard label="En retard" value={stats.enRetard} icon={AlertTriangle} accent="destructive" />
         <KpiCard label="En attente DG" value={stats.enAttenteDG} icon={ClipboardCheck} accent="warning" />
         <KpiCard label="À payer" value={stats.aPayer} icon={CreditCard} accent="primary" />
         <KpiCard label="Chèques à remettre" value={stats.chequesARemettre} icon={FileCheck} accent="info" />
@@ -192,6 +255,15 @@ export default function FacturesFournisseursModule() {
                     {fournisseurs.map(f => (
                       <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+                <Select value={echeanceFilter} onValueChange={setEcheanceFilter}>
+                  <SelectTrigger className="w-[200px]"><SelectValue placeholder="Échéance" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes échéances</SelectItem>
+                    <SelectItem value="overdue">⚠ Échéance dépassée</SelectItem>
+                    <SelectItem value="due_soon">À échoir (≤ 3j)</SelectItem>
+                    <SelectItem value="open">Toutes ouvertes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -345,10 +417,11 @@ export default function FacturesFournisseursModule() {
 
 /* ================= Sous-composants ================= */
 
-function KpiCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: any; accent?: "primary" | "warning" | "info" }) {
+function KpiCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: any; accent?: "primary" | "warning" | "info" | "destructive" }) {
   const accentClass = accent === "warning" ? "text-warning bg-warning/10"
     : accent === "info" ? "text-info bg-info/10"
     : accent === "primary" ? "text-primary bg-primary/10"
+    : accent === "destructive" ? "text-destructive bg-destructive/10"
     : "text-muted-foreground bg-muted";
   return (
     <Card>
@@ -396,10 +469,24 @@ export function InvoiceTable({ rows, loading, supplierMap, onRowClick, actions, 
       <TableBody>
         {rows.map(inv => {
           const cfg = STATUS_CONFIG[inv.status as SupplierInvoiceStatus];
+          const lvl = getEcheanceLevel(inv.due_date, inv.status);
+          const isOverdue = lvl === "overdue";
+          const isDueSoon = lvl === "due_soon";
+          let daysLabel: string | null = null;
+          if (inv.due_date && (isOverdue || isDueSoon)) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const due = new Date(inv.due_date); due.setHours(0, 0, 0, 0);
+            const diff = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+            daysLabel = isOverdue ? `${Math.abs(diff)}j retard` : diff === 0 ? "Aujourd'hui" : `${diff}j`;
+          }
           return (
             <TableRow
               key={inv.id}
-              className={onRowClick ? "cursor-pointer" : ""}
+              className={cn(
+                onRowClick ? "cursor-pointer" : "",
+                isOverdue && "bg-destructive/5 hover:bg-destructive/10",
+                isDueSoon && !isOverdue && "bg-warning/5 hover:bg-warning/10"
+              )}
               onClick={() => onRowClick?.(inv.id)}
             >
               {selectable && (
@@ -410,7 +497,21 @@ export function InvoiceTable({ rows, loading, supplierMap, onRowClick, actions, 
               <TableCell className="font-mono text-xs">{inv.reference}</TableCell>
               <TableCell className="font-medium">{supplierMap[inv.supplier_id] || "—"}</TableCell>
               <TableCell>{fmtDate(inv.invoice_date)}</TableCell>
-              <TableCell>{fmtDate(inv.due_date)}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={cn(isOverdue && "text-destructive font-semibold")}>{fmtDate(inv.due_date)}</span>
+                  {isOverdue && (
+                    <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-[10px] gap-0.5">
+                      <AlertTriangle className="h-2.5 w-2.5" /> {daysLabel}
+                    </Badge>
+                  )}
+                  {isDueSoon && (
+                    <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px] gap-0.5">
+                      <Clock className="h-2.5 w-2.5" /> {daysLabel}
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="text-right font-medium">{fmt(inv.amount)}</TableCell>
               <TableCell>
                 <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
