@@ -14,11 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package } from "lucide-react";
+import { CalendarIcon, Plus, CheckCircle2, Trash2, TrendingUp, TrendingDown, Wallet, Package, Receipt } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import FacturesTab from "@/pages/finance/FacturesTab";
 
 type Periode = "WEEK" | "MONTH" | "QUARTER" | "CUSTOM";
 
