@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -60,6 +61,8 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     const matchStatut = filterStatut === "ALL" || d.statut === filterStatut;
     return matchSearch && matchStatut;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterStatut]);
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); };
   const openEdit = (d: DemandeAchatRow) => {
@@ -217,7 +220,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(d => {
+              {pagination.paginated.map(d => {
                 const statutCfg = STATUT_DA_CONFIG[d.statut];
                 return (
                   <TableRow key={d.id}>
@@ -263,6 +266,17 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="demandes"
+          />
         </CardContent>
       </Card>
 

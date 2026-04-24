@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -47,6 +48,8 @@ export default function FournisseursTab({ canManage }: Props) {
     const matchCat = filterCategorie === "ALL" || f.categorie === filterCategorie;
     return matchSearch && matchCat;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterCategorie]);
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
   const openEdit = (f: FournisseurRow) => {
@@ -150,7 +153,7 @@ export default function FournisseursTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(f => {
+              {pagination.paginated.map(f => {
                 const catCfg = CATEGORIE_FOURNISSEUR_CONFIG[f.categorie];
                 return (
                   <TableRow key={f.id} className={cn(!f.actif && "opacity-50")}>
@@ -189,6 +192,17 @@ export default function FournisseursTab({ canManage }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="fournisseurs"
+          />
         </CardContent>
       </Card>
 

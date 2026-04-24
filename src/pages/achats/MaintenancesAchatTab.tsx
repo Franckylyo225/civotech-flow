@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,9 @@ export default function MaintenancesAchatTab({ canManage }: Props) {
 
   const pendingMaintenances = activeMaintenances.filter(m => !maintenanceIdsWithDA.has(m.id));
   const linkedMaintenances = activeMaintenances.filter(m => maintenanceIdsWithDA.has(m.id));
+
+  const pendingPagination = usePagination(pendingMaintenances, 10, [pendingMaintenances.length]);
+  const linkedPagination = usePagination(linkedMaintenances, 10, [linkedMaintenances.length]);
 
   const openCreateDA = (m: typeof maintenances[0]) => {
     setCreateFor(m.id);
@@ -134,7 +138,7 @@ export default function MaintenancesAchatTab({ canManage }: Props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingMaintenances.map(m => {
+                {pendingPagination.paginated.map(m => {
                   const typeCfg = TYPE_MAINTENANCE_CONFIG[m.type];
                   const statutCfg = STATUT_MAINTENANCE_CONFIG[m.statut];
                   return (
@@ -161,6 +165,17 @@ export default function MaintenancesAchatTab({ canManage }: Props) {
                 })}
               </TableBody>
             </Table>
+            <DataTablePagination
+              page={pendingPagination.page}
+              pageSize={pendingPagination.pageSize}
+              total={pendingPagination.total}
+              totalPages={pendingPagination.totalPages}
+              startIdx={pendingPagination.startIdx}
+              endIdx={pendingPagination.endIdx}
+              onPageChange={pendingPagination.setPage}
+              onPageSizeChange={pendingPagination.setPageSize}
+              itemLabel="maintenances"
+            />
           </CardContent>
         </Card>
       )}
@@ -184,7 +199,7 @@ export default function MaintenancesAchatTab({ canManage }: Props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {linkedMaintenances.map(m => {
+                {linkedPagination.paginated.map(m => {
                   const typeCfg = TYPE_MAINTENANCE_CONFIG[m.type];
                   const da = getDAForMaintenance(m.id);
                   return (
@@ -208,6 +223,17 @@ export default function MaintenancesAchatTab({ canManage }: Props) {
                 })}
               </TableBody>
             </Table>
+            <DataTablePagination
+              page={linkedPagination.page}
+              pageSize={linkedPagination.pageSize}
+              total={linkedPagination.total}
+              totalPages={linkedPagination.totalPages}
+              startIdx={linkedPagination.startIdx}
+              endIdx={linkedPagination.endIdx}
+              onPageChange={linkedPagination.setPage}
+              onPageSizeChange={linkedPagination.setPageSize}
+              itemLabel="maintenances"
+            />
           </CardContent>
         </Card>
       )}
