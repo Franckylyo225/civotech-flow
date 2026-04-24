@@ -204,7 +204,7 @@ export default function StockBureauPage() {
               <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune demande</TableCell></TableRow>
-            ) : filtered.map((it) => {
+            ) : paginated.map((it) => {
               const cfg = STOCK_BUREAU_STATUT_CONFIG[it.statut];
               return (
                 <TableRow key={it.id} className="hover:bg-muted/30">
