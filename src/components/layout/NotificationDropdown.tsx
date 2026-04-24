@@ -1,4 +1,4 @@
-import { Bell, Check, CheckCheck, Trash2, FileText, Wrench, ShieldCheck, Info } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, FileText, Wrench, ShieldCheck, Info, PackageCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,6 +13,8 @@ const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string }> = {
   INFO: { icon: Info, color: "text-info" },
   ALERTE: { icon: Wrench, color: "text-warning" },
   VALIDATION: { icon: ShieldCheck, color: "text-primary" },
+  CONSOLIDATION: { icon: PackageCheck, color: "text-success" },
+  RAPPEL: { icon: Bell, color: "text-warning" },
   SYSTEM: { icon: FileText, color: "text-muted-foreground" },
 };
 
