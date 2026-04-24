@@ -204,12 +204,13 @@ export async function exportBilanPdf({ rows, stats, periodeLabel, from, to, comp
   doc.save(`flux-operations-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.pdf`);
 }
 
-export function exportBilanExcel({ rows, stats, periodeLabel, from, to }: BilanExportOptions) {
+export function exportBilanExcel({ rows, stats, periodeLabel, from, to, company }: BilanExportOptions) {
   const wb = XLSX.utils.book_new();
 
   // Feuille synthèse
   const synthese = [
-    ["Bilan par période"],
+    ["Flux Opérations — Bilan par période"],
+    [company?.nom || "CIVOTECH"],
     ["Période", periodeLabel],
     ["Plage", periodeRange({ from, to })],
     ["Exporté le", format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr })],
