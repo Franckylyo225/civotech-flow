@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format, subDays, subWeeks, isAfter, parseISO } from "date-fns";
@@ -99,6 +100,8 @@ export default function MaintenanceTab({ canManage }: Props) {
     return matchSearch && matchStatut && matchPeriod;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterStatut, filterPeriod, customFrom, customTo]);
+
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
   const openEdit = (m: MaintenanceRow) => {
     setEditingId(m.id);
@@ -160,7 +163,7 @@ export default function MaintenanceTab({ canManage }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: Wrench, value: stats.total, label: "Total", color: "primary" },
+          { icon: Wrench, value: stats.total, label: "Total maintenances", color: "primary" },
           { icon: Clock, value: stats.planifiee, label: "Planifiées", color: "info" },
           { icon: AlertTriangle, value: stats.enCours, label: "En cours", color: "warning" },
           { icon: CheckCircle2, value: `${stats.coutTotal.toLocaleString()} F`, label: "Coût total", color: "success" },
@@ -259,7 +262,7 @@ export default function MaintenanceTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(m => {
+              {pagination.paginated.map(m => {
                 const typeCfg = TYPE_MAINTENANCE_CONFIG[m.type];
                 const statutCfg = STATUT_MAINTENANCE_CONFIG[m.statut];
                 return (
@@ -301,6 +304,17 @@ export default function MaintenanceTab({ canManage }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="maintenances"
+          />
         </CardContent>
       </Card>
 

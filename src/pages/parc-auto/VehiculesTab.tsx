@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -52,6 +53,8 @@ export default function VehiculesTab({ canManage }: Props) {
     const matchStatut = filterStatut === "ALL" || c.statut === filterStatut;
     return matchSearch && matchStatut;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterStatut]);
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
   const openEdit = (c: CamionRow) => {
@@ -178,7 +181,7 @@ export default function VehiculesTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(camion => {
+              {pagination.paginated.map(camion => {
                 const cfg = STATUT_CAMION_CONFIG[camion.statut];
                 return (
                   <TableRow key={camion.id} className="cursor-pointer" onClick={() => setDetailCamion(camion)}>
@@ -219,6 +222,17 @@ export default function VehiculesTab({ canManage }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="véhicules"
+          />
         </CardContent>
       </Card>
 

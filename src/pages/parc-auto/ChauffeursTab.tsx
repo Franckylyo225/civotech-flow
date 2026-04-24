@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format, differenceInDays } from "date-fns";
@@ -42,6 +43,8 @@ export default function ChauffeursTab({ canManage }: Props) {
     const matchStatut = filterStatut === "ALL" || c.statut === filterStatut;
     return matchSearch && matchStatut;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterStatut]);
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
   const openEdit = (c: ChauffeurRow) => {
@@ -159,7 +162,7 @@ export default function ChauffeursTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(c => {
+              {pagination.paginated.map(c => {
                 const cfg = STATUT_CHAUFFEUR_CONFIG[c.statut];
                 const permisAlert = getPermisAlert(c.date_expiration_permis);
                 return (
@@ -209,6 +212,17 @@ export default function ChauffeursTab({ canManage }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="chauffeurs"
+          />
         </CardContent>
       </Card>
 
