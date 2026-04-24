@@ -138,9 +138,10 @@ export function useOperationsStore() {
   useEffect(() => {
     fetchAll();
 
-    // Realtime subscription
-    const channel = supabase
-      .channel("operations-changes")
+    // Realtime subscription — unique channel name per instance to avoid
+    // "cannot add postgres_changes after subscribe()" when re-mounting.
+    const channel = supabase.channel(`operations-changes-${Math.random().toString(36).slice(2)}`);
+    channel
       .on("postgres_changes", { event: "*", schema: "public", table: "operations" }, () => {
         fetchAll();
       })
