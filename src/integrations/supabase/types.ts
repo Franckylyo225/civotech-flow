@@ -1613,6 +1613,7 @@ export type Database = {
         | "ASSISTANTE"
         | "MAINTENANCE"
         | "ADMIN"
+        | "ADMIN_VENTES"
       categorie_charge:
         | "LOYER"
         | "SALAIRES"
@@ -1666,6 +1667,7 @@ export type Database = {
         | "EN_COURS"
         | "TERMINEE"
         | "ARCHIVEE"
+        | "CONSOLIDEE"
       type_compte: "BANQUE" | "CAISSE"
       type_evenement: "REUNION" | "RDV" | "DEPLACEMENT" | "RAPPEL" | "AUTRE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
@@ -1807,6 +1809,7 @@ export const Constants = {
         "ASSISTANTE",
         "MAINTENANCE",
         "ADMIN",
+        "ADMIN_VENTES",
       ],
       categorie_charge: [
         "LOYER",
@@ -1867,6 +1870,7 @@ export const Constants = {
         "EN_COURS",
         "TERMINEE",
         "ARCHIVEE",
+        "CONSOLIDEE",
       ],
       type_compte: ["BANQUE", "CAISSE"],
       type_evenement: ["REUNION", "RDV", "DEPLACEMENT", "RAPPEL", "AUTRE"],
