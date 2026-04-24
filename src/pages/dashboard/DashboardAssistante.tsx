@@ -98,7 +98,7 @@ export default function DashboardAssistante() {
           .order("created_at", { ascending: false }).limit(3),
       ]);
 
-      const siATraiter = siAttRes.data?.filter((s: any) => s.status === "EN_ATTENTE").length || 0;
+      const siATraiter = siAttRes.data?.filter((s: any) => s.status === "received" || s.status === "pending_DG").length || 0;
       const siMontant = (siAttRes.data || []).reduce((s: number, f: any) => s + Number(f.amount || 0), 0);
 
       setStats({
