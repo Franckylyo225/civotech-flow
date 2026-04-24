@@ -124,12 +124,13 @@ export default function AdministrationVentesModule() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Administration des Ventes</h1>
-        <p className="text-sm text-muted-foreground">Consolidation et bilan des opérations livrées</p>
+        <p className="text-sm text-muted-foreground">Consolidation, facturation et bilan des opérations</p>
       </div>
 
       <Tabs defaultValue="consolidation" className="space-y-4">
         <TabsList>
           <TabsTrigger value="consolidation">Consolidation</TabsTrigger>
+          <TabsTrigger value="factures" className="gap-1.5"><Receipt className="h-3.5 w-3.5" />Factures</TabsTrigger>
           <TabsTrigger value="bilan">Bilan par période</TabsTrigger>
         </TabsList>
 
