@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { Search, Plus, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
 
 function fmt(v: number) { return v.toLocaleString("fr-FR"); }
