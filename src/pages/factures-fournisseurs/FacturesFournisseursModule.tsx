@@ -18,6 +18,7 @@ import { DGApprovalDialog } from "./DGApprovalDialog";
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
@@ -274,6 +275,7 @@ export default function FacturesFournisseursModule() {
                 loading={loading}
                 supplierMap={supplierMap}
                 onRowClick={openDetail}
+                resetDeps={[search, statusFilter, supplierFilter, echeanceFilter]}
                 actions={(inv) => (
                   <div className="flex gap-1 justify-end">
                     {isAssistante && inv.status === "received" && (
@@ -447,82 +449,117 @@ interface InvoiceTableProps {
   selectable?: boolean;
   selected?: Set<string>;
   onToggle?: (id: string) => void;
+  /** Active la pagination interne (true par défaut). */
+  paginate?: boolean;
+  pageSize?: number;
+  /** Dépendances qui doivent réinitialiser la page 1 (ex: filtres parents). */
+  resetDeps?: unknown[];
 }
 
-export function InvoiceTable({ rows, loading, supplierMap, onRowClick, actions, selectable, selected, onToggle }: InvoiceTableProps) {
+export function InvoiceTable({
+  rows,
+  loading,
+  supplierMap,
+  onRowClick,
+  actions,
+  selectable,
+  selected,
+  onToggle,
+  paginate = true,
+  pageSize = 25,
+  resetDeps = [],
+}: InvoiceTableProps) {
+  const pagination = usePagination(rows, pageSize, [rows.length, ...resetDeps]);
+  const visibleRows = paginate ? pagination.paginated : rows;
+
   if (loading) return <p className="text-sm text-muted-foreground py-8 text-center">Chargement…</p>;
   if (rows.length === 0) return <p className="text-sm text-muted-foreground py-8 text-center">Aucune facture</p>;
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {selectable && <TableHead className="w-[40px]"></TableHead>}
-          <TableHead>Référence</TableHead>
-          <TableHead>Fournisseur</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Échéance</TableHead>
-          <TableHead className="text-right">Montant</TableHead>
-          <TableHead>Statut</TableHead>
-          {actions && <TableHead className="text-right">Actions</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map(inv => {
-          const cfg = STATUS_CONFIG[inv.status as SupplierInvoiceStatus];
-          const lvl = getEcheanceLevel(inv.due_date, inv.status);
-          const isOverdue = lvl === "overdue";
-          const isDueSoon = lvl === "due_soon";
-          let daysLabel: string | null = null;
-          if (inv.due_date && (isOverdue || isDueSoon)) {
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const due = new Date(inv.due_date); due.setHours(0, 0, 0, 0);
-            const diff = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-            daysLabel = isOverdue ? `${Math.abs(diff)}j retard` : diff === 0 ? "Aujourd'hui" : `${diff}j`;
-          }
-          return (
-            <TableRow
-              key={inv.id}
-              className={cn(
-                onRowClick ? "cursor-pointer" : "",
-                isOverdue && "bg-destructive/5 hover:bg-destructive/10",
-                isDueSoon && !isOverdue && "bg-warning/5 hover:bg-warning/10"
-              )}
-              onClick={() => onRowClick?.(inv.id)}
-            >
-              {selectable && (
-                <TableCell onClick={e => e.stopPropagation()}>
-                  <Checkbox checked={selected?.has(inv.id) || false} onCheckedChange={() => onToggle?.(inv.id)} />
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {selectable && <TableHead className="w-[40px]"></TableHead>}
+            <TableHead>Référence</TableHead>
+            <TableHead>Fournisseur</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Échéance</TableHead>
+            <TableHead className="text-right">Montant</TableHead>
+            <TableHead>Statut</TableHead>
+            {actions && <TableHead className="text-right">Actions</TableHead>}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {visibleRows.map(inv => {
+            const cfg = STATUS_CONFIG[inv.status as SupplierInvoiceStatus];
+            const lvl = getEcheanceLevel(inv.due_date, inv.status);
+            const isOverdue = lvl === "overdue";
+            const isDueSoon = lvl === "due_soon";
+            let daysLabel: string | null = null;
+            if (inv.due_date && (isOverdue || isDueSoon)) {
+              const today = new Date(); today.setHours(0, 0, 0, 0);
+              const due = new Date(inv.due_date); due.setHours(0, 0, 0, 0);
+              const diff = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+              daysLabel = isOverdue ? `${Math.abs(diff)}j retard` : diff === 0 ? "Aujourd'hui" : `${diff}j`;
+            }
+            return (
+              <TableRow
+                key={inv.id}
+                className={cn(
+                  onRowClick ? "cursor-pointer" : "",
+                  isOverdue && "bg-destructive/5 hover:bg-destructive/10",
+                  isDueSoon && !isOverdue && "bg-warning/5 hover:bg-warning/10"
+                )}
+                onClick={() => onRowClick?.(inv.id)}
+              >
+                {selectable && (
+                  <TableCell onClick={e => e.stopPropagation()}>
+                    <Checkbox checked={selected?.has(inv.id) || false} onCheckedChange={() => onToggle?.(inv.id)} />
+                  </TableCell>
+                )}
+                <TableCell className="font-mono text-xs">{inv.reference}</TableCell>
+                <TableCell className="font-medium">{supplierMap[inv.supplier_id] || "—"}</TableCell>
+                <TableCell>{fmtDate(inv.invoice_date)}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={cn(isOverdue && "text-destructive font-semibold")}>{fmtDate(inv.due_date)}</span>
+                    {isOverdue && (
+                      <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-[10px] gap-0.5">
+                        <AlertTriangle className="h-2.5 w-2.5" /> {daysLabel}
+                      </Badge>
+                    )}
+                    {isDueSoon && (
+                      <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px] gap-0.5">
+                        <Clock className="h-2.5 w-2.5" /> {daysLabel}
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
-              )}
-              <TableCell className="font-mono text-xs">{inv.reference}</TableCell>
-              <TableCell className="font-medium">{supplierMap[inv.supplier_id] || "—"}</TableCell>
-              <TableCell>{fmtDate(inv.invoice_date)}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={cn(isOverdue && "text-destructive font-semibold")}>{fmtDate(inv.due_date)}</span>
-                  {isOverdue && (
-                    <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-[10px] gap-0.5">
-                      <AlertTriangle className="h-2.5 w-2.5" /> {daysLabel}
-                    </Badge>
-                  )}
-                  {isDueSoon && (
-                    <Badge variant="outline" className="border-0 bg-warning/10 text-warning text-[10px] gap-0.5">
-                      <Clock className="h-2.5 w-2.5" /> {daysLabel}
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell className="text-right font-medium">{fmt(inv.amount)}</TableCell>
-              <TableCell>
-                <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
-                  {cfg.label}
-                </span>
-              </TableCell>
-              {actions && <TableCell className="text-right">{actions(inv)}</TableCell>}
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                <TableCell className="text-right font-medium">{fmt(inv.amount)}</TableCell>
+                <TableCell>
+                  <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium", cfg.bg, cfg.color)}>
+                    {cfg.label}
+                  </span>
+                </TableCell>
+                {actions && <TableCell className="text-right">{actions(inv)}</TableCell>}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      {paginate && (
+        <DataTablePagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          totalPages={pagination.totalPages}
+          startIdx={pagination.startIdx}
+          endIdx={pagination.endIdx}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+          itemLabel="factures"
+        />
+      )}
+    </>
   );
 }
