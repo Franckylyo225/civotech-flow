@@ -49,14 +49,40 @@ export default function StockBureauPage() {
   const [rejectItem, setRejectItem] = useState<StockBureauRow | null>(null);
   const [deleteItem, setDeleteItem] = useState<StockBureauRow | null>(null);
   const [statutFilter, setStatutFilter] = useState<string>("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
 
   const isDG = user?.role === "DG";
   const isAssistante = user?.role === "ASSISTANTE";
 
   const filtered = useMemo(() => {
-    if (statutFilter === "ALL") return items;
-    return items.filter((i) => i.statut === statutFilter);
-  }, [items, statutFilter]);
+    const term = searchTerm.trim().toLowerCase();
+    const debut = dateDebut ? new Date(dateDebut + "T00:00:00") : null;
+    const fin = dateFin ? new Date(dateFin + "T23:59:59") : null;
+    return items.filter((i) => {
+      if (statutFilter !== "ALL" && i.statut !== statutFilter) return false;
+      if (term) {
+        const hay = `${i.designation} ${i.reference}`.toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      if (debut || fin) {
+        const d = new Date(i.created_at);
+        if (debut && d < debut) return false;
+        if (fin && d > fin) return false;
+      }
+      return true;
+    });
+  }, [items, statutFilter, searchTerm, dateDebut, dateFin]);
+
+  const resetFilters = () => {
+    setStatutFilter("ALL");
+    setSearchTerm("");
+    setDateDebut("");
+    setDateFin("");
+  };
+
+  const hasActiveFilters = statutFilter !== "ALL" || searchTerm || dateDebut || dateFin;
 
   const stats = useMemo(() => ({
     total: items.length,
