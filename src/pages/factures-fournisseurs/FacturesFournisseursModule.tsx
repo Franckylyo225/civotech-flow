@@ -58,6 +58,7 @@ export default function FacturesFournisseursModule() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [supplierFilter, setSupplierFilter] = useState<string>("all");
+  const [echeanceFilter, setEcheanceFilter] = useState<string>("all"); // all | overdue | due_soon | open
 
   const [createOpen, setCreateOpen] = useState(false);
   const [batchOpen, setBatchOpen] = useState(false);
@@ -76,6 +77,12 @@ export default function FacturesFournisseursModule() {
     return invoices.filter(i => {
       if (statusFilter !== "all" && i.status !== statusFilter) return false;
       if (supplierFilter !== "all" && i.supplier_id !== supplierFilter) return false;
+      if (echeanceFilter !== "all") {
+        const lvl = getEcheanceLevel(i.due_date, i.status);
+        if (echeanceFilter === "overdue" && lvl !== "overdue") return false;
+        if (echeanceFilter === "due_soon" && lvl !== "due_soon") return false;
+        if (echeanceFilter === "open" && !["overdue", "due_soon", "ok"].includes(lvl)) return false;
+      }
       if (search) {
         const s = search.toLowerCase();
         const supName = (supplierMap[i.supplier_id] || "").toLowerCase();
@@ -83,7 +90,7 @@ export default function FacturesFournisseursModule() {
       }
       return true;
     });
-  }, [invoices, search, statusFilter, supplierFilter, supplierMap]);
+  }, [invoices, search, statusFilter, supplierFilter, echeanceFilter, supplierMap]);
 
   // Sous-ensembles métier
   const inProcessing = invoices.filter(i => i.status === "processing");
@@ -91,11 +98,23 @@ export default function FacturesFournisseursModule() {
   const approvedToPay = invoices.filter(i => i.status === "approved_for_payment");
   const chequesReady = invoices.filter(i => i.status === "cheque_ready");
 
+  const overdueInvoices = useMemo(
+    () => invoices.filter(i => getEcheanceLevel(i.due_date, i.status) === "overdue"),
+    [invoices]
+  );
+  const dueSoonInvoices = useMemo(
+    () => invoices.filter(i => getEcheanceLevel(i.due_date, i.status) === "due_soon"),
+    [invoices]
+  );
+
   const stats = {
     total: invoices.length,
     enAttenteDG: pendingDG.length,
     aPayer: approvedToPay.length,
     chequesARemettre: chequesReady.length,
+    enRetard: overdueInvoices.length,
+    bientotEchues: dueSoonInvoices.length,
+    montantRetard: overdueInvoices.reduce((s, i) => s + Number(i.amount || 0), 0),
   };
 
   const openDetail = (id: string) => {
