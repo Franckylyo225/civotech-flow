@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 
 interface DevisListPageProps {
@@ -55,6 +56,8 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
     const matchStatut = statutFilter === "ALL" || d.statut === statutFilter;
     return matchSearch && matchStatut;
   });
+
+  const pagination = usePagination(filtered, viewMode === "grid" ? 12 : 25, [search, statutFilter, showArchived, viewMode]);
 
   const totalCA = filtered.reduce((s, d) => s + d.montantTotal, 0);
   const isCommercialOrDG = user?.role === "COMMERCIAL" || user?.role === "DG";
@@ -182,8 +185,9 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
 
       {/* Grid view */}
       {viewMode === "grid" ? (
+        <>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((devis) => {
+          {pagination.paginated.map((devis) => {
             const actions = getQuickActions(devis.statut, user?.role);
             return (
               <Card key={devis.id} className="group hover:shadow-md transition-shadow">
@@ -238,6 +242,24 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
             </div>
           )}
         </div>
+        {filtered.length > 0 && (
+          <Card>
+            <DataTablePagination
+              page={pagination.page}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              totalPages={pagination.totalPages}
+              startIdx={pagination.startIdx}
+              endIdx={pagination.endIdx}
+              onPageChange={pagination.setPage}
+              onPageSizeChange={pagination.setPageSize}
+              pageSizeOptions={[6, 12, 24, 48]}
+              itemLabel="devis"
+              className="border-t-0"
+            />
+          </Card>
+        )}
+        </>
       ) : (
         /* Table view */
         <Card className="overflow-x-auto">
@@ -254,7 +276,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((devis) => {
+              {pagination.paginated.map((devis) => {
                 const actions = getQuickActions(devis.statut, user?.role);
                 return (
                   <TableRow key={devis.id}>
@@ -296,6 +318,17 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="devis"
+          />
         </Card>
       )}
     </div>

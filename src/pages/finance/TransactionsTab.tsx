@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { Search, Plus, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
 
 function fmt(v: number) { return v.toLocaleString("fr-FR"); }
@@ -48,6 +49,8 @@ export default function TransactionsTab({ canManage }: Props) {
     }
     return true;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterType, filterCompte]);
 
   const comptesMap: Record<string, string> = {};
   comptes.forEach(c => { comptesMap[c.id] = c.nom; });
@@ -118,7 +121,7 @@ export default function TransactionsTab({ canManage }: Props) {
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune transaction</TableCell></TableRow>
-            ) : filtered.map(t => {
+            ) : pagination.paginated.map(t => {
               const cfg = TYPE_CONFIG[t.type];
               return (
                 <TableRow key={t.id}>
@@ -140,6 +143,17 @@ export default function TransactionsTab({ canManage }: Props) {
             })}
           </TableBody>
         </Table>
+        <DataTablePagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          totalPages={pagination.totalPages}
+          startIdx={pagination.startIdx}
+          endIdx={pagination.endIdx}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+          itemLabel="transactions"
+        />
       </Card>
 
       {/* Create Dialog */}

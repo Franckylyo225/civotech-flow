@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -81,6 +82,8 @@ export default function FacturesTab({ canManage }: Props) {
     const matchTo = !dateTo || emissionDate <= new Date(dateTo.getTime() + 86400000 - 1);
     return matchSearch && matchStatut && matchFrom && matchTo;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterStatut, dateFrom, dateTo]);
 
   const handleCreate = async () => {
     if (!createForm.operation_id) { toast.error("Sélectionnez une opération"); return; }
@@ -298,7 +301,7 @@ export default function FacturesTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(f => {
+              {pagination.paginated.map(f => {
                 const statutCfg = STATUT_FACTURE_CONFIG[f.statut];
                 const isOverdue = f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date();
                 const blUrl = getOpBL(f.operation_id);
@@ -361,6 +364,17 @@ export default function FacturesTab({ canManage }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="factures"
+          />
         </CardContent>
       </Card>
 

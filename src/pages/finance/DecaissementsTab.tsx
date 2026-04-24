@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -69,6 +70,8 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
     const matchTo = !dateTo || createdDate <= new Date(dateTo.getTime() + 86400000 - 1);
     return matchSearch && matchStatut && matchFrom && matchTo;
   });
+
+  const pagination = usePagination(filtered, 25, [search, filterStatut, dateFrom, dateTo]);
 
   const handleApprouver = async (id: string) => {
     try {
@@ -250,7 +253,7 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(d => {
+              {pagination.paginated.map(d => {
                 const statutCfg = STATUT_DECAISSEMENT_CONFIG[d.statut];
                 return (
                   <TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDetailDialog(d)}>
@@ -333,6 +336,17 @@ export default function DecaissementsTab({ canManage, isDG }: Props) {
               )}
             </TableBody>
           </Table>
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            startIdx={pagination.startIdx}
+            endIdx={pagination.endIdx}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="décaissements"
+          />
         </CardContent>
       </Card>
 

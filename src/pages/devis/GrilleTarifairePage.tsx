@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -49,6 +50,8 @@ export default function GrilleTarifairePage() {
     const matchCat = catFilter === "ALL" || t.categorie === catFilter;
     return matchSearch && matchCat;
   });
+
+  const pagination = usePagination(filtered, 25, [search, catFilter]);
 
   const openCreate = () => {
     setEditingTarif(null);
@@ -127,7 +130,7 @@ export default function GrilleTarifairePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((tarif) => (
+            {pagination.paginated.map((tarif) => (
               <TableRow key={tarif.id} className={cn(!tarif.actif && "opacity-50")}>
                 <TableCell className="font-medium">{tarif.designation}</TableCell>
                 <TableCell>
@@ -166,6 +169,17 @@ export default function GrilleTarifairePage() {
             )}
           </TableBody>
         </Table>
+        <DataTablePagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          totalPages={pagination.totalPages}
+          startIdx={pagination.startIdx}
+          endIdx={pagination.endIdx}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+          itemLabel="tarifs"
+        />
       </Card>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
