@@ -378,6 +378,11 @@ export default function AdministrationVentesModule() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* === ONGLET FACTURES === */}
+        <TabsContent value="factures" className="space-y-4">
+          <FacturesTab canManage={canManageFactures} />
+        </TabsContent>
       </Tabs>
     </div>
   );
