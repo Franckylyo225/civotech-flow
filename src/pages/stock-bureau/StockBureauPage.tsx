@@ -180,6 +180,7 @@ export default function StockBureauPage() {
         </div>
         <p className="text-xs text-muted-foreground mt-3">
           {filtered.length} demande{filtered.length > 1 ? "s" : ""} {hasActiveFilters && `(sur ${items.length})`}
+          {filtered.length > 0 && ` — affichage ${startIdx + 1}-${Math.min(startIdx + pageSize, filtered.length)}`}
         </p>
       </Card>
 
