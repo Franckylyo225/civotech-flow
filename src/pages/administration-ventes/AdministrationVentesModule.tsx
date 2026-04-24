@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useOperationsStore } from "@/hooks/use-operations-store";
 import { useConsolidationsStore, type DepenseConsolidation } from "@/hooks/use-consolidations-store";
 import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, formatMontantOp, formatDateShort, type CategorieDepense } from "@/types/operations";
