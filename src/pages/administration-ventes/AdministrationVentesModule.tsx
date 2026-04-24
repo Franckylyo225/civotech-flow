@@ -36,6 +36,7 @@ const STATUT_VALIDATION_CONFIG: Record<string, { label: string; color: string; b
 
 export default function AdministrationVentesModule() {
   const { user } = useAuth();
+  const { settings: companySettings } = useCompanySettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const canManageFactures = user?.role === "DG" || user?.role === "FINANCE" || user?.role === "ADMIN_VENTES" || user?.role === "ADMIN";
   const { operations, loading: opsLoading } = useOperationsStore();
