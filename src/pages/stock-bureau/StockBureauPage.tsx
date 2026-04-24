@@ -88,7 +88,7 @@ export default function StockBureauPage() {
   const hasActiveFilters = statutFilter !== "ALL" || searchTerm || dateDebut || dateFin;
 
   // Reset page when filters or page size change
-  useMemo(() => { setPage(1); }, [statutFilter, searchTerm, dateDebut, dateFin, pageSize]);
+  useEffect(() => { setPage(1); }, [statutFilter, searchTerm, dateDebut, dateFin, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
