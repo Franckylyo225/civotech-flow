@@ -298,11 +298,24 @@ export function useSupplierInvoiceHistory(invoiceId: string | null) {
       .from("supplier_invoice_history")
       .select("*")
       .eq("supplier_invoice_id", invoiceId)
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: true })
       .then(({ data }) => {
         setHistory((data || []) as SupplierInvoiceHistoryRow[]);
         setLoading(false);
       });
+
+    const channel = supabase
+      .channel(`supplier_invoice_history:${invoiceId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "supplier_invoice_history", filter: `supplier_invoice_id=eq.${invoiceId}` },
+        (payload) => {
+          setHistory((prev) => [...prev, payload.new as SupplierInvoiceHistoryRow]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [invoiceId]);
 
   return { history, loading };
