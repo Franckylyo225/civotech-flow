@@ -49,6 +49,8 @@ export default function FournisseursTab({ canManage }: Props) {
     return matchSearch && matchCat;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterCategorie]);
+
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowDialog(true); };
   const openEdit = (f: FournisseurRow) => {
     setEditingId(f.id);

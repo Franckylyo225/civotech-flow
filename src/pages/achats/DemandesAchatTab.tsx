@@ -62,6 +62,8 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     return matchSearch && matchStatut;
   });
 
+  const pagination = usePagination(filtered, 25, [search, filterStatut]);
+
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); };
   const openEdit = (d: DemandeAchatRow) => {
     setEditingId(d.id);
