@@ -169,6 +169,17 @@ export default function GrilleTarifairePage() {
             )}
           </TableBody>
         </Table>
+        <DataTablePagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          totalPages={pagination.totalPages}
+          startIdx={pagination.startIdx}
+          endIdx={pagination.endIdx}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+          itemLabel="tarifs"
+        />
       </Card>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
