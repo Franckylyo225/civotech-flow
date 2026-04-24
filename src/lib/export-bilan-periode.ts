@@ -185,7 +185,23 @@ export async function exportBilanPdf({ rows, stats, periodeLabel, from, to, comp
     margin: { left: margin, right: margin },
   });
 
-  doc.save(`bilan-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.pdf`);
+  // ── Footer paginé ──
+  const pageCount = doc.getNumberOfPages();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...PRIMARY);
+    doc.setLineWidth(0.3);
+    doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(140, 140, 140);
+    doc.text(`${company?.nom || "CIVOTECH"} — Flux Opérations`, margin, pageHeight - 7);
+    doc.text(`Page ${i} / ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: "right" });
+  }
+
+  doc.setProperties({ title: `Flux Opérations — ${periodeLabel}`, subject: "Bilan par période", author: company?.nom || "CIVOTECH" });
+  doc.save(`flux-operations-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.pdf`);
 }
 
 export function exportBilanExcel({ rows, stats, periodeLabel, from, to }: BilanExportOptions) {
