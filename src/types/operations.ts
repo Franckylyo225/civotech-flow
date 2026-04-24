@@ -1,4 +1,4 @@
-export type OperationStatut = "DEMANDE" | "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "ARCHIVEE";
+export type OperationStatut = "DEMANDE" | "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "CONSOLIDEE" | "ARCHIVEE";
 export type CategorieDepense = "CARBURANT" | "PEAGE" | "TAXE" | "AUTRE";
 export type TypeIncident = "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE";
 export type GraviteIncident = "FAIBLE" | "MOYENNE" | "CRITIQUE";
@@ -98,6 +98,7 @@ export const OPERATION_STATUT_CONFIG: Record<OperationStatut, { label: string; c
   PLANIFIEE: { label: "Planifiée", color: "text-warning", bgColor: "bg-warning/10" },
   EN_COURS: { label: "En transit", color: "text-info", bgColor: "bg-info/10" },
   TERMINEE: { label: "Livrée", color: "text-success", bgColor: "bg-success/10" },
+  CONSOLIDEE: { label: "Consolidée", color: "text-primary", bgColor: "bg-primary/10" },
   ARCHIVEE: { label: "Archivée", color: "text-muted-foreground", bgColor: "bg-muted" },
 };
 

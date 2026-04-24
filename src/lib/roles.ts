@@ -15,10 +15,11 @@ import {
   ClipboardCheck,
   HelpCircle,
   Megaphone,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
-export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN";
+export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN_VENTES" | "ADMIN";
 
 export interface NavItem {
   label: string;
@@ -35,6 +36,7 @@ export const roleLabels: Record<UserRole, string> = {
   ACHATS: "Achats",
   ASSISTANTE: "Assistante DG",
   MAINTENANCE: "Maintenance",
+  ADMIN_VENTES: "Administration des Ventes",
   ADMIN: "Administrateur",
 };
 
@@ -45,6 +47,7 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Approbations", path: "/approbations", icon: ClipboardCheck },
     { label: "Devis", path: "/devis", icon: FileText, category: "SERVICES" },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
+    { label: "Administration Ventes", path: "/administration-ventes", icon: ClipboardList, category: "SERVICES" },
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },
@@ -95,10 +98,18 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
+  ADMIN_VENTES: [
+    { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Administration Ventes", path: "/administration-ventes", icon: ClipboardList, category: "SERVICES" },
+    { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
+    { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
+  ],
   ADMIN: [
     { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
     { label: "Devis", path: "/devis", icon: FileText, category: "SERVICES" },
     { label: "Opérations", path: "/operations", icon: Truck, category: "SERVICES" },
+    { label: "Administration Ventes", path: "/administration-ventes", icon: ClipboardList, category: "SERVICES" },
     { label: "Clients", path: "/clients", icon: Users, category: "SERVICES" },
     { label: "Finance & Comptabilité", path: "/factures", icon: Wallet, category: "SERVICES" },
     { label: "Achats", path: "/achats", icon: ShoppingCart, category: "SERVICES" },

@@ -417,6 +417,59 @@ export type Database = {
         }
         Relationships: []
       }
+      consolidations_operations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_cloture: string | null
+          id: string
+          marge: number
+          notes: string | null
+          operation_id: string
+          terminee: boolean
+          total_depenses_consolidation: number
+          total_depenses_terrain: number
+          total_recettes: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          id?: string
+          marge?: number
+          notes?: string | null
+          operation_id: string
+          terminee?: boolean
+          total_depenses_consolidation?: number
+          total_depenses_terrain?: number
+          total_recettes?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          id?: string
+          marge?: number
+          notes?: string | null
+          operation_id?: string
+          terminee?: boolean
+          total_depenses_consolidation?: number
+          total_depenses_terrain?: number
+          total_recettes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consolidations_operations_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: true
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_roles: {
         Row: {
           actif: boolean
@@ -633,6 +686,69 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "depenses_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      depenses_consolidation: {
+        Row: {
+          categorie: Database["public"]["Enums"]["categorie_depense"]
+          commentaire: string | null
+          consolidation_id: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          decaissement_id: string | null
+          id: string
+          libelle: string
+          montant: number
+          operation_id: string
+          statut_validation: string
+          updated_at: string
+        }
+        Insert: {
+          categorie?: Database["public"]["Enums"]["categorie_depense"]
+          commentaire?: string | null
+          consolidation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          decaissement_id?: string | null
+          id?: string
+          libelle?: string
+          montant?: number
+          operation_id: string
+          statut_validation?: string
+          updated_at?: string
+        }
+        Update: {
+          categorie?: Database["public"]["Enums"]["categorie_depense"]
+          commentaire?: string | null
+          consolidation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          decaissement_id?: string | null
+          id?: string
+          libelle?: string
+          montant?: number
+          operation_id?: string
+          statut_validation?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depenses_consolidation_consolidation_id_fkey"
+            columns: ["consolidation_id"]
+            isOneToOne: false
+            referencedRelation: "consolidations_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "depenses_consolidation_operation_id_fkey"
             columns: ["operation_id"]
             isOneToOne: false
             referencedRelation: "operations"

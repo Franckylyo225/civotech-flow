@@ -20,6 +20,8 @@ export default function DashboardPage() {
       return <DashboardAchats />;
     case "MAINTENANCE":
       return <DashboardLogistique />;
+    case "ADMIN_VENTES":
+      return <DashboardCommercial />;
     default:
       // DG, ADMIN, and others
       return <DashboardDG />;
