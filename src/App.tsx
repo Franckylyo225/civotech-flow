@@ -24,6 +24,7 @@ import NotificationsPage from "@/pages/notifications/NotificationsPage";
 import CentreAidePage from "@/pages/aide/CentreAidePage";
 import AnnoncesPage from "@/pages/annonces/AnnoncesPage";
 import FacturesFournisseursModule from "@/pages/factures-fournisseurs/FacturesFournisseursModule";
+import StockBureauPage from "@/pages/stock-bureau/StockBureauPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/annonces" element={<AnnoncesPage />} />
         <Route path="/factures-fournisseurs" element={<FacturesFournisseursModule />} />
+        <Route path="/stock-bureau" element={<StockBureauPage />} />
         <Route path="/aide" element={<CentreAidePage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
