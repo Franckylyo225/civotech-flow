@@ -257,6 +257,15 @@ export default function FacturesFournisseursModule() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Select value={echeanceFilter} onValueChange={setEcheanceFilter}>
+                  <SelectTrigger className="w-[200px]"><SelectValue placeholder="Échéance" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes échéances</SelectItem>
+                    <SelectItem value="overdue">⚠ Échéance dépassée</SelectItem>
+                    <SelectItem value="due_soon">À échoir (≤ 3j)</SelectItem>
+                    <SelectItem value="open">Toutes ouvertes</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
             <CardContent>
