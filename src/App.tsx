@@ -11,6 +11,7 @@ import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 import CalendrierPage from "@/pages/calendrier/CalendrierPage";
 import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
+import AdministrationVentesModule from "@/pages/administration-ventes/AdministrationVentesModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import ClientsModule from "@/pages/clients/ClientsModule";
 import AchatsModule from "@/pages/achats/AchatsModule";
@@ -50,6 +51,7 @@ function AppRoutes() {
         <Route path="/approbations" element={<ApprobationsPage />} />
         <Route path="/devis/*" element={<DevisModule />} />
         <Route path="/operations" element={<OperationsModule />} />
+        <Route path="/administration-ventes" element={<AdministrationVentesModule />} />
         <Route path="/factures" element={<FinanceModule />} />
         <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
