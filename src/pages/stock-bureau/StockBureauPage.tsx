@@ -126,23 +126,50 @@ export default function StockBureauPage() {
 
       {/* Filters */}
       <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <Label className="text-sm">Statut :</Label>
-          <Select value={statutFilter} onValueChange={setStatutFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Tous statuts</SelectItem>
-              {Object.entries(STOCK_BUREAU_STATUT_CONFIG).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-muted-foreground ml-auto">
-            {filtered.length} demande{filtered.length > 1 ? "s" : ""}
-          </span>
+        <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-end">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Recherche</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Désignation ou référence (SB-2026-0001)…"
+                className="pl-8"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Du</Label>
+            <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} className="w-[160px]" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Au</Label>
+            <Input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} className="w-[160px]" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Statut</Label>
+            <Select value={statutFilter} onValueChange={setStatutFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tous statuts</SelectItem>
+                {Object.entries(STOCK_BUREAU_STATUT_CONFIG).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1">
+              <RotateCcw className="h-3.5 w-3.5" /> Réinitialiser
+            </Button>
+          )}
         </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          {filtered.length} demande{filtered.length > 1 ? "s" : ""} {hasActiveFilters && `(sur ${items.length})`}
+        </p>
       </Card>
 
       {/* Table */}
