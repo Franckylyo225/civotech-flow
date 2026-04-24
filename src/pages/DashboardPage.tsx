@@ -4,6 +4,7 @@ import DashboardCommercial from "./dashboard/DashboardCommercial";
 import DashboardLogistique from "./dashboard/DashboardLogistique";
 import DashboardFinance from "./dashboard/DashboardFinance";
 import DashboardAchats from "./dashboard/DashboardAchats";
+import DashboardAssistante from "./dashboard/DashboardAssistante";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -18,6 +19,8 @@ export default function DashboardPage() {
       return <DashboardFinance />;
     case "ACHATS":
       return <DashboardAchats />;
+    case "ASSISTANTE":
+      return <DashboardAssistante />;
     case "MAINTENANCE":
       return <DashboardLogistique />;
     case "ADMIN_VENTES":
@@ -27,3 +30,4 @@ export default function DashboardPage() {
       return <DashboardDG />;
   }
 }
+
