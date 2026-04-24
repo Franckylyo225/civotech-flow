@@ -57,6 +57,8 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
     return matchSearch && matchStatut;
   });
 
+  const pagination = usePagination(filtered, viewMode === "grid" ? 12 : 25, [search, statutFilter, showArchived, viewMode]);
+
   const totalCA = filtered.reduce((s, d) => s + d.montantTotal, 0);
   const isCommercialOrDG = user?.role === "COMMERCIAL" || user?.role === "DG";
 
