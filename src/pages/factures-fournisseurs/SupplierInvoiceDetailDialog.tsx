@@ -1,0 +1,129 @@
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, FileText, History } from "lucide-react";
+import {
+  useSupplierInvoicesStore,
+  useSupplierInvoiceHistory,
+  STATUS_CONFIG,
+  PAYMENT_METHOD_LABELS,
+  type SupplierInvoiceStatus,
+} from "@/hooks/use-supplier-invoices-store";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  invoiceId: string | null;
+  onClose: () => void;
+  supplierMap: Record<string, string>;
+}
+
+const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
+const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
+const fmtDT = (d: string) => new Date(d).toLocaleString("fr-FR");
+
+export function SupplierInvoiceDetailDialog({ invoiceId, onClose, supplierMap }: Props) {
+  const { invoices, getFileUrl } = useSupplierInvoicesStore();
+  const inv = invoices.find(i => i.id === invoiceId);
+  const { history } = useSupplierInvoiceHistory(invoiceId);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (inv?.file_url) {
+      getFileUrl(inv.file_url).then(setFileUrl);
+    } else {
+      setFileUrl(null);
+    }
+  }, [inv?.file_url, getFileUrl]);
+
+  if (!invoiceId || !inv) return null;
+  const cfg = STATUS_CONFIG[inv.status as SupplierInvoiceStatus];
+
+  return (
+    <Dialog open={!!invoiceId} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" /> Facture {inv.reference}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className={cn("inline-block rounded-full px-3 py-1 text-xs font-medium", cfg.bg, cfg.color)}>
+              {cfg.label}
+            </span>
+            {inv.payment_method && (
+              <span className="text-xs text-muted-foreground">
+                Paiement : {PAYMENT_METHOD_LABELS[inv.payment_method]}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <Info label="Fournisseur" value={supplierMap[inv.supplier_id] || "—"} />
+            <Info label="Montant" value={fmt(inv.amount)} />
+            <Info label="Date facture" value={fmtDate(inv.invoice_date)} />
+            <Info label="Date échéance" value={fmtDate(inv.due_date)} />
+          </div>
+
+          {inv.description && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-1">Description</p>
+              <p className="text-sm">{inv.description}</p>
+            </div>
+          )}
+
+          {fileUrl && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-1">Document</p>
+              <Button asChild variant="outline" size="sm">
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <ExternalLink className="h-4 w-4" /> Ouvrir le fichier
+                </a>
+              </Button>
+            </div>
+          )}
+
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+              <History className="h-3.5 w-3.5" /> Historique
+            </p>
+            <div className="space-y-2">
+              {history.length === 0 && <p className="text-xs text-muted-foreground">Aucun événement.</p>}
+              {history.map(h => {
+                const newCfg = STATUS_CONFIG[h.nouveau_statut];
+                return (
+                  <div key={h.id} className="flex items-start gap-3 border-l-2 border-border pl-3 py-1">
+                    <div className="flex-1">
+                      <p className="text-sm">
+                        {h.ancien_statut ? (
+                          <>
+                            <span className="text-muted-foreground">{STATUS_CONFIG[h.ancien_statut].label}</span>
+                            <span className="text-muted-foreground"> → </span>
+                          </>
+                        ) : null}
+                        <span className={cn("font-medium", newCfg.color)}>{newCfg.label}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {h.user_nom || "Système"} • {fmtDT(h.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium text-foreground">{value}</p>
+    </div>
+  );
+}
