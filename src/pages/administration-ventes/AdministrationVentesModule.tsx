@@ -392,6 +392,12 @@ export default function AdministrationVentesModule() {
                     </PopoverContent>
                   </Popover>
                 )}
+                <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={opsBilan.length === 0} className="gap-1.5">
+                  <FileText className="h-3.5 w-3.5" /> PDF
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={opsBilan.length === 0} className="gap-1.5">
+                  <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
