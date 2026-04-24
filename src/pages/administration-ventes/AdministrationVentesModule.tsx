@@ -155,7 +155,7 @@ export default function AdministrationVentesModule() {
         <p className="text-sm text-muted-foreground">Consolidation, facturation et bilan des opérations</p>
       </div>
 
-      <Tabs defaultValue="consolidation" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="consolidation">Consolidation</TabsTrigger>
           <TabsTrigger value="factures" className="gap-1.5"><Receipt className="h-3.5 w-3.5" />Factures</TabsTrigger>
@@ -179,7 +179,7 @@ export default function AdministrationVentesModule() {
                   return (
                     <button
                       key={op.id}
-                      onClick={() => setSelectedOpId(op.id)}
+                      onClick={() => handleSelectOp(op.id)}
                       className={cn(
                         "w-full text-left px-4 py-3 border-b border-border transition-colors",
                         isSel ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/50 border-l-2 border-l-transparent"
@@ -389,7 +389,7 @@ export default function AdministrationVentesModule() {
                       const m = op.montantDevis - dt - dc;
                       const cfg = OPERATION_STATUT_CONFIG[op.statut];
                       return (
-                        <TableRow key={op.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setSelectedOpId(op.id)}>
+                        <TableRow key={op.id} className="cursor-pointer hover:bg-muted/30" onClick={() => handleSelectOp(op.id)}>
                           <TableCell className="text-xs font-medium">{op.reference}</TableCell>
                           <TableCell className="text-xs">{op.clientNom}</TableCell>
                           <TableCell className="text-xs">{op.dateLivraisonReelle ? formatDateShort(op.dateLivraisonReelle) : "—"}</TableCell>
