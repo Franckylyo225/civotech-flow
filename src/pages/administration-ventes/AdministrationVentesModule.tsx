@@ -32,6 +32,8 @@ const STATUT_VALIDATION_CONFIG: Record<string, { label: string; color: string; b
 };
 
 export default function AdministrationVentesModule() {
+  const { user } = useAuth();
+  const canManageFactures = user?.role === "DG" || user?.role === "FINANCE" || user?.role === "ADMIN_VENTES" || user?.role === "ADMIN";
   const { operations, loading: opsLoading } = useOperationsStore();
   const { consolidations, depenses, loading: consLoading, addDepense, deleteDepense, terminerConsolidation } = useConsolidationsStore();
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
