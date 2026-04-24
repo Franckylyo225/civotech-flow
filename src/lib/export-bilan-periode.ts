@@ -23,12 +23,22 @@ export interface BilanStats {
   marge: number;
 }
 
+export interface BilanCompanyInfo {
+  nom?: string;
+  logo_url?: string;
+  adresse?: string;
+  telephone?: string;
+  email?: string;
+  site_web?: string;
+}
+
 export interface BilanExportOptions {
   rows: BilanRow[];
   stats: BilanStats;
   periodeLabel: string;
   from?: Date;
   to?: Date;
+  company?: BilanCompanyInfo;
 }
 
 function periodeRange({ from, to }: { from?: Date; to?: Date }) {
@@ -36,27 +46,106 @@ function periodeRange({ from, to }: { from?: Date; to?: Date }) {
   return `${format(from, "dd/MM/yyyy", { locale: fr })} → ${format(to, "dd/MM/yyyy", { locale: fr })}`;
 }
 
-export function exportBilanPdf({ rows, stats, periodeLabel, from, to }: BilanExportOptions) {
+async function loadImageAsDataUrl(src: string): Promise<{ data: string; w: number; h: number } | null> {
+  try {
+    const res = await fetch(src);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const data: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onloadend = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const dims = await new Promise<{ w: number; h: number }>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.width, h: img.height });
+      img.onerror = () => resolve({ w: 0, h: 0 });
+      img.src = data;
+    });
+    return { data, w: dims.w, h: dims.h };
+  } catch {
+    return null;
+  }
+}
+
+export async function exportBilanPdf({ rows, stats, periodeLabel, from, to, company }: BilanExportOptions) {
   const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
 
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(16, 185, 129);
-  doc.text("Bilan par période", margin, 20);
+  // Brand colors (primary green from app)
+  const PRIMARY: [number, number, number] = [16, 185, 129];
 
-  doc.setFontSize(10);
+  // ── Top brand band ──
+  doc.setFillColor(...PRIMARY);
+  doc.rect(0, 0, pageWidth, 4, "F");
+
+  // ── Logo ──
+  const logoSrc = company?.logo_url && company.logo_url.length > 0 ? company.logo_url : "/logo-civotech.png";
+  const logo = await loadImageAsDataUrl(logoSrc);
+  let textStartX = margin;
+  if (logo && logo.w > 0 && logo.h > 0) {
+    const targetH = 14;
+    const targetW = Math.min(48, (logo.w / logo.h) * targetH);
+    try {
+      const ext = logo.data.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
+      doc.addImage(logo.data, ext, margin, 12, targetW, targetH);
+      textStartX = margin + targetW + 6;
+    } catch { /* ignore */ }
+  }
+
+  // Company name
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(30, 30, 30);
+  doc.text(company?.nom || "CIVOTECH", textStartX, 18);
+
+  // Company contact line
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(110, 110, 110);
+  const contactBits: string[] = [];
+  if (company?.adresse) contactBits.push(company.adresse);
+  if (company?.telephone) contactBits.push(company.telephone);
+  if (company?.email) contactBits.push(company.email);
+  if (company?.site_web) contactBits.push(company.site_web);
+  if (contactBits.length === 0) contactBits.push("Transport & Logistique");
+  doc.text(contactBits.join("  •  "), textStartX, 23);
+
+  // ── Document title (right) ──
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(...PRIMARY);
+  doc.text("Flux Opérations", pageWidth - margin, 18, { align: "right" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(110, 110, 110);
+  doc.text("Bilan par période", pageWidth - margin, 23, { align: "right" });
+
+  // ── Separator ──
+  doc.setDrawColor(...PRIMARY);
+  doc.setLineWidth(0.6);
+  doc.line(margin, 30, pageWidth - margin, 30);
+
+  // ── Period meta ──
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
   doc.setTextColor(60, 60, 60);
-  doc.text(`Période : ${periodeLabel}`, margin, 28);
-  doc.text(periodeRange({ from, to }), margin, 33);
+  doc.text(`Période : ${periodeLabel}`, margin, 38);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(90, 90, 90);
+  doc.text(periodeRange({ from, to }), margin, 43);
 
   doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  doc.text(`Exporté le ${format(new Date(), "dd/MM/yyyy à HH:mm", { locale: fr })}`, margin, 39);
+  doc.setTextColor(140, 140, 140);
+  doc.text(`Exporté le ${format(new Date(), "dd/MM/yyyy à HH:mm", { locale: fr })}`, pageWidth - margin, 43, { align: "right" });
 
   // KPI summary
   autoTable(doc, {
-    startY: 44,
+    startY: 49,
     head: [["Indicateur", "Valeur"]],
     body: [
       ["Opérations", `${stats.nbOps} (${stats.nbConsolidees} consolidées)`],
@@ -96,15 +185,32 @@ export function exportBilanPdf({ rows, stats, periodeLabel, from, to }: BilanExp
     margin: { left: margin, right: margin },
   });
 
-  doc.save(`bilan-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.pdf`);
+  // ── Footer paginé ──
+  const pageCount = doc.getNumberOfPages();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...PRIMARY);
+    doc.setLineWidth(0.3);
+    doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(140, 140, 140);
+    doc.text(`${company?.nom || "CIVOTECH"} — Flux Opérations`, margin, pageHeight - 7);
+    doc.text(`Page ${i} / ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: "right" });
+  }
+
+  doc.setProperties({ title: `Flux Opérations — ${periodeLabel}`, subject: "Bilan par période", author: company?.nom || "CIVOTECH" });
+  doc.save(`flux-operations-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.pdf`);
 }
 
-export function exportBilanExcel({ rows, stats, periodeLabel, from, to }: BilanExportOptions) {
+export function exportBilanExcel({ rows, stats, periodeLabel, from, to, company }: BilanExportOptions) {
   const wb = XLSX.utils.book_new();
 
   // Feuille synthèse
   const synthese = [
-    ["Bilan par période"],
+    ["Flux Opérations — Bilan par période"],
+    [company?.nom || "CIVOTECH"],
     ["Période", periodeLabel],
     ["Plage", periodeRange({ from, to })],
     ["Exporté le", format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr })],
@@ -140,5 +246,5 @@ export function exportBilanExcel({ rows, stats, periodeLabel, from, to }: BilanE
   ];
   XLSX.utils.book_append_sheet(wb, wsDetail, "Détail");
 
-  XLSX.writeFile(wb, `bilan-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.xlsx`);
+  XLSX.writeFile(wb, `flux-operations-${periodeLabel.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyyMMdd-HHmm")}.xlsx`);
 }
