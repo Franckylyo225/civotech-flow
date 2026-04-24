@@ -83,9 +83,9 @@ export default function DashboardAssistante() {
         supabase.from("stock_bureau_demandes").select("id, reference, designation, montant, statut, urgence, created_at")
           .in("statut", ["BROUILLON", "SOUMISE_DG", "VALIDEE_DG"])
           .order("created_at", { ascending: false }).limit(5),
-        supabase.from("supplier_invoices").select("amount, status").in("status", ["EN_ATTENTE", "VALIDEE_DG"]),
+        supabase.from("supplier_invoices").select("amount, status").in("status", ["received", "pending_DG", "approved_for_payment"]),
         supabase.from("supplier_invoices").select("id, reference, amount, status, due_date, invoice_date")
-          .in("status", ["EN_ATTENTE", "VALIDEE_DG", "PROGRAMMEE"])
+          .in("status", ["received", "pending_DG", "approved_for_payment", "cheque_ready", "processing"])
           .order("due_date", { ascending: true, nullsFirst: false }).limit(5),
         supabase.from("evenements_calendrier").select("id", { count: "exact", head: true })
           .gte("date_debut", debutSemaine.toISOString())
