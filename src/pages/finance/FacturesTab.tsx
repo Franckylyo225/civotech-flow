@@ -301,7 +301,7 @@ export default function FacturesTab({ canManage }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(f => {
+              {pagination.paginated.map(f => {
                 const statutCfg = STATUT_FACTURE_CONFIG[f.statut];
                 const isOverdue = f.date_echeance && f.statut !== "PAYEE" && f.statut !== "ANNULEE" && new Date(f.date_echeance) < new Date();
                 const blUrl = getOpBL(f.operation_id);
