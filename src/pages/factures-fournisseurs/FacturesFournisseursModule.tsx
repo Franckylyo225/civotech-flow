@@ -18,6 +18,7 @@ import { DGApprovalDialog } from "./DGApprovalDialog";
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString("fr-FR") : "—";
