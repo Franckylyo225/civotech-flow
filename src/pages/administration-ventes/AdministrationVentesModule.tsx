@@ -118,6 +118,39 @@ export default function AdministrationVentesModule() {
     };
   }, [opsBilan, depenses]);
 
+  const periodeLabel = useMemo(() => {
+    if (periode === "WEEK") return "Cette semaine";
+    if (periode === "MONTH") return "Ce mois";
+    if (periode === "QUARTER") return "Ce trimestre";
+    return "Période personnalisée";
+  }, [periode]);
+
+  const buildBilanRows = (): BilanRow[] => opsBilan.map(op => {
+    const dt = op.depenses.reduce((s, d) => s + d.montant, 0);
+    const dc = depenses.filter(d => d.operationId === op.id).reduce((s, d) => s + d.montant, 0);
+    return {
+      reference: op.reference,
+      clientNom: op.clientNom,
+      dateLivraisonReelle: op.dateLivraisonReelle ?? null,
+      statut: op.statut as any,
+      recettes: op.montantDevis,
+      depenses: dt + dc,
+      marge: op.montantDevis - dt - dc,
+    };
+  });
+
+  const handleExportPdf = () => {
+    if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
+    exportBilanPdf({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
+    toast.success("Export PDF généré");
+  };
+
+  const handleExportExcel = () => {
+    if (opsBilan.length === 0) { toast.error("Aucune donnée à exporter"); return; }
+    exportBilanExcel({ rows: buildBilanRows(), stats: bilanStats, periodeLabel, from, to });
+    toast.success("Export Excel généré");
+  };
+
   const handleAddDepense = async () => {
     if (!selectedOp) return;
     if (!newDep.libelle || newDep.montant <= 0) { toast.error("Libellé et montant requis"); return; }
