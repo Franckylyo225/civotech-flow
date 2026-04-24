@@ -275,6 +275,7 @@ export default function FacturesFournisseursModule() {
                 loading={loading}
                 supplierMap={supplierMap}
                 onRowClick={openDetail}
+                resetDeps={[search, statusFilter, supplierFilter, echeanceFilter]}
                 actions={(inv) => (
                   <div className="flex gap-1 justify-end">
                     {isAssistante && inv.status === "received" && (
