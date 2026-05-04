@@ -1100,6 +1100,39 @@ export type Database = {
         }
         Relationships: []
       }
+      frais_fixes: {
+        Row: {
+          actif: boolean
+          applicable: string
+          created_at: string
+          created_by: string | null
+          designation: string
+          id: string
+          montant: number
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          applicable?: string
+          created_at?: string
+          created_by?: string | null
+          designation: string
+          id?: string
+          montant?: number
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          applicable?: string
+          created_at?: string
+          created_by?: string | null
+          designation?: string
+          id?: string
+          montant?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       grille_tarifaire: {
         Row: {
           actif: boolean
@@ -1279,6 +1312,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      majorations: {
+        Row: {
+          actif: boolean
+          applicable: string
+          created_at: string
+          created_by: string | null
+          id: string
+          motif: string
+          pct: number
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          applicable?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          motif: string
+          pct?: number
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          applicable?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          motif?: string
+          pct?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1752,6 +1818,84 @@ export type Database = {
           },
         ]
       }
+      tarifs_km: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          forfait_depart: number
+          id: string
+          prix_km: number
+          tonnage_max: number
+          updated_at: string
+          validite: string
+          vehicule: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          forfait_depart?: number
+          id?: string
+          prix_km?: number
+          tonnage_max?: number
+          updated_at?: string
+          validite?: string
+          vehicule: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          forfait_depart?: number
+          id?: string
+          prix_km?: number
+          tonnage_max?: number
+          updated_at?: string
+          validite?: string
+          vehicule?: string
+        }
+        Relationships: []
+      }
+      tarifs_zone: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          destination: string
+          id: string
+          km: number
+          tarif: number
+          tonnage: string
+          type: Database["public"]["Enums"]["tarif_type_transport"]
+          updated_at: string
+          validite: string
+          zone: Database["public"]["Enums"]["tarif_zone_code"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          destination: string
+          id?: string
+          km?: number
+          tarif?: number
+          tonnage: string
+          type?: Database["public"]["Enums"]["tarif_type_transport"]
+          updated_at?: string
+          validite?: string
+          zone: Database["public"]["Enums"]["tarif_zone_code"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          destination?: string
+          id?: string
+          km?: number
+          tarif?: number
+          tonnage?: string
+          type?: Database["public"]["Enums"]["tarif_type_transport"]
+          updated_at?: string
+          validite?: string
+          zone?: Database["public"]["Enums"]["tarif_zone_code"]
+        }
+        Relationships: []
+      }
       timeline_events: {
         Row: {
           created_at: string
@@ -2011,6 +2155,8 @@ export type Database = {
         | "paid"
         | "delivered"
         | "archived"
+      tarif_type_transport: "standard" | "express" | "special"
+      tarif_zone_code: "A" | "B" | "C" | "D"
       type_compte: "BANQUE" | "CAISSE"
       type_evenement: "REUNION" | "RDV" | "DEPLACEMENT" | "RAPPEL" | "AUTRE"
       type_incident: "PANNE" | "ACCIDENT" | "RETARD" | "VOL" | "AUTRE"
@@ -2241,6 +2387,8 @@ export const Constants = {
         "delivered",
         "archived",
       ],
+      tarif_type_transport: ["standard", "express", "special"],
+      tarif_zone_code: ["A", "B", "C", "D"],
       type_compte: ["BANQUE", "CAISSE"],
       type_evenement: ["REUNION", "RDV", "DEPLACEMENT", "RAPPEL", "AUTRE"],
       type_incident: ["PANNE", "ACCIDENT", "RETARD", "VOL", "AUTRE"],
