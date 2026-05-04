@@ -97,12 +97,12 @@ export function useGrilleTarifaire() {
 
   // ── tarifs_zone CRUD
   const addTarifZone = async (data: Omit<TarifZone, "id">) => {
-    const { error } = await supabase.from("tarifs_zone").insert(data);
+    const { error } = await supabase.from("tarifs_zone").insert(data as any);
     if (error) { toast.error(error.message); return; }
     toast.success("Tarif ajouté"); fetchAll();
   };
   const updateTarifZone = async (id: string, patch: Partial<TarifZone>) => {
-    const { error } = await supabase.from("tarifs_zone").update(patch).eq("id", id);
+    const { error } = await supabase.from("tarifs_zone").update(patch as any).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Tarif mis à jour"); fetchAll();
   };
