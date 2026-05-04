@@ -19,41 +19,16 @@ import { formatFCFA } from "@/utils/format";
 import { useAuth } from "@/lib/auth-context";
 import {
   useGrilleTarifaire, type TarifZone, type TarifKm, type Majoration,
-  type FraisFixe, type ZoneCode, type TypeTransport,
+  type FraisFixe, type ZoneCode, type TypeTransport, type ZoneConfig, type TonnageConfig,
 } from "@/hooks/use-grille-tarifaire";
 
-const ZONE_LABELS: Record<ZoneCode, string> = {
-  A: "Zone A — Grand Abidjan et périphérie",
-  B: "Zone B — Côte sud",
-  C: "Zone C — Centre et Nord",
-  D: "Zone D — Ouest",
-};
-const ZONE_FILTER_LABELS: Record<ZoneCode, string> = {
-  A: "Zone A — Grand Abidjan", B: "Zone B — Côte sud",
-  C: "Zone C — Centre et Nord", D: "Zone D — Ouest",
-};
-const ZONE_BADGE: Record<ZoneCode, string> = {
-  A: "bg-[#ECFDF5] text-[#065F46]", B: "bg-[#EFF6FF] text-[#1E40AF]",
-  C: "bg-[#FFFBEB] text-[#92400E]", D: "bg-[#FEF2F2] text-[#991B1B]",
-};
 const TYPE_BADGE: Record<TypeTransport, string> = {
   standard: "bg-[#F3F4F6] text-[#374151]",
   express: "bg-[#EDE9FE] text-[#4C1D95]",
   special: "bg-[#FEF3C7] text-[#92400E]",
 };
 const TYPE_LABEL: Record<TypeTransport, string> = { standard: "Standard", express: "Express", special: "Spécial" };
-const TONNAGES = ["≤ 10T", "10–20T", "20–40T", "> 40T"];
 
-function tonnageBorneHaute(t: string): number {
-  if (t.includes("10T") && t.includes("≤")) return 10;
-  if (t === "10–20T") return 20;
-  if (t === "10–40T" || t === "20–40T" || t === "≤ 40T") return 40;
-  if (t === "> 40T") return 50;
-  return 40;
-}
-function calcTarifParTonne(tarif: number, tonnage: string): number {
-  return Math.round(tarif / tonnageBorneHaute(tonnage));
-}
 function toFr(d: string) {
   if (!d) return "";
   const [y, m, day] = d.split("-");
@@ -68,12 +43,13 @@ function validityClass(s: string): string {
   return "text-muted-foreground";
 }
 
-type TabKey = "zone" | "km" | "majorations" | "simulateur";
+type TabKey = "zone" | "km" | "majorations" | "simulateur" | "parametres";
 const TABS: { key: TabKey; label: string }[] = [
   { key: "zone", label: "Tarifs par zone" },
   { key: "km", label: "Tarifs au km" },
   { key: "majorations", label: "Majorations" },
   { key: "simulateur", label: "Simulateur" },
+  { key: "parametres", label: "Paramètres" },
 ];
 
 export default function GrilleTarifairePage() {
