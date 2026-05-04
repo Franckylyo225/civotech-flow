@@ -1,33 +1,52 @@
-import { PIPELINE_STAGES, DEVIS_STATUT_CONFIG, type DevisStatut } from "@/types/devis";
+import { type DevisStatut } from "@/types/devis";
 import { cn } from "@/lib/utils";
-import { CheckCircle2 } from "lucide-react";
 
 interface DevisProgressBarProps {
   statut: DevisStatut;
   className?: string;
 }
 
+const TOTAL_STEPS = 5;
+
+/**
+ * Mapping métier (5 étapes du workflow devis) :
+ *  - Brouillon      → étape 1 colorée
+ *  - Attente DG     → étapes 1-2 colorées (SOUMIS_DG ou APPROUVE_DG)
+ *  - Envoyé client  → étapes 1-3 colorées
+ *  - Validé client  → étapes 1-5 colorées
+ *  - Refusé         → étapes 1-3 colorées en rouge (REFUSE_DG ou REFUSE_CLIENT)
+ *  - Archivé        → étapes 1-5 colorées
+ */
+export function getDevisProgress(statut: DevisStatut): { done: number; refused: boolean } {
+  switch (statut) {
+    case "BROUILLON": return { done: 1, refused: false };
+    case "SOUMIS_DG":
+    case "APPROUVE_DG": return { done: 2, refused: false };
+    case "ENVOYE_CLIENT": return { done: 3, refused: false };
+    case "VALIDE_CLIENT":
+    case "ARCHIVE": return { done: 5, refused: false };
+    case "REFUSE_DG":
+    case "REFUSE_CLIENT": return { done: 3, refused: true };
+  }
+}
+
 export function DevisProgressBar({ statut, className }: DevisProgressBarProps) {
-  const isRefused = statut === "REFUSE_DG" || statut === "REFUSE_CLIENT";
-  const currentIndex = PIPELINE_STAGES.indexOf(statut);
-  const progress = isRefused ? -1 : currentIndex;
+  const { done, refused } = getDevisProgress(statut);
 
   return (
     <div className={cn("flex items-center gap-1", className)}>
-      {PIPELINE_STAGES.map((stage, i) => {
-        const done = !isRefused && i <= progress;
-        const active = !isRefused && i === progress;
+      {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+        const filled = i < done;
         return (
-          <div key={stage} className="flex items-center gap-1 flex-1">
-            <div className="flex flex-col items-center flex-1">
-              <div
-                className={cn(
-                  "h-1.5 w-full rounded-full transition-all",
-                  done ? "bg-primary" : isRefused ? "bg-destructive/30" : "bg-muted"
-                )}
-              />
-            </div>
-          </div>
+          <div
+            key={i}
+            className={cn(
+              "h-1.5 flex-1 rounded-full transition-all",
+              filled
+                ? refused ? "bg-destructive" : "bg-primary"
+                : "bg-muted",
+            )}
+          />
         );
       })}
     </div>
@@ -35,20 +54,26 @@ export function DevisProgressBar({ statut, className }: DevisProgressBarProps) {
 }
 
 export function DevisProgressLabel({ statut }: { statut: DevisStatut }) {
-  const isRefused = statut === "REFUSE_DG" || statut === "REFUSE_CLIENT";
-  const currentIndex = PIPELINE_STAGES.indexOf(statut);
-  const stepsTotal = PIPELINE_STAGES.length;
-  const stepsDone = isRefused ? 0 : currentIndex + 1;
+  const { done, refused } = getDevisProgress(statut);
 
-  if (isRefused) {
-    return (
-      <span className="text-xs text-destructive font-medium">Refusé</span>
-    );
+  if (refused) {
+    return <span className="text-xs text-destructive font-medium">Refusé</span>;
   }
+
+  const labels: Record<DevisStatut, string> = {
+    BROUILLON: "Brouillon",
+    SOUMIS_DG: "Attente DG",
+    APPROUVE_DG: "Attente DG",
+    ENVOYE_CLIENT: "Envoyé client",
+    VALIDE_CLIENT: "Validé client",
+    ARCHIVE: "Archivé",
+    REFUSE_DG: "Refusé",
+    REFUSE_CLIENT: "Refusé",
+  };
 
   return (
     <span className="text-xs text-muted-foreground">
-      Étape {stepsDone}/{stepsTotal} — {DEVIS_STATUT_CONFIG[statut]?.label}
+      Étape {done}/{TOTAL_STEPS} — {labels[statut]}
     </span>
   );
 }
