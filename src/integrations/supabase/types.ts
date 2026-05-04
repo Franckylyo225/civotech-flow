@@ -1937,6 +1937,39 @@ export type Database = {
           },
         ]
       }
+      tonnages_config: {
+        Row: {
+          actif: boolean
+          borne_haute: number
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          ordre: number
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          borne_haute?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          ordre?: number
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          borne_haute?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          ordre?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transactions_tresorerie: {
         Row: {
           compte_destination_id: string | null
@@ -2029,6 +2062,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      zones_config: {
+        Row: {
+          actif: boolean
+          code: string
+          couleur: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          ordre: number
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          code: string
+          couleur?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          ordre?: number
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          code?: string
+          couleur?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          ordre?: number
+          updated_at?: string
         }
         Relationships: []
       }
