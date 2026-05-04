@@ -164,103 +164,133 @@ export function useGrilleTarifaire() {
 
   // ── tarifs_zone CRUD
   const addTarifZone = async (data: Omit<TarifZone, "id">) => {
-    const { error } = await supabase.from("tarifs_zone").insert(data as any);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(TarifZoneSchema, data); if (!v) return;
+    const { error } = await supabase.from("tarifs_zone").insert(v as any);
+    if (error) return handleDbError(error);
     toast.success("Tarif ajouté"); fetchAll();
   };
   const updateTarifZone = async (id: string, patch: Partial<TarifZone>) => {
     const { error } = await supabase.from("tarifs_zone").update(patch as any).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tarif mis à jour"); fetchAll();
   };
   const deleteTarifZone = async (id: string) => {
     const { error } = await supabase.from("tarifs_zone").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tarif supprimé"); setTarifsZone((p) => p.filter((t) => t.id !== id));
   };
 
   // ── tarifs_km CRUD
   const addTarifKm = async (data: Omit<TarifKm, "id">) => {
-    const { error } = await supabase.from("tarifs_km").insert(data);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(TarifKmSchema, data); if (!v) return;
+    const { error } = await supabase.from("tarifs_km").insert(v);
+    if (error) return handleDbError(error);
     toast.success("Tarif ajouté"); fetchAll();
   };
   const updateTarifKm = async (id: string, patch: Partial<TarifKm>) => {
     const { error } = await supabase.from("tarifs_km").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tarif mis à jour"); fetchAll();
   };
   const deleteTarifKm = async (id: string) => {
     const { error } = await supabase.from("tarifs_km").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tarif supprimé"); setTarifsKm((p) => p.filter((t) => t.id !== id));
   };
 
   // ── majorations CRUD
   const addMajoration = async (data: Omit<Majoration, "id">) => {
-    const { error } = await supabase.from("majorations").insert(data);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(MajorationSchema, data); if (!v) return;
+    const { error } = await supabase.from("majorations").insert(v);
+    if (error) return handleDbError(error);
     toast.success("Majoration ajoutée"); fetchAll();
   };
   const updateMajoration = async (id: string, patch: Partial<Majoration>) => {
     const { error } = await supabase.from("majorations").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     fetchAll();
   };
   const deleteMajoration = async (id: string) => {
     const { error } = await supabase.from("majorations").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Majoration supprimée"); setMajorations((p) => p.filter((m) => m.id !== id));
   };
 
   // ── frais CRUD
   const addFrais = async (data: Omit<FraisFixe, "id">) => {
-    const { error } = await supabase.from("frais_fixes").insert(data);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(FraisSchema, data); if (!v) return;
+    const { error } = await supabase.from("frais_fixes").insert(v);
+    if (error) return handleDbError(error);
     toast.success("Frais ajouté"); fetchAll();
   };
   const updateFrais = async (id: string, patch: Partial<FraisFixe>) => {
     const { error } = await supabase.from("frais_fixes").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     fetchAll();
   };
   const deleteFrais = async (id: string) => {
     const { error } = await supabase.from("frais_fixes").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Frais supprimé"); setFrais((p) => p.filter((f) => f.id !== id));
   };
 
   // ── zones_config CRUD
   const addZone = async (data: Omit<ZoneConfig, "id">) => {
-    const { error } = await supabase.from("zones_config").insert(data);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(ZoneSchema, data); if (!v) return;
+    if (zonesConfig.some((z) => z.code.toLowerCase() === v.code.toLowerCase())) {
+      return toast.error("Cette zone existe déjà (code en doublon)");
+    }
+    const { error } = await supabase.from("zones_config").insert(v);
+    if (error) return handleDbError(error);
     toast.success("Zone ajoutée"); fetchAll();
   };
   const updateZone = async (id: string, patch: Partial<ZoneConfig>) => {
+    if (patch.code) {
+      const dup = zonesConfig.some((z) => z.id !== id && z.code.toLowerCase() === patch.code!.toLowerCase());
+      if (dup) return toast.error("Cette zone existe déjà (code en doublon)");
+    }
     const { error } = await supabase.from("zones_config").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Zone mise à jour"); fetchAll();
   };
   const deleteZone = async (id: string) => {
+    const zone = zonesConfig.find((z) => z.id === id);
+    if (zone) {
+      const used = tarifsZone.filter((t) => t.zone === zone.code).length;
+      if (used > 0) return toast.error(`Impossible de supprimer la zone ${zone.code} : ${used} tarif(s) y font référence.`);
+    }
     const { error } = await supabase.from("zones_config").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Zone supprimée"); setZonesConfig((p) => p.filter((z) => z.id !== id));
   };
 
   // ── tonnages_config CRUD
   const addTonnage = async (data: Omit<TonnageConfig, "id">) => {
-    const { error } = await supabase.from("tonnages_config").insert(data);
-    if (error) { toast.error(error.message); return; }
+    const v = validate(TonnageSchema, data); if (!v) return;
+    if (tonnagesConfig.some((t) => t.label.toLowerCase() === v.label.toLowerCase())) {
+      return toast.error("Ce tonnage existe déjà (libellé en doublon)");
+    }
+    const { error } = await supabase.from("tonnages_config").insert(v);
+    if (error) return handleDbError(error);
     toast.success("Tonnage ajouté"); fetchAll();
   };
   const updateTonnage = async (id: string, patch: Partial<TonnageConfig>) => {
+    if (patch.label) {
+      const dup = tonnagesConfig.some((t) => t.id !== id && t.label.toLowerCase() === patch.label!.toLowerCase());
+      if (dup) return toast.error("Ce tonnage existe déjà (libellé en doublon)");
+    }
     const { error } = await supabase.from("tonnages_config").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tonnage mis à jour"); fetchAll();
   };
   const deleteTonnage = async (id: string) => {
+    const ton = tonnagesConfig.find((t) => t.id === id);
+    if (ton) {
+      const used = tarifsZone.filter((t) => t.tonnage === ton.label).length;
+      if (used > 0) return toast.error(`Impossible de supprimer le tonnage "${ton.label}" : ${used} tarif(s) y font référence.`);
+    }
     const { error } = await supabase.from("tonnages_config").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) return handleDbError(error);
     toast.success("Tonnage supprimé"); setTonnagesConfig((p) => p.filter((t) => t.id !== id));
   };
 
