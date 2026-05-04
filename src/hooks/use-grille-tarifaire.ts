@@ -49,8 +49,8 @@ const FraisSchema = z.object({
 function validate<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
   const r = schema.safeParse(data);
   if (!r.success) {
-    const msg = Object.values(r.error.flatten().fieldErrors).flat()[0] || "Données invalides";
-    toast.error(msg);
+    const msg = Object.values(r.error.flatten().fieldErrors).flat()[0];
+    toast.error(typeof msg === "string" ? msg : "Données invalides");
     return null;
   }
   return r.data;
