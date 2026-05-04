@@ -58,6 +58,24 @@ export default function GrilleTarifairePage() {
   const canManage = user?.role === "DG" || user?.role === "COMMERCIAL";
   const g = useGrilleTarifaire();
 
+  // Maps dynamiques depuis la config DB
+  const zonesActives = useMemo(() => g.zonesConfig.filter((z) => z.actif), [g.zonesConfig]);
+  const tonnagesActifs = useMemo(() => g.tonnagesConfig.filter((t) => t.actif), [g.tonnagesConfig]);
+  const TONNAGES = useMemo(() => tonnagesActifs.map((t) => t.label), [tonnagesActifs]);
+  const ZONE_LABELS = useMemo(() => Object.fromEntries(g.zonesConfig.map((z) => [z.code, z.label])) as Record<string, string>, [g.zonesConfig]);
+  const ZONE_FILTER_LABELS = ZONE_LABELS;
+  const ZONE_BADGE = useMemo(() => Object.fromEntries(
+    g.zonesConfig.map((z) => [z.code, `text-white`])
+  ) as Record<string, string>, [g.zonesConfig]);
+  const ZONE_COLOR = useMemo(() => Object.fromEntries(g.zonesConfig.map((z) => [z.code, z.couleur])) as Record<string, string>, [g.zonesConfig]);
+
+  const tonnageBorneHaute = (label: string): number => {
+    const t = g.tonnagesConfig.find((x) => x.label === label);
+    return t?.borne_haute || 40;
+  };
+  const calcTarifParTonne = (tarif: number, tonnage: string): number =>
+    Math.round(tarif / tonnageBorneHaute(tonnage));
+
   const [activeTab, setActiveTab] = useState<TabKey>("zone");
   const [searchQuery, setSearchQuery] = useState("");
   const [filtreZone, setFiltreZone] = useState("ALL");
