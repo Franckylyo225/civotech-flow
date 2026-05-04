@@ -302,20 +302,29 @@ export default function GrilleTarifairePage() {
         </div>
       )}
 
-      {activeTab === "km" && <TarifsKmTab tarifs={g.tarifsKm} canManage={canManage} onUpdate={g.updateTarifKm} onDelete={g.deleteTarifKm} />}
+      {activeTab === "km" && <TarifsKmTab tarifs={g.tarifsKm} canManage={canManage} onAdd={g.addTarifKm} onUpdate={g.updateTarifKm} onDelete={g.deleteTarifKm} />}
       {activeTab === "majorations" && (
         <MajorationsTab
           majorations={g.majorations} frais={g.frais} canManage={canManage}
-          onUpdateMaj={g.updateMajoration} onDeleteMaj={g.deleteMajoration}
-          onUpdateFrais={g.updateFrais} onDeleteFrais={g.deleteFrais}
+          onAddMaj={g.addMajoration} onUpdateMaj={g.updateMajoration} onDeleteMaj={g.deleteMajoration}
+          onAddFrais={g.addFrais} onUpdateFrais={g.updateFrais} onDeleteFrais={g.deleteFrais}
         />
       )}
       {activeTab === "simulateur" && (
-        <SimulateurTab tarifs={g.tarifsZone} majorations={g.majorations} frais={g.frais}
+        <SimulateurTab tarifs={g.tarifsZone} majorations={g.majorations} frais={g.frais} tonnages={TONNAGES}
           onCreateDevis={(d) => navigate("/devis/nouveau", { state: d })} />
       )}
+      {activeTab === "parametres" && (
+        <ParametresTab
+          zones={g.zonesConfig} tonnages={g.tonnagesConfig} canManage={canManage}
+          onAddZone={g.addZone} onUpdateZone={g.updateZone} onDeleteZone={g.deleteZone}
+          onAddTonnage={g.addTonnage} onUpdateTonnage={g.updateTonnage} onDeleteTonnage={g.deleteTonnage}
+        />
+      )}
 
-      <NouveauTarifDrawer open={showDrawer} onOpenChange={setShowDrawer} onSave={async (t) => { await g.addTarifZone(t); setShowDrawer(false); }} />
+      <NouveauTarifDrawer open={showDrawer} onOpenChange={setShowDrawer}
+        zones={g.zonesConfig} tonnages={tonnagesActifs}
+        onSave={async (t) => { await g.addTarifZone(t); setShowDrawer(false); }} />
 
       <AlertDialog open={confirmDelete !== null} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
