@@ -374,78 +374,142 @@ function InlineTarifInput({ value, onChange }: { value: number; onChange: (v: nu
   );
 }
 
-function TarifsKmTab({ tarifs, canManage, onUpdate, onDelete }: {
+function TarifsKmTab({ tarifs, canManage, onAdd, onUpdate, onDelete }: {
   tarifs: TarifKm[]; canManage: boolean;
+  onAdd: (data: Omit<TarifKm, "id">) => Promise<void>;
   onUpdate: (id: string, p: Partial<TarifKm>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
   const [editId, setEditId] = useState<string | null>(null);
   const [buf, setBuf] = useState<TarifKm | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [newRow, setNewRow] = useState<Omit<TarifKm, "id">>({ vehicule: "", tonnage_max: 0, prix_km: 0, forfait_depart: 0, validite: "2026-12-31" });
   const start = (t: TarifKm) => { setEditId(t.id); setBuf({ ...t }); };
   const cancel = () => { setEditId(null); setBuf(null); };
   const save = async () => { if (!buf) return; const { id, ...p } = buf; await onUpdate(id, p); cancel(); };
+  const addRow = async () => {
+    if (!newRow.vehicule.trim()) return toast.error("Type de véhicule requis");
+    await onAdd(newRow);
+    setNewRow({ vehicule: "", tonnage_max: 0, prix_km: 0, forfait_depart: 0, validite: "2026-12-31" });
+    setAdding(false);
+  };
 
   return (
-    <Card className="overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-[#F9FAFB] text-[10px] uppercase text-muted-foreground">
-            <th className="text-left px-4 py-2.5 font-medium">Type de véhicule</th>
-            <th className="text-left px-4 py-2.5 font-medium">Tonnage max</th>
-            <th className="text-right px-4 py-2.5 font-medium">Prix/km (FCFA)</th>
-            <th className="text-right px-4 py-2.5 font-medium">Forfait départ</th>
-            <th className="text-left px-4 py-2.5 font-medium">Validité</th>
-            {canManage && <th className="text-right px-4 py-2.5 font-medium">Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {tarifs.map((t) => {
-            const editing = editId === t.id && buf;
-            const row = editing ? buf! : t;
-            return (
-              <tr key={t.id} className="border-t hover:bg-[#F9FAFB]">
-                <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.vehicule} onChange={(e) => setBuf({ ...row, vehicule: e.target.value })} /> : t.vehicule}</td>
-                <td className="px-4 py-2.5 text-muted-foreground">{editing ? <Input type="number" className="h-8 w-20" value={row.tonnage_max} onChange={(e) => setBuf({ ...row, tonnage_max: Number(e.target.value) })} /> : `${t.tonnage_max}T`}</td>
-                <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 text-right" value={row.prix_km} onChange={(e) => setBuf({ ...row, prix_km: Number(e.target.value) })} /> : `${new Intl.NumberFormat("fr-FR").format(t.prix_km)} F/km`}</td>
-                <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 text-right" value={row.forfait_depart} onChange={(e) => setBuf({ ...row, forfait_depart: Number(e.target.value) })} /> : `${new Intl.NumberFormat("fr-FR").format(t.forfait_depart)} F`}</td>
-                <td className={cn("px-4 py-2.5 text-[11px]", validityClass(t.validite))}>{editing ? <Input type="date" className="h-8 w-36" value={row.validite} onChange={(e) => setBuf({ ...row, validite: e.target.value })} /> : toFr(t.validite)}</td>
-                {canManage && (
-                  <td className="px-4 py-2.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {editing ? (
-                        <>
-                          <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={save}><Check className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={cancel}><X className="h-4 w-4" /></Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => start(t)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDelete(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                )}
+    <div className="space-y-3">
+      {canManage && (
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => setAdding(true)}><Plus className="h-4 w-4" /> Ajouter un tarif au km</Button>
+        </div>
+      )}
+      <Card className="overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-[#F9FAFB] text-[10px] uppercase text-muted-foreground">
+              <th className="text-left px-4 py-2.5 font-medium">Type de véhicule</th>
+              <th className="text-left px-4 py-2.5 font-medium">Tonnage max</th>
+              <th className="text-right px-4 py-2.5 font-medium">Prix/km (FCFA)</th>
+              <th className="text-right px-4 py-2.5 font-medium">Forfait départ</th>
+              <th className="text-left px-4 py-2.5 font-medium">Validité</th>
+              {canManage && <th className="text-right px-4 py-2.5 font-medium">Actions</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {adding && (
+              <tr className="border-t bg-[#F0FDF4]">
+                <td className="px-4 py-2.5"><Input className="h-8" placeholder="Ex: Porteur 10T" value={newRow.vehicule} onChange={(e) => setNewRow({ ...newRow, vehicule: e.target.value })} /></td>
+                <td className="px-4 py-2.5"><Input type="number" className="h-8 w-20" value={newRow.tonnage_max} onChange={(e) => setNewRow({ ...newRow, tonnage_max: Number(e.target.value) })} /></td>
+                <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 text-right" value={newRow.prix_km} onChange={(e) => setNewRow({ ...newRow, prix_km: Number(e.target.value) })} /></td>
+                <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 text-right" value={newRow.forfait_depart} onChange={(e) => setNewRow({ ...newRow, forfait_depart: Number(e.target.value) })} /></td>
+                <td className="px-4 py-2.5"><Input type="date" className="h-8 w-36" value={newRow.validite} onChange={(e) => setNewRow({ ...newRow, validite: e.target.value })} /></td>
+                <td className="px-4 py-2.5 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={addRow}><Check className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => setAdding(false)}><X className="h-4 w-4" /></Button>
+                  </div>
+                </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </Card>
+            )}
+            {tarifs.map((t) => {
+              const editing = editId === t.id && buf;
+              const row = editing ? buf! : t;
+              return (
+                <tr key={t.id} className="border-t hover:bg-[#F9FAFB]">
+                  <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.vehicule} onChange={(e) => setBuf({ ...row, vehicule: e.target.value })} /> : t.vehicule}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{editing ? <Input type="number" className="h-8 w-20" value={row.tonnage_max} onChange={(e) => setBuf({ ...row, tonnage_max: Number(e.target.value) })} /> : `${t.tonnage_max}T`}</td>
+                  <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 text-right" value={row.prix_km} onChange={(e) => setBuf({ ...row, prix_km: Number(e.target.value) })} /> : `${new Intl.NumberFormat("fr-FR").format(t.prix_km)} F/km`}</td>
+                  <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 text-right" value={row.forfait_depart} onChange={(e) => setBuf({ ...row, forfait_depart: Number(e.target.value) })} /> : `${new Intl.NumberFormat("fr-FR").format(t.forfait_depart)} F`}</td>
+                  <td className={cn("px-4 py-2.5 text-[11px]", validityClass(t.validite))}>{editing ? <Input type="date" className="h-8 w-36" value={row.validite} onChange={(e) => setBuf({ ...row, validite: e.target.value })} /> : toFr(t.validite)}</td>
+                  {canManage && (
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {editing ? (
+                          <>
+                            <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={save}><Check className="h-4 w-4" /></Button>
+                            <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={cancel}><X className="h-4 w-4" /></Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => start(t)}><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDelete(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Card>
+    </div>
   );
 }
 
-function MajorationsTab({ majorations, frais, canManage, onUpdateMaj, onDeleteMaj, onUpdateFrais, onDeleteFrais }: {
+function MajorationsTab({ majorations, frais, canManage, onAddMaj, onUpdateMaj, onDeleteMaj, onAddFrais, onUpdateFrais, onDeleteFrais }: {
   majorations: Majoration[]; frais: FraisFixe[]; canManage: boolean;
+  onAddMaj: (data: Omit<Majoration, "id">) => Promise<void>;
   onUpdateMaj: (id: string, p: Partial<Majoration>) => Promise<void>;
   onDeleteMaj: (id: string) => Promise<void>;
+  onAddFrais: (data: Omit<FraisFixe, "id">) => Promise<void>;
   onUpdateFrais: (id: string, p: Partial<FraisFixe>) => Promise<void>;
   onDeleteFrais: (id: string) => Promise<void>;
 }) {
+  const [editMajId, setEditMajId] = useState<string | null>(null);
+  const [bufMaj, setBufMaj] = useState<Majoration | null>(null);
+  const [addingMaj, setAddingMaj] = useState(false);
+  const [newMaj, setNewMaj] = useState<Omit<Majoration, "id">>({ motif: "", pct: 0, applicable: "Tous tarifs", actif: true });
+
+  const [editFraisId, setEditFraisId] = useState<string | null>(null);
+  const [bufFrais, setBufFrais] = useState<FraisFixe | null>(null);
+  const [addingFrais, setAddingFrais] = useState(false);
+  const [newFrais, setNewFrais] = useState<Omit<FraisFixe, "id">>({ designation: "", montant: 0, applicable: "Par trajet", actif: true });
+
+  const startMaj = (m: Majoration) => { setEditMajId(m.id); setBufMaj({ ...m }); };
+  const saveMaj = async () => { if (!bufMaj) return; const { id, ...p } = bufMaj; await onUpdateMaj(id, p); setEditMajId(null); setBufMaj(null); };
+  const addMaj = async () => {
+    if (!newMaj.motif.trim()) return toast.error("Motif requis");
+    await onAddMaj(newMaj);
+    setNewMaj({ motif: "", pct: 0, applicable: "Tous tarifs", actif: true });
+    setAddingMaj(false);
+  };
+
+  const startFrais = (f: FraisFixe) => { setEditFraisId(f.id); setBufFrais({ ...f }); };
+  const saveFrais = async () => { if (!bufFrais) return; const { id, ...p } = bufFrais; await onUpdateFrais(id, p); setEditFraisId(null); setBufFrais(null); };
+  const addFrais = async () => {
+    if (!newFrais.designation.trim()) return toast.error("Désignation requise");
+    await onAddFrais(newFrais);
+    setNewFrais({ designation: "", montant: 0, applicable: "Par trajet", actif: true });
+    setAddingFrais(false);
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-[11px] uppercase tracking-[0.5px] text-muted-foreground font-medium mb-2">Majorations en pourcentage</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[11px] uppercase tracking-[0.5px] text-muted-foreground font-medium">Majorations en pourcentage</div>
+          {canManage && <Button size="sm" variant="outline" onClick={() => setAddingMaj(true)}><Plus className="h-4 w-4" /> Ajouter</Button>}
+        </div>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -458,26 +522,59 @@ function MajorationsTab({ majorations, frais, canManage, onUpdateMaj, onDeleteMa
               </tr>
             </thead>
             <tbody>
-              {majorations.map((m) => (
-                <tr key={m.id} className="border-t hover:bg-[#F9FAFB]">
-                  <td className="px-4 py-2.5 font-medium">{m.motif}</td>
-                  <td className="px-4 py-2.5 text-right text-primary font-medium">+{m.pct}%</td>
-                  <td className="px-4 py-2.5 text-muted-foreground">{m.applicable}</td>
-                  <td className="px-4 py-2.5"><Switch checked={m.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateMaj(m.id, { actif: v })} /></td>
-                  {canManage && (
-                    <td className="px-4 py-2.5 text-right">
-                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteMaj(m.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                    </td>
-                  )}
+              {addingMaj && (
+                <tr className="border-t bg-[#F0FDF4]">
+                  <td className="px-4 py-2.5"><Input className="h-8" placeholder="Ex: Carburant" value={newMaj.motif} onChange={(e) => setNewMaj({ ...newMaj, motif: e.target.value })} /></td>
+                  <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 w-20 ml-auto text-right" value={newMaj.pct} onChange={(e) => setNewMaj({ ...newMaj, pct: Number(e.target.value) })} /></td>
+                  <td className="px-4 py-2.5"><Input className="h-8" value={newMaj.applicable} onChange={(e) => setNewMaj({ ...newMaj, applicable: e.target.value })} /></td>
+                  <td className="px-4 py-2.5"><Switch checked={newMaj.actif} onCheckedChange={(v) => setNewMaj({ ...newMaj, actif: v })} /></td>
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={addMaj}><Check className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => setAddingMaj(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              )}
+              {majorations.map((m) => {
+                const editing = editMajId === m.id && bufMaj;
+                const row = editing ? bufMaj! : m;
+                return (
+                  <tr key={m.id} className="border-t hover:bg-[#F9FAFB]">
+                    <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.motif} onChange={(e) => setBufMaj({ ...row, motif: e.target.value })} /> : m.motif}</td>
+                    <td className="px-4 py-2.5 text-right text-primary font-medium">{editing ? <Input type="number" className="h-8 w-20 ml-auto text-right" value={row.pct} onChange={(e) => setBufMaj({ ...row, pct: Number(e.target.value) })} /> : `+${m.pct}%`}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{editing ? <Input className="h-8" value={row.applicable} onChange={(e) => setBufMaj({ ...row, applicable: e.target.value })} /> : m.applicable}</td>
+                    <td className="px-4 py-2.5"><Switch checked={m.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateMaj(m.id, { actif: v })} /></td>
+                    {canManage && (
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {editing ? (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={saveMaj}><Check className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditMajId(null); setBufMaj(null); }}><X className="h-4 w-4" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => startMaj(m)}><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteMaj(m.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </Card>
       </div>
 
       <div>
-        <div className="text-[11px] uppercase tracking-[0.5px] text-muted-foreground font-medium mb-2">Frais fixes additionnels</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[11px] uppercase tracking-[0.5px] text-muted-foreground font-medium">Frais fixes additionnels</div>
+          {canManage && <Button size="sm" variant="outline" onClick={() => setAddingFrais(true)}><Plus className="h-4 w-4" /> Ajouter</Button>}
+        </div>
         <Card className="overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -490,19 +587,49 @@ function MajorationsTab({ majorations, frais, canManage, onUpdateMaj, onDeleteMa
               </tr>
             </thead>
             <tbody>
-              {frais.map((f) => (
-                <tr key={f.id} className="border-t hover:bg-[#F9FAFB]">
-                  <td className="px-4 py-2.5 font-medium">{f.designation}</td>
-                  <td className="px-4 py-2.5 text-right">{new Intl.NumberFormat("fr-FR").format(f.montant)} F</td>
-                  <td className="px-4 py-2.5 text-muted-foreground">{f.applicable}</td>
-                  <td className="px-4 py-2.5"><Switch checked={f.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateFrais(f.id, { actif: v })} /></td>
-                  {canManage && (
-                    <td className="px-4 py-2.5 text-right">
-                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteFrais(f.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                    </td>
-                  )}
+              {addingFrais && (
+                <tr className="border-t bg-[#F0FDF4]">
+                  <td className="px-4 py-2.5"><Input className="h-8" placeholder="Ex: Péage" value={newFrais.designation} onChange={(e) => setNewFrais({ ...newFrais, designation: e.target.value })} /></td>
+                  <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 text-right" value={newFrais.montant} onChange={(e) => setNewFrais({ ...newFrais, montant: Number(e.target.value) })} /></td>
+                  <td className="px-4 py-2.5"><Input className="h-8" value={newFrais.applicable} onChange={(e) => setNewFrais({ ...newFrais, applicable: e.target.value })} /></td>
+                  <td className="px-4 py-2.5"><Switch checked={newFrais.actif} onCheckedChange={(v) => setNewFrais({ ...newFrais, actif: v })} /></td>
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={addFrais}><Check className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => setAddingFrais(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              )}
+              {frais.map((f) => {
+                const editing = editFraisId === f.id && bufFrais;
+                const row = editing ? bufFrais! : f;
+                return (
+                  <tr key={f.id} className="border-t hover:bg-[#F9FAFB]">
+                    <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.designation} onChange={(e) => setBufFrais({ ...row, designation: e.target.value })} /> : f.designation}</td>
+                    <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 text-right" value={row.montant} onChange={(e) => setBufFrais({ ...row, montant: Number(e.target.value) })} /> : `${new Intl.NumberFormat("fr-FR").format(f.montant)} F`}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{editing ? <Input className="h-8" value={row.applicable} onChange={(e) => setBufFrais({ ...row, applicable: e.target.value })} /> : f.applicable}</td>
+                    <td className="px-4 py-2.5"><Switch checked={f.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateFrais(f.id, { actif: v })} /></td>
+                    {canManage && (
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {editing ? (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={saveFrais}><Check className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditFraisId(null); setBufFrais(null); }}><X className="h-4 w-4" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => startFrais(f)}><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteFrais(f.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </Card>
@@ -511,8 +638,192 @@ function MajorationsTab({ majorations, frais, canManage, onUpdateMaj, onDeleteMa
   );
 }
 
-function SimulateurTab({ tarifs, majorations, frais, onCreateDevis }: {
-  tarifs: TarifZone[]; majorations: Majoration[]; frais: FraisFixe[];
+function ParametresTab({ zones, tonnages, canManage, onAddZone, onUpdateZone, onDeleteZone, onAddTonnage, onUpdateTonnage, onDeleteTonnage }: {
+  zones: ZoneConfig[]; tonnages: TonnageConfig[]; canManage: boolean;
+  onAddZone: (d: Omit<ZoneConfig, "id">) => Promise<void>;
+  onUpdateZone: (id: string, p: Partial<ZoneConfig>) => Promise<void>;
+  onDeleteZone: (id: string) => Promise<void>;
+  onAddTonnage: (d: Omit<TonnageConfig, "id">) => Promise<void>;
+  onUpdateTonnage: (id: string, p: Partial<TonnageConfig>) => Promise<void>;
+  onDeleteTonnage: (id: string) => Promise<void>;
+}) {
+  const [editZoneId, setEditZoneId] = useState<string | null>(null);
+  const [bufZone, setBufZone] = useState<ZoneConfig | null>(null);
+  const [addingZone, setAddingZone] = useState(false);
+  const [newZone, setNewZone] = useState<Omit<ZoneConfig, "id">>({ code: "", label: "", couleur: "#10B981", ordre: 0, actif: true });
+
+  const [editTonId, setEditTonId] = useState<string | null>(null);
+  const [bufTon, setBufTon] = useState<TonnageConfig | null>(null);
+  const [addingTon, setAddingTon] = useState(false);
+  const [newTon, setNewTon] = useState<Omit<TonnageConfig, "id">>({ label: "", borne_haute: 0, ordre: 0, actif: true });
+
+  const saveZone = async () => { if (!bufZone) return; const { id, ...p } = bufZone; await onUpdateZone(id, p); setEditZoneId(null); setBufZone(null); };
+  const addZone = async () => {
+    if (!newZone.code.trim() || !newZone.label.trim()) return toast.error("Code et libellé requis");
+    await onAddZone(newZone);
+    setNewZone({ code: "", label: "", couleur: "#10B981", ordre: 0, actif: true });
+    setAddingZone(false);
+  };
+  const saveTon = async () => { if (!bufTon) return; const { id, ...p } = bufTon; await onUpdateTonnage(id, p); setEditTonId(null); setBufTon(null); };
+  const addTon = async () => {
+    if (!newTon.label.trim()) return toast.error("Libellé requis");
+    await onAddTonnage(newTon);
+    setNewTon({ label: "", borne_haute: 0, ordre: 0, actif: true });
+    setAddingTon(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Zones */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="text-[13px] font-medium">Zones géographiques</div>
+            <div className="text-[12px] text-muted-foreground">Définissez les zones utilisées pour catégoriser vos tarifs.</div>
+          </div>
+          {canManage && <Button size="sm" onClick={() => setAddingZone(true)}><Plus className="h-4 w-4" /> Ajouter une zone</Button>}
+        </div>
+        <Card className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-[#F9FAFB] text-[10px] uppercase text-muted-foreground">
+                <th className="text-left px-4 py-2.5 font-medium w-[80px]">Code</th>
+                <th className="text-left px-4 py-2.5 font-medium">Libellé</th>
+                <th className="text-left px-4 py-2.5 font-medium w-[120px]">Couleur</th>
+                <th className="text-right px-4 py-2.5 font-medium w-[80px]">Ordre</th>
+                <th className="text-left px-4 py-2.5 font-medium w-[80px]">Actif</th>
+                {canManage && <th className="text-right px-4 py-2.5 font-medium w-[100px]">Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {addingZone && (
+                <tr className="border-t bg-[#F0FDF4]">
+                  <td className="px-4 py-2.5"><Input className="h-8" placeholder="A" value={newZone.code} onChange={(e) => setNewZone({ ...newZone, code: e.target.value })} /></td>
+                  <td className="px-4 py-2.5"><Input className="h-8" placeholder="Zone A — ..." value={newZone.label} onChange={(e) => setNewZone({ ...newZone, label: e.target.value })} /></td>
+                  <td className="px-4 py-2.5"><Input type="color" className="h-8 w-16 p-1" value={newZone.couleur} onChange={(e) => setNewZone({ ...newZone, couleur: e.target.value })} /></td>
+                  <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 w-16 ml-auto text-right" value={newZone.ordre} onChange={(e) => setNewZone({ ...newZone, ordre: Number(e.target.value) })} /></td>
+                  <td className="px-4 py-2.5"><Switch checked={newZone.actif} onCheckedChange={(v) => setNewZone({ ...newZone, actif: v })} /></td>
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={addZone}><Check className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => setAddingZone(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {zones.map((z) => {
+                const editing = editZoneId === z.id && bufZone;
+                const row = editing ? bufZone! : z;
+                return (
+                  <tr key={z.id} className="border-t hover:bg-[#F9FAFB]">
+                    <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.code} onChange={(e) => setBufZone({ ...row, code: e.target.value })} /> : z.code}</td>
+                    <td className="px-4 py-2.5">{editing ? <Input className="h-8" value={row.label} onChange={(e) => setBufZone({ ...row, label: e.target.value })} /> : z.label}</td>
+                    <td className="px-4 py-2.5">
+                      {editing ? <Input type="color" className="h-8 w-16 p-1" value={row.couleur} onChange={(e) => setBufZone({ ...row, couleur: e.target.value })} /> : (
+                        <div className="flex items-center gap-2"><div className="h-4 w-8 rounded border" style={{ background: z.couleur }} /><span className="text-[11px] text-muted-foreground">{z.couleur}</span></div>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 w-16 ml-auto text-right" value={row.ordre} onChange={(e) => setBufZone({ ...row, ordre: Number(e.target.value) })} /> : z.ordre}</td>
+                    <td className="px-4 py-2.5"><Switch checked={z.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateZone(z.id, { actif: v })} /></td>
+                    {canManage && (
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {editing ? (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={saveZone}><Check className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditZoneId(null); setBufZone(null); }}><X className="h-4 w-4" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditZoneId(z.id); setBufZone({ ...z }); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteZone(z.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+
+      {/* Tonnages */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="text-[13px] font-medium">Tranches de tonnage</div>
+            <div className="text-[12px] text-muted-foreground">La borne haute sert à calculer le tarif/tonne.</div>
+          </div>
+          {canManage && <Button size="sm" onClick={() => setAddingTon(true)}><Plus className="h-4 w-4" /> Ajouter un tonnage</Button>}
+        </div>
+        <Card className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-[#F9FAFB] text-[10px] uppercase text-muted-foreground">
+                <th className="text-left px-4 py-2.5 font-medium">Libellé</th>
+                <th className="text-right px-4 py-2.5 font-medium w-[140px]">Borne haute (T)</th>
+                <th className="text-right px-4 py-2.5 font-medium w-[80px]">Ordre</th>
+                <th className="text-left px-4 py-2.5 font-medium w-[80px]">Actif</th>
+                {canManage && <th className="text-right px-4 py-2.5 font-medium w-[100px]">Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {addingTon && (
+                <tr className="border-t bg-[#F0FDF4]">
+                  <td className="px-4 py-2.5"><Input className="h-8" placeholder="Ex: 10–20T" value={newTon.label} onChange={(e) => setNewTon({ ...newTon, label: e.target.value })} /></td>
+                  <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 w-24 ml-auto text-right" value={newTon.borne_haute} onChange={(e) => setNewTon({ ...newTon, borne_haute: Number(e.target.value) })} /></td>
+                  <td className="px-4 py-2.5 text-right"><Input type="number" className="h-8 w-16 ml-auto text-right" value={newTon.ordre} onChange={(e) => setNewTon({ ...newTon, ordre: Number(e.target.value) })} /></td>
+                  <td className="px-4 py-2.5"><Switch checked={newTon.actif} onCheckedChange={(v) => setNewTon({ ...newTon, actif: v })} /></td>
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={addTon}><Check className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => setAddingTon(false)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {tonnages.map((t) => {
+                const editing = editTonId === t.id && bufTon;
+                const row = editing ? bufTon! : t;
+                return (
+                  <tr key={t.id} className="border-t hover:bg-[#F9FAFB]">
+                    <td className="px-4 py-2.5 font-medium">{editing ? <Input className="h-8" value={row.label} onChange={(e) => setBufTon({ ...row, label: e.target.value })} /> : t.label}</td>
+                    <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 w-24 ml-auto text-right" value={row.borne_haute} onChange={(e) => setBufTon({ ...row, borne_haute: Number(e.target.value) })} /> : t.borne_haute}</td>
+                    <td className="px-4 py-2.5 text-right">{editing ? <Input type="number" className="h-8 w-16 ml-auto text-right" value={row.ordre} onChange={(e) => setBufTon({ ...row, ordre: Number(e.target.value) })} /> : t.ordre}</td>
+                    <td className="px-4 py-2.5"><Switch checked={t.actif} disabled={!canManage} onCheckedChange={(v) => onUpdateTonnage(t.id, { actif: v })} /></td>
+                    {canManage && (
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {editing ? (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-primary" onClick={saveTon}><Check className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditTonId(null); setBufTon(null); }}><X className="h-4 w-4" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px]" onClick={() => { setEditTonId(t.id); setBufTon({ ...t }); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-[26px] w-[26px] text-destructive" onClick={() => onDeleteTonnage(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function SimulateurTab({ tarifs, majorations, frais, tonnages, onCreateDevis }: {
+  tarifs: TarifZone[]; majorations: Majoration[]; frais: FraisFixe[]; tonnages: string[];
   onCreateDevis: (d: { destination: string; montant: number; type: TypeTransport }) => void;
 }) {
   const destinations = useMemo(() => Array.from(new Set(tarifs.map((t) => t.destination))).sort(), [tarifs]);
@@ -580,7 +891,7 @@ function SimulateurTab({ tarifs, majorations, frais, onCreateDevis }: {
               <Label>Tranche de tonnage</Label>
               <Select value={tonnage} onValueChange={setTonnage}>
                 <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
-                <SelectContent>{TONNAGES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                <SelectContent>{tonnages.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
@@ -656,18 +967,22 @@ function SimulateurTab({ tarifs, majorations, frais, onCreateDevis }: {
   );
 }
 
-function NouveauTarifDrawer({ open, onOpenChange, onSave }: {
+function NouveauTarifDrawer({ open, onOpenChange, zones, tonnages, onSave }: {
   open: boolean; onOpenChange: (o: boolean) => void;
+  zones: ZoneConfig[]; tonnages: TonnageConfig[];
   onSave: (t: Omit<TarifZone, "id">) => Promise<void>;
 }) {
-  const [zone, setZone] = useState<ZoneCode>("A");
+  const [zone, setZone] = useState<ZoneCode>(zones[0]?.code ?? "A");
   const [destination, setDestination] = useState("");
   const [km, setKm] = useState(0);
-  const [tonnage, setTonnage] = useState<string>("≤ 10T");
+  const [tonnage, setTonnage] = useState<string>(tonnages[0]?.label ?? "");
   const [type, setType] = useState<TypeTransport>("standard");
   const [tarif, setTarif] = useState(0);
   const [validite, setValidite] = useState("2026-12-31");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => { if (zones[0] && !zones.find((z) => z.code === zone)) setZone(zones[0].code); }, [zones]);
+  useEffect(() => { if (tonnages[0] && !tonnages.find((t) => t.label === tonnage)) setTonnage(tonnages[0].label); }, [tonnages]);
 
   const submit = async () => {
     if (!destination.trim() || !tarif) return toast.error("Destination et tarif requis");
@@ -676,7 +991,8 @@ function NouveauTarifDrawer({ open, onOpenChange, onSave }: {
     setSaving(false);
     setDestination(""); setKm(0); setTarif(0);
   };
-  const tarifTonne = tarif > 0 ? Math.round(tarif / tonnageBorneHaute(tonnage)) : 0;
+  const borne = tonnages.find((t) => t.label === tonnage)?.borne_haute || 40;
+  const tarifTonne = tarif > 0 ? Math.round(tarif / borne) : 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -686,7 +1002,7 @@ function NouveauTarifDrawer({ open, onOpenChange, onSave }: {
           <div><Label>Zone</Label>
             <Select value={zone} onValueChange={(v) => setZone(v as ZoneCode)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{(["A", "B", "C", "D"] as ZoneCode[]).map((z) => <SelectItem key={z} value={z}>Zone {z}</SelectItem>)}</SelectContent>
+              <SelectContent>{zones.map((z) => <SelectItem key={z.id} value={z.code}>Zone {z.code} — {z.label}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div><Label>Destination</Label><Input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ex: Abidjan → Gagnoa" /></div>
@@ -694,7 +1010,7 @@ function NouveauTarifDrawer({ open, onOpenChange, onSave }: {
           <div><Label>Tranche de tonnage</Label>
             <Select value={tonnage} onValueChange={setTonnage}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{TONNAGES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              <SelectContent>{tonnages.map((t) => <SelectItem key={t.id} value={t.label}>{t.label}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div><Label>Type de transport</Label>
@@ -721,3 +1037,4 @@ function NouveauTarifDrawer({ open, onOpenChange, onSave }: {
     </Sheet>
   );
 }
+
