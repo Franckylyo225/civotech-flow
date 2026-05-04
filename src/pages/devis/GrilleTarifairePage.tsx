@@ -239,9 +239,9 @@ export default function GrilleTarifairePage() {
                             {isEditing ? (
                               <Select value={row.zone} onValueChange={(v) => setEditBuf({ ...row, zone: v as ZoneCode })}>
                                 <SelectTrigger className="h-8 w-[80px]"><SelectValue /></SelectTrigger>
-                                <SelectContent>{(["A", "B", "C", "D"] as ZoneCode[]).map((z) => <SelectItem key={z} value={z}>Zone {z}</SelectItem>)}</SelectContent>
+                                <SelectContent>{zonesActives.map((z) => <SelectItem key={z.id} value={z.code}>Zone {z.code}</SelectItem>)}</SelectContent>
                               </Select>
-                            ) : <span className={cn("inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium", ZONE_BADGE[t.zone])}>Zone {t.zone}</span>}
+                            ) : <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium text-white" style={{ background: ZONE_COLOR[t.zone] || '#6B7280' }}>Zone {t.zone}</span>}
                           </td>
                           <td className="px-4 py-2.5 text-[12px] text-muted-foreground">
                             {isEditing ? (
