@@ -1,6 +1,73 @@
 import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// ── Schémas de validation
+const ZoneSchema = z.object({
+  code: z.string().trim().min(1, "Code requis").max(10, "Code trop long (max 10)"),
+  label: z.string().trim().min(1, "Libellé requis").max(100),
+  couleur: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide (format #RRGGBB)"),
+  ordre: z.number().int().min(0).max(999),
+  actif: z.boolean(),
+});
+const TonnageSchema = z.object({
+  label: z.string().trim().min(1, "Libellé requis").max(50),
+  borne_haute: z.number().positive("Borne haute > 0").max(10000),
+  ordre: z.number().int().min(0).max(999),
+  actif: z.boolean(),
+});
+const TarifZoneSchema = z.object({
+  destination: z.string().trim().min(1, "Destination requise").max(200),
+  km: z.number().min(0).max(100000),
+  zone: z.string().min(1, "Zone requise"),
+  tonnage: z.string().min(1, "Tonnage requis"),
+  type: z.enum(["standard", "express", "special"]),
+  tarif: z.number().positive("Tarif > 0").max(1_000_000_000),
+  validite: z.string().min(1, "Validité requise"),
+});
+const TarifKmSchema = z.object({
+  vehicule: z.string().trim().min(1, "Véhicule requis").max(100),
+  tonnage_max: z.number().positive().max(10000),
+  prix_km: z.number().min(0).max(1_000_000),
+  forfait_depart: z.number().min(0).max(1_000_000_000),
+  validite: z.string().min(1),
+});
+const MajorationSchema = z.object({
+  motif: z.string().trim().min(1, "Motif requis").max(100),
+  pct: z.number().min(0).max(1000),
+  applicable: z.string().trim().min(1).max(100),
+  actif: z.boolean(),
+});
+const FraisSchema = z.object({
+  designation: z.string().trim().min(1, "Désignation requise").max(100),
+  montant: z.number().min(0).max(1_000_000_000),
+  applicable: z.string().trim().min(1).max(100),
+  actif: z.boolean(),
+});
+
+function validate<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
+  const r = schema.safeParse(data);
+  if (!r.success) {
+    const msg = Object.values(r.error.flatten().fieldErrors).flat()[0] || "Données invalides";
+    toast.error(msg);
+    return null;
+  }
+  return r.data;
+}
+
+function handleDbError(error: { message: string; code?: string }) {
+  const m = error.message || "";
+  if (error.code === "23505" || m.includes("duplicate") || m.includes("unique")) {
+    if (m.includes("zones_config")) return toast.error("Cette zone existe déjà (code en doublon)");
+    if (m.includes("tonnages_config")) return toast.error("Ce tonnage existe déjà (libellé en doublon)");
+    return toast.error("Doublon détecté");
+  }
+  if (error.code === "23503" || m.includes("foreign_key") || m.includes("Impossible de supprimer")) {
+    return toast.error(m.replace(/^.*?:\s*/, "") || "Suppression bloquée : élément référencé");
+  }
+  toast.error(m);
+}
 
 export type ZoneCode = string;
 export type TypeTransport = "standard" | "express" | "special";
