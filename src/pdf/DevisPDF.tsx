@@ -137,14 +137,8 @@ export function DevisPDF({ devis, companySettings, validiteJours = 30, mission, 
           </View>
         </View>
 
-        {/* STATUS BAND */}
-        <View style={s.statusBand}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: cs.couleurPrimaire, marginRight: 6 }} />
-            <Text style={{ fontSize: 10, color: "#085041" }}>{STATUT_LABELS[devis.statut] || devis.statut}</Text>
-          </View>
-          <Text style={{ fontSize: 10, color: "#085041" }}>Établi par : {createdByName} · Commercial</Text>
-        </View>
+        {/* STATUS BAND removed */}
+
 
         {/* BODY */}
         <View style={s.body}>
