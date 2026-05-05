@@ -377,7 +377,7 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
               />
             </div>
             <div className="space-y-2">
-              <Label>Bon de commande du client *</Label>
+              <Label>Bon de commande du client</Label>
               <input
                 ref={fileInputRef}
                 type="file"
