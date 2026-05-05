@@ -70,6 +70,7 @@ export function usePdfCompanySettings() {
       siteWeb: dbSettings.site_web || DEFAULTS.siteWeb,
       logoUrl: dbSettings.logo_url || DEFAULTS.logoUrl,
       conditionsDevis: (dbSettings as any).conditions_devis || DEFAULTS.conditionsDevis,
+      afficherMajDevis: (dbSettings as any).afficher_maj_devis ?? DEFAULTS.afficherMajDevis,
     }),
     ...local,
   };
