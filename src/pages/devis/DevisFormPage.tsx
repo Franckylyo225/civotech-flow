@@ -185,7 +185,7 @@ export default function DevisFormPage() {
     if (!opForm.lieu_embarquement.trim() || !opForm.lieu_livraison.trim()) {
       toast.error("Lieux de récupération et de livraison obligatoires"); return;
     }
-    if (!bonCommandeFile) { toast.error("Le bon de commande est obligatoire"); return; }
+    // Bon de commande optionnel
     const ok = await createOperationFromDevis(devis, {
       lieu_embarquement: opForm.lieu_embarquement.trim(),
       lieu_livraison: opForm.lieu_livraison.trim(),
