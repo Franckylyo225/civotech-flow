@@ -71,6 +71,7 @@ export default function DevisFormPage() {
   const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   // Hydrate from devis when loaded
   useEffect(() => {
