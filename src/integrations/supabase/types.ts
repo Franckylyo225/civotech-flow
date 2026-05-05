@@ -306,6 +306,7 @@ export type Database = {
       company_settings: {
         Row: {
           adresse: string | null
+          afficher_maj_devis: boolean
           categories_depenses: Json
           conditions_devis: string
           conditions_paiement: string | null
@@ -333,6 +334,7 @@ export type Database = {
         }
         Insert: {
           adresse?: string | null
+          afficher_maj_devis?: boolean
           categories_depenses?: Json
           conditions_devis?: string
           conditions_paiement?: string | null
@@ -360,6 +362,7 @@ export type Database = {
         }
         Update: {
           adresse?: string | null
+          afficher_maj_devis?: boolean
           categories_depenses?: Json
           conditions_devis?: string
           conditions_paiement?: string | null

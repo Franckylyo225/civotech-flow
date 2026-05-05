@@ -25,6 +25,7 @@ export interface CompanySettings {
   categories_depenses: string[];
   modes_paiement: string[];
   conditions_devis: string;
+  afficher_maj_devis: boolean;
   created_at: string;
   updated_at: string;
 }

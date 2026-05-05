@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 interface Props { canEdit: boolean; }
@@ -209,6 +210,20 @@ export default function EntrepriseTab({ canEdit }: Props) {
               disabled={!canEdit}
               rows={6}
               className="text-sm"
+            />
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label className="text-sm font-medium">Afficher la mention « Mis à jour » sur le PDF du devis</Label>
+              <p className="text-xs text-muted-foreground">
+                Affiche la date de dernière mise à jour à côté de la date d'émission dans l'en-tête.
+              </p>
+            </div>
+            <Switch
+              checked={form.afficher_maj_devis ?? true}
+              onCheckedChange={(v) => set("afficher_maj_devis", v)}
+              disabled={!canEdit}
             />
           </div>
         </CardContent>
