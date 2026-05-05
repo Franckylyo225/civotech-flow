@@ -411,14 +411,31 @@ export default function FacturesTab({ canManage }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>TVA (%)</Label>
-                <Input type="number" value={createForm.taux_tva} onChange={e => setCreateForm(f => ({ ...f, taux_tva: Number(e.target.value) }))} />
+                <Label>
+                  TVA (%)
+                  {devisHasTva && <span className="ml-1 text-[10px] text-muted-foreground">(héritée du devis)</span>}
+                </Label>
+                <Input
+                  type="number"
+                  value={effectiveTauxTva}
+                  disabled={devisHasTva}
+                  onChange={e => setCreateForm(f => ({ ...f, taux_tva: Number(e.target.value) }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Échéance (jours)</Label>
                 <Input type="number" value={createForm.date_echeance_days} onChange={e => setCreateForm(f => ({ ...f, date_echeance_days: Number(e.target.value) }))} />
               </div>
             </div>
+            {devisHasTva && (
+              <div className="rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] p-2.5 text-[12px] text-[#1E40AF] flex items-start gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                <span>
+                  La TVA ({linkedDevis!.tauxTva}%) a déjà été appliquée sur le devis {linkedDevis!.reference}.
+                  Elle ne peut pas être modifiée ici pour éviter une double taxation.
+                </span>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Notes</Label>
               <Textarea value={createForm.notes} onChange={e => setCreateForm(f => ({ ...f, notes: e.target.value }))} rows={2} />
@@ -427,12 +444,12 @@ export default function FacturesTab({ canManage }: Props) {
               const op = operations.find(o => o.id === createForm.operation_id);
               if (!op) return null;
               const ttc = op.montantDevis;
-              const tva = Math.round(ttc * createForm.taux_tva / (100 + createForm.taux_tva));
+              const tva = Math.round(ttc * effectiveTauxTva / (100 + effectiveTauxTva));
               const ht = ttc - tva;
               return (
                 <div className="p-3 rounded-lg bg-muted/50 border border-border text-sm space-y-1">
                   <div className="flex justify-between"><span className="text-muted-foreground">HT</span><span>{ht.toLocaleString()} F</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">TVA ({createForm.taux_tva}%)</span><span>{tva.toLocaleString()} F</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">TVA ({effectiveTauxTva}%)</span><span>{tva.toLocaleString()} F</span></div>
                   <Separator />
                   <div className="flex justify-between font-semibold"><span>TTC</span><span>{ttc.toLocaleString()} F</span></div>
                 </div>
