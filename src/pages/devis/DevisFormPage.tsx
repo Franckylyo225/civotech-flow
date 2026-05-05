@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Plus, Trash2, Save, Send, FileText, Download, Copy,
-  ListChecks, AlertTriangle, CheckCircle2, XCircle, Truck, Mail,
+  AlertTriangle, CheckCircle2, XCircle, Truck, Mail,
   UserCheck, UserX, MessageSquare, Upload, X as XIcon,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -35,13 +35,6 @@ type Mission = {
 
 const VALIDITE_OPTIONS = [15, 30, 45, 60];
 const DUREE_OPTIONS = ["1j", "2j", "3j", "4j", "5j+"];
-
-// Suggestions de tarifs (popover ≡)
-const TARIFS_SUGGERES = [
-  { label: "Zone A Standard ≤40T", prix: 320_000 },
-  { label: "Zone B Standard 20–40T", prix: 1_250_000 },
-  { label: "Zone B Express 20–40T", prix: 1_800_000 },
-];
 
 export default function DevisFormPage() {
   const { id } = useParams();
