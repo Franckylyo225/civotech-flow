@@ -38,6 +38,7 @@ const DEFAULTS: PdfCompanySettings = {
   tva: "CI-2018-00123",
   couleurPrimaire: "#0F6E56",
   conditionsDevis: "Ce devis est valable {validite} jours à compter de sa date d'émission. Tout bon de commande passé au-delà de cette date devra faire l'objet d'un nouveau devis. Le paiement est exigible à 30 jours date de facture. Tout retard de paiement entraînera l'application de pénalités au taux légal en vigueur. Les prix sont exprimés en Francs CFA (FCFA) hors taxes.",
+  afficherMajDevis: true,
 };
 
 function readLocal(): Partial<PdfCompanySettings> {
