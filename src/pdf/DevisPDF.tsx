@@ -127,7 +127,7 @@ export function DevisPDF({ devis, companySettings, validiteJours = 30, mission, 
             <Text style={{ fontSize: 26, fontFamily: "Helvetica-Bold", color: "#FFFFFF", letterSpacing: 2 }}>DEVIS</Text>
             <Text style={{ fontSize: 13, color: "#9FE1CB", marginTop: 4 }}>Réf. {devis.reference || devis.id}</Text>
             <Text style={{ fontSize: 11, color: "#9FE1CB", marginTop: 2 }}>Émis le {formatDateFr(devis.createdAt)}</Text>
-            <Text style={{ fontSize: 11, color: "#9FE1CB" }}>Mis à jour le {formatDateFr(devis.updatedAt)}</Text>
+            
             <View style={{ backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 4, paddingVertical: 6, paddingHorizontal: 12, marginTop: 10, alignItems: "flex-end" }}>
               <Text style={{ fontSize: 9, color: "#9FE1CB" }}>VALIDE JUSQU'AU</Text>
               <Text style={{ fontSize: 13, fontFamily: "Helvetica-Bold", color: "#FFFFFF" }}>
