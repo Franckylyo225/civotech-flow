@@ -4,6 +4,7 @@ import { useCompanySettings, type CompanySettings } from "@/hooks/use-company-se
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -193,6 +194,22 @@ export default function EntrepriseTab({ canEdit }: Props) {
                 </div>
               ))}
             </div>
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              <FileText className="h-4 w-4 inline mr-1.5" /> Conditions générales des devis
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Affichées en bas du PDF du devis. Variables : <code className="font-mono">{"{validite}"}</code> (jours), <code className="font-mono">{"{tva}"}</code> (taux TVA).
+            </p>
+            <Textarea
+              value={form.conditions_devis || ""}
+              onChange={e => set("conditions_devis", e.target.value)}
+              disabled={!canEdit}
+              rows={6}
+              className="text-sm"
+            />
           </div>
         </CardContent>
       </Card>
