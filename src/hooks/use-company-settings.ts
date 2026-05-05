@@ -24,6 +24,7 @@ export interface CompanySettings {
   types_prestations: string[];
   categories_depenses: string[];
   modes_paiement: string[];
+  conditions_devis: string;
   created_at: string;
   updated_at: string;
 }
