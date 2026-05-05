@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useDevisStore } from "@/hooks/use-devis-store";
-import { useGrilleTarifaireStore } from "@/hooks/use-grille-tarifaire-store";
+import { TarifPickerPopover } from "@/components/devis/TarifPickerPopover";
 import { calculeDevisTotaux, formatMontant, formatDate, type DevisStatut, type TypeRemise } from "@/types/devis";
 import { generateDevisPdf } from "@/lib/generate-devis-pdf";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
@@ -48,7 +48,6 @@ export default function DevisFormPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { devisList, clients, addDevis, updateDevis, updateStatut, createOperationFromDevis } = useDevisStore();
-  const { tarifs } = useGrilleTarifaireStore();
 
   const isNew = !id || id === "nouveau";
   const devis = !isNew ? devisList.find((d) => d.id === id) : undefined;
@@ -407,42 +406,9 @@ export default function DevisFormPage() {
                             onChange={(e) => updateLigne(i, { description: e.target.value })}
                             placeholder="Ex: Transport Abidjan → Bouaké" />
                           {isEditable && (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button type="button" variant="ghost" size="icon" className="shrink-0" title="Tarifs suggérés">
-                                  <ListChecks className="h-4 w-4 text-primary" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-72 p-2" align="start">
-                                <div className="text-[12px] text-muted-foreground px-1 pb-1">Tarifs de la grille</div>
-                                {TARIFS_SUGGERES.map((t) => (
-                                  <button
-                                    key={t.label}
-                                    type="button"
-                                    className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm hover:bg-accent"
-                                    onClick={() => updateLigne(i, { prixUnitaire: t.prix })}
-                                  >
-                                    <span>{t.label}</span>
-                                    <span className="font-medium text-primary">{formatMontant(t.prix)}</span>
-                                  </button>
-                                ))}
-                                {tarifs.filter((t) => t.actif).length > 0 && (
-                                  <>
-                                    <div className="text-[12px] text-muted-foreground px-1 pt-2 pb-1 border-t mt-1">Grille tarifaire</div>
-                                    <div className="max-h-40 overflow-y-auto">
-                                      {tarifs.filter((t) => t.actif).map((t) => (
-                                        <button key={t.id} type="button"
-                                          className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm hover:bg-accent"
-                                          onClick={() => updateLigne(i, { description: t.designation, prixUnitaire: t.prixUnitaire })}>
-                                          <span className="truncate">{t.designation}</span>
-                                          <span className="font-medium text-primary shrink-0">{formatMontant(t.prixUnitaire)}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </>
-                                )}
-                              </PopoverContent>
-                            </Popover>
+                            <TarifPickerPopover
+                              onSelect={(p) => updateLigne(i, { description: p.description, prixUnitaire: p.prixUnitaire })}
+                            />
                           )}
                         </div>
                       </td>
