@@ -137,7 +137,43 @@ export default function EntrepriseTab({ canEdit }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Logo upload */}
+          <div className="space-y-2">
+            <Label>Logo de l'entreprise</Label>
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-32 rounded-md border border-border bg-muted/30 flex items-center justify-center overflow-hidden">
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="Logo" className="max-h-full max-w-full object-contain" />
+                ) : (
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                />
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" disabled={!canEdit || uploading} onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="mr-1.5 h-4 w-4" />
+                    {uploading ? "Envoi..." : form.logo_url ? "Changer" : "Téléverser"}
+                  </Button>
+                  {form.logo_url && canEdit && (
+                    <Button type="button" variant="ghost" size="sm" onClick={handleLogoDelete}>
+                      <Trash2 className="mr-1.5 h-4 w-4" /> Supprimer
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">PNG, JPG ou SVG · 2 Mo max · Affiché sur les PDF.</p>
+              </div>
+            </div>
+          </div>
+          <Separator />
           <div className="grid grid-cols-2 gap-4">
+
             <div className="space-y-2">
               <Label>Nom de l'entreprise</Label>
               <Input value={form.nom || ""} onChange={e => set("nom", e.target.value)} disabled={!canEdit} />
