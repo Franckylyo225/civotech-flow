@@ -38,6 +38,43 @@ export default function EntrepriseTab({ canEdit }: Props) {
 
   const set = (key: keyof CompanySettings, value: any) => setForm(f => ({ ...f, [key]: value }));
 
+  const handleLogoUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Taille maximale : 2 Mo");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-assets")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-assets").getPublicUrl(path);
+      await update({ logo_url: pub.publicUrl });
+      toast.success("Logo mis à jour");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleLogoDelete = async () => {
+    try {
+      await update({ logo_url: "" });
+      toast.success("Logo supprimé");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur");
+    }
+  };
+
   const addToList = (key: keyof CompanySettings) => {
     if (!newItem.trim()) return;
     const current = (form[key] as string[]) || [];
