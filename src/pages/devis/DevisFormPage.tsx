@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useDevisStore } from "@/hooks/use-devis-store";
 import { TarifPickerPopover } from "@/components/devis/TarifPickerPopover";
 import { calculeDevisTotaux, formatMontant, formatDate, type DevisStatut, type TypeRemise } from "@/types/devis";
-import { generateDevisPdf } from "@/lib/generate-devis-pdf";
+import { DevisPDFPreview } from "@/pdf/DevisPDFPreview";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
