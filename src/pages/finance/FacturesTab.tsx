@@ -87,6 +87,17 @@ export default function FacturesTab({ canManage }: Props) {
 
   const pagination = usePagination(filtered, 25, [search, filterStatut, dateFrom, dateTo]);
 
+  // Devis lié à l'opération sélectionnée (par référence)
+  const linkedDevis = createForm.operation_id
+    ? (() => {
+        const op = operations.find(o => o.id === createForm.operation_id);
+        if (!op?.devisReference) return undefined;
+        return devisList.find(d => d.reference === op.devisReference);
+      })()
+    : undefined;
+  const devisHasTva = !!linkedDevis && linkedDevis.tauxTva > 0 && linkedDevis.montantTva > 0;
+  const effectiveTauxTva = devisHasTva ? linkedDevis!.tauxTva : createForm.taux_tva;
+
   const handleCreate = async () => {
     if (!createForm.operation_id) { toast.error("Sélectionnez une opération"); return; }
     const op = operations.find(o => o.id === createForm.operation_id);
@@ -95,14 +106,14 @@ export default function FacturesTab({ canManage }: Props) {
     const { data: opRow } = await supabase.from("operations").select("client_id").eq("id", op.id).single();
     // Le montant du devis est déjà TTC (TVA incluse lors de l'édition du devis)
     const montantTtc = op.montantDevis;
-    const montantTva = Math.round(montantTtc * createForm.taux_tva / (100 + createForm.taux_tva));
+    const montantTva = Math.round(montantTtc * effectiveTauxTva / (100 + effectiveTauxTva));
     const montantHt = montantTtc - montantTva;
     try {
       await addFacture({
         operation_id: op.id,
         client_id: opRow?.client_id || null,
         montant_ht: montantHt,
-        taux_tva: createForm.taux_tva,
+        taux_tva: effectiveTauxTva,
         montant_tva: Math.round(montantTva),
         montant_ttc: Math.round(montantTtc),
         date_emission: new Date().toISOString().slice(0, 10),
