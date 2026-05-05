@@ -17,6 +17,7 @@ export interface PdfCompanySettings {
   tva: string;
   couleurPrimaire: string;
   conditionsDevis: string;
+  afficherMajDevis: boolean;
 }
 
 const STORAGE_KEY = "civotech_pdf_settings";
