@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Building2, Globe, DollarSign, FileText, Save, Plus, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Building2, Globe, DollarSign, FileText, Save, Plus, X, Upload, Image as ImageIcon, Trash2 } from "lucide-react";
 import { useCompanySettings, type CompanySettings } from "@/hooks/use-company-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface Props { canEdit: boolean; }
@@ -17,8 +18,10 @@ export default function EntrepriseTab({ canEdit }: Props) {
   const { settings, loading, update } = useCompanySettings();
   const [form, setForm] = useState<Partial<CompanySettings>>({});
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newItem, setNewItem] = useState("");
   const [editingList, setEditingList] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (settings) setForm(settings);
@@ -34,6 +37,43 @@ export default function EntrepriseTab({ canEdit }: Props) {
   };
 
   const set = (key: keyof CompanySettings, value: any) => setForm(f => ({ ...f, [key]: value }));
+
+  const handleLogoUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Taille maximale : 2 Mo");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-assets")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-assets").getPublicUrl(path);
+      await update({ logo_url: pub.publicUrl });
+      toast.success("Logo mis à jour");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleLogoDelete = async () => {
+    try {
+      await update({ logo_url: "" });
+      toast.success("Logo supprimé");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur");
+    }
+  };
 
   const addToList = (key: keyof CompanySettings) => {
     if (!newItem.trim()) return;
@@ -97,7 +137,43 @@ export default function EntrepriseTab({ canEdit }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Logo upload */}
+          <div className="space-y-2">
+            <Label>Logo de l'entreprise</Label>
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-32 rounded-md border border-border bg-muted/30 flex items-center justify-center overflow-hidden">
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="Logo" className="max-h-full max-w-full object-contain" />
+                ) : (
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                />
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" disabled={!canEdit || uploading} onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="mr-1.5 h-4 w-4" />
+                    {uploading ? "Envoi..." : form.logo_url ? "Changer" : "Téléverser"}
+                  </Button>
+                  {form.logo_url && canEdit && (
+                    <Button type="button" variant="ghost" size="sm" onClick={handleLogoDelete}>
+                      <Trash2 className="mr-1.5 h-4 w-4" /> Supprimer
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">PNG, JPG ou SVG · 2 Mo max · Affiché sur les PDF.</p>
+              </div>
+            </div>
+          </div>
+          <Separator />
           <div className="grid grid-cols-2 gap-4">
+
             <div className="space-y-2">
               <Label>Nom de l'entreprise</Label>
               <Input value={form.nom || ""} onChange={e => set("nom", e.target.value)} disabled={!canEdit} />
