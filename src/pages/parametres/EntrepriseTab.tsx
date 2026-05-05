@@ -18,8 +18,10 @@ export default function EntrepriseTab({ canEdit }: Props) {
   const { settings, loading, update } = useCompanySettings();
   const [form, setForm] = useState<Partial<CompanySettings>>({});
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newItem, setNewItem] = useState("");
   const [editingList, setEditingList] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (settings) setForm(settings);
