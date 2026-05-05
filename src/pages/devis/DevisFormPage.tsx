@@ -431,31 +431,78 @@ export default function DevisFormPage() {
               </table>
             </div>
 
-            {/* Remise + TVA */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <Field label="Remise">
+            {/* Remise + TVA — encadrés distincts */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+              {/* REMISE */}
+              <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-6 w-6 rounded-full bg-[#FEE2E2] text-destructive flex items-center justify-center text-[11px] font-bold">−</span>
+                    <span className="text-[12px] font-semibold text-[#991B1B] uppercase tracking-wide">Remise commerciale</span>
+                  </div>
+                  {totaux.montantRemise > 0 && (
+                    <span className="text-[12px] font-medium text-destructive">
+                      − {formatMontant(totaux.montantRemise)}
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <Select value={typeRemise} onValueChange={(v) => setTypeRemise(v as TypeRemise)} disabled={!isEditable}>
-                    <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-[120px] bg-white"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="POURCENTAGE">Pourcentage (%)</SelectItem>
-                      <SelectItem value="MONTANT">Montant fixe</SelectItem>
+                      <SelectItem value="POURCENTAGE">% (Pourcentage)</SelectItem>
+                      <SelectItem value="MONTANT">FCFA (Montant)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Input type="number" min={0} value={valeurRemise} disabled={!isEditable}
-                    onChange={(e) => setValeurRemise(parseFloat(e.target.value) || 0)}
-                    className="flex-1"
-                    placeholder={typeRemise === "POURCENTAGE" ? "0 %" : "0 FCFA"} />
+                  <div className="relative flex-1">
+                    <Input type="number" min={0} value={valeurRemise || ""} disabled={!isEditable}
+                      onChange={(e) => setValeurRemise(parseFloat(e.target.value) || 0)}
+                      className="bg-white pr-12"
+                      placeholder="0" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-muted-foreground pointer-events-none">
+                      {typeRemise === "POURCENTAGE" ? "%" : "FCFA"}
+                    </span>
+                  </div>
                 </div>
-              </Field>
-              <Field label="TVA">
-                <div className="flex items-center gap-2">
-                  <Input type="number" min={0} max={100} value={tauxTva} disabled={!isEditable}
-                    onChange={(e) => setTauxTva(parseFloat(e.target.value) || 0)}
-                    className="w-24" />
-                  <span className="text-sm text-muted-foreground">%</span>
+                <p className="text-[10px] text-[#991B1B]/70 mt-1.5">Appliquée sur le sous-total HT, avant TVA</p>
+              </div>
+
+              {/* TVA */}
+              <div className="rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-6 w-6 rounded-full bg-[#DBEAFE] text-[#1E40AF] flex items-center justify-center text-[11px] font-bold">+</span>
+                    <span className="text-[12px] font-semibold text-[#1E40AF] uppercase tracking-wide">Taxe (TVA)</span>
+                  </div>
+                  {totaux.montantTva > 0 && (
+                    <span className="text-[12px] font-medium text-[#1E40AF]">
+                      + {formatMontant(totaux.montantTva)}
+                    </span>
+                  )}
                 </div>
-              </Field>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input type="number" min={0} max={100} value={tauxTva} disabled={!isEditable}
+                      onChange={(e) => setTauxTva(parseFloat(e.target.value) || 0)}
+                      className="bg-white pr-8" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-muted-foreground pointer-events-none">%</span>
+                  </div>
+                  {isEditable && (
+                    <div className="flex gap-1">
+                      {[0, 18].map((v) => (
+                        <button key={v} type="button" onClick={() => setTauxTva(v)}
+                          className={cn(
+                            "px-2 rounded text-[11px] border transition-colors",
+                            tauxTva === v ? "bg-[#1E40AF] text-white border-[#1E40AF]" : "bg-white border-[#BFDBFE] text-[#1E40AF] hover:bg-[#DBEAFE]"
+                          )}>
+                          {v}%
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-[10px] text-[#1E40AF]/70 mt-1.5">Calculée sur le HT après remise</p>
+              </div>
             </div>
 
             {/* Totaux */}
