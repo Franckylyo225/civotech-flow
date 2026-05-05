@@ -219,7 +219,7 @@ export default function DevisFormPage() {
           {/* BROUILLON */}
           {statut === "BROUILLON" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)} disabled={isNew}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)} disabled={isNew}>
                 <FileText className="mr-1 h-4 w-4" /> Aperçu PDF
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSave} disabled={saving}>
@@ -235,7 +235,7 @@ export default function DevisFormPage() {
           {/* SOUMIS_DG */}
           {statut === "SOUMIS_DG" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {role === "DG" && (
@@ -255,7 +255,7 @@ export default function DevisFormPage() {
           {/* APPROUVE_DG */}
           {statut === "APPROUVE_DG" && (role === "COMMERCIAL" || role === "DG") && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               <Button size="sm" onClick={() => handleQuickStatut("ENVOYE_CLIENT", "Devis envoyé au client")}>
@@ -266,7 +266,7 @@ export default function DevisFormPage() {
           {/* ENVOYE_CLIENT */}
           {statut === "ENVOYE_CLIENT" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {(role === "COMMERCIAL" || role === "DG") && (
@@ -286,7 +286,7 @@ export default function DevisFormPage() {
           {/* VALIDE_CLIENT */}
           {statut === "VALIDE_CLIENT" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {(role === "COMMERCIAL" || role === "DG" || role === "LOGISTIQUE") && (
@@ -299,7 +299,7 @@ export default function DevisFormPage() {
           {/* REFUSE */}
           {(statut === "REFUSE_DG" || statut === "REFUSE_CLIENT") && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               <Button variant="ghost" size="sm" onClick={handleDuplicate}>
