@@ -144,30 +144,19 @@ export function DevisPDF({ devis, companySettings, validiteJours = 30, mission, 
 
         {/* BODY */}
         <View style={s.body}>
-          {/* Parties */}
-          <View style={s.partiesRow}>
-            <View style={s.partyBlock}>
-              <Text style={s.partyLabel}>ÉMETTEUR</Text>
-              <Text style={s.partyName}>{cs.nom}</Text>
-              <Text style={s.partyText}>{cs.adresse}</Text>
-              <Text style={s.partyText}>{cs.bp} · {cs.pays}</Text>
-              <Text style={s.partyText}>RCCM {cs.rccm} · NCC {cs.ncc}</Text>
-              <Text style={s.partyText}>N° TVA {cs.tva}</Text>
-            </View>
-            <View style={s.vSep} />
-            <View style={s.partyBlock}>
-              <Text style={s.partyLabel}>DESTINATAIRE</Text>
-              <Text style={s.partyName}>{devis.client?.nom || "—"}</Text>
-              {devis.client?.adresse && <Text style={s.partyText}>{devis.client.adresse}</Text>}
-              {(devis.client?.email || devis.client?.telephone) && (
-                <Text style={s.partyText}>
-                  {[devis.client?.email, devis.client?.telephone].filter(Boolean).join(" · ")}
-                </Text>
-              )}
-              {devis.client?.contact && (
-                <Text style={[s.partyText, { marginTop: 4 }]}>À l'attention de : {devis.client.contact}</Text>
-              )}
-            </View>
+          {/* Destinataire */}
+          <View style={{ marginBottom: 24 }}>
+            <Text style={s.partyLabel}>DESTINATAIRE</Text>
+            <Text style={s.partyName}>{devis.client?.nom || "—"}</Text>
+            {devis.client?.adresse && <Text style={s.partyText}>{devis.client.adresse}</Text>}
+            {(devis.client?.email || devis.client?.telephone) && (
+              <Text style={s.partyText}>
+                {[devis.client?.email, devis.client?.telephone].filter(Boolean).join(" · ")}
+              </Text>
+            )}
+            {devis.client?.contact && (
+              <Text style={[s.partyText, { marginTop: 4 }]}>À l'attention de : {devis.client.contact}</Text>
+            )}
           </View>
 
           <View style={s.hSep} />
@@ -241,31 +230,9 @@ export function DevisPDF({ devis, companySettings, validiteJours = 30, mission, 
           {/* Conditions */}
           <View style={s.conditions}>
             <Text style={{ fontSize: 10, color: "#9CA3AF", letterSpacing: 1, marginBottom: 6 }}>CONDITIONS GÉNÉRALES</Text>
-            <Text style={{ fontSize: 9, color: "#9CA3AF", lineHeight: 1.7 }}>
-              Ce devis est valable {validiteJours} jours à compter de sa date d'émission. Tout bon de commande passé au-delà de cette date devra faire l'objet d'un nouveau devis. Le paiement est exigible à 30 jours date de facture. Tout retard de paiement entraînera l'application de pénalités au taux légal en vigueur. Les prix sont exprimés en Francs CFA (FCFA) hors taxes. La TVA applicable est de {devis.tauxTva}% conformément à la législation ivoirienne en vigueur.
+            <Text style={{ fontSize: 9, color: "#6B7280", lineHeight: 1.7 }}>
+              {(cs.conditionsDevis || "").replace(/\{validite\}/g, String(validiteJours)).replace(/\{tva\}/g, String(devis.tauxTva))}
             </Text>
-          </View>
-
-          {/* Signatures */}
-          <View style={s.signaturesRow}>
-            <View style={[s.signatureBox, { marginRight: 10 }]}>
-              <Text style={{ fontSize: 9, color: "#9CA3AF", letterSpacing: 1 }}>BON POUR ACCORD — CLIENT</Text>
-              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold", color: "#374151", marginTop: 4 }}>
-                {devis.client?.nom || "—"}
-              </Text>
-              <View style={{ height: 40 }} />
-              <View style={{ borderTopWidth: 1, borderTopColor: "#E5E7EB", paddingTop: 6, width: "100%", alignItems: "center" }}>
-                <Text style={{ fontSize: 9, color: "#D1D5DB" }}>Signature et cachet</Text>
-              </View>
-            </View>
-            <View style={[s.signatureBox, { marginLeft: 10 }]}>
-              <Text style={{ fontSize: 9, color: "#9CA3AF", letterSpacing: 1 }}>ÉTABLI PAR — {cs.nom.toUpperCase()}</Text>
-              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold", color: "#374151", marginTop: 4 }}>{createdByName}</Text>
-              <View style={{ height: 40 }} />
-              <View style={{ borderTopWidth: 1, borderTopColor: "#E5E7EB", paddingTop: 6, width: "100%", alignItems: "center" }}>
-                <Text style={{ fontSize: 9, color: "#D1D5DB" }}>Signature et cachet</Text>
-              </View>
-            </View>
           </View>
         </View>
 
