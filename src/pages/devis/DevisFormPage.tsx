@@ -753,6 +753,18 @@ export default function DevisFormPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* APERÇU PDF */}
+      {devis && (
+        <DevisPDFPreview
+          open={showPdfPreview}
+          onOpenChange={setShowPdfPreview}
+          devis={devis}
+          validiteJours={validiteJours}
+          mission={mission}
+          createdByName={user?.email || "—"}
+        />
+      )}
     </div>
   );
 }
