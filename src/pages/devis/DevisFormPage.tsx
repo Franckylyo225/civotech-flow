@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useDevisStore } from "@/hooks/use-devis-store";
 import { TarifPickerPopover } from "@/components/devis/TarifPickerPopover";
 import { calculeDevisTotaux, formatMontant, formatDate, type DevisStatut, type TypeRemise } from "@/types/devis";
-import { generateDevisPdf } from "@/lib/generate-devis-pdf";
+import { DevisPDFPreview } from "@/pdf/DevisPDFPreview";
 import { DevisStatutBadge } from "@/components/devis/DevisStatutBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,7 @@ export default function DevisFormPage() {
   const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   // Hydrate from devis when loaded
   useEffect(() => {
@@ -218,7 +219,7 @@ export default function DevisFormPage() {
           {/* BROUILLON */}
           {statut === "BROUILLON" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)} disabled={isNew}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)} disabled={isNew}>
                 <FileText className="mr-1 h-4 w-4" /> Aperçu PDF
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSave} disabled={saving}>
@@ -234,7 +235,7 @@ export default function DevisFormPage() {
           {/* SOUMIS_DG */}
           {statut === "SOUMIS_DG" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {role === "DG" && (
@@ -254,7 +255,7 @@ export default function DevisFormPage() {
           {/* APPROUVE_DG */}
           {statut === "APPROUVE_DG" && (role === "COMMERCIAL" || role === "DG") && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               <Button size="sm" onClick={() => handleQuickStatut("ENVOYE_CLIENT", "Devis envoyé au client")}>
@@ -265,7 +266,7 @@ export default function DevisFormPage() {
           {/* ENVOYE_CLIENT */}
           {statut === "ENVOYE_CLIENT" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {(role === "COMMERCIAL" || role === "DG") && (
@@ -285,7 +286,7 @@ export default function DevisFormPage() {
           {/* VALIDE_CLIENT */}
           {statut === "VALIDE_CLIENT" && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               {(role === "COMMERCIAL" || role === "DG" || role === "LOGISTIQUE") && (
@@ -298,7 +299,7 @@ export default function DevisFormPage() {
           {/* REFUSE */}
           {(statut === "REFUSE_DG" || statut === "REFUSE_CLIENT") && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => devis && generateDevisPdf(devis)}>
+              <Button variant="ghost" size="sm" onClick={() => setShowPdfPreview(true)}>
                 <Download className="mr-1 h-4 w-4" /> Télécharger PDF
               </Button>
               <Button variant="ghost" size="sm" onClick={handleDuplicate}>
@@ -752,6 +753,18 @@ export default function DevisFormPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* APERÇU PDF */}
+      {devis && (
+        <DevisPDFPreview
+          open={showPdfPreview}
+          onOpenChange={setShowPdfPreview}
+          devis={devis}
+          validiteJours={validiteJours}
+          mission={mission}
+          createdByName={user?.email || "—"}
+        />
+      )}
     </div>
   );
 }
