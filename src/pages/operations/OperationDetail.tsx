@@ -168,7 +168,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     toast.success("Opération mise à jour");
   };
 
-  const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG";
+  const canManage = user?.role === "LOGISTIQUE" || user?.role === "DG" || user?.role === "COMMERCIAL";
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
