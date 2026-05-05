@@ -730,7 +730,7 @@ export default function DevisFormPage() {
             <Field label="Commentaires">
               <Textarea rows={2} value={opForm.commentaires} onChange={(e) => setOpForm((p) => ({ ...p, commentaires: e.target.value }))} />
             </Field>
-            <Field label="Bon de commande client *">
+            <Field label="Bon de commande client">
               <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="hidden"
                 onChange={(e) => setBonCommandeFile(e.target.files?.[0] || null)} />
               {bonCommandeFile ? (
