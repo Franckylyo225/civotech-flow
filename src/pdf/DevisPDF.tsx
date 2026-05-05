@@ -2,8 +2,12 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { Devis } from "@/types/devis";
 import type { PdfCompanySettings } from "@/hooks/use-pdf-company-settings";
 
-const formatFCFA = (n: number) =>
-  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + " FCFA";
+const formatFCFA = (n: number) => {
+  const formatted = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 })
+    .format(Math.round(n || 0))
+    .replace(/\u202F|\u00A0/g, " ");
+  return formatted + " FCFA";
+};
 
 const formatDateFr = (iso: string) => {
   try {
