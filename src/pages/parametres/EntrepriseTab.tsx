@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Building2, Globe, DollarSign, FileText, Save, Plus, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Building2, Globe, DollarSign, FileText, Save, Plus, X, Upload, Image as ImageIcon, Trash2 } from "lucide-react";
 import { useCompanySettings, type CompanySettings } from "@/hooks/use-company-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface Props { canEdit: boolean; }
