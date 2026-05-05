@@ -36,6 +36,7 @@ const DEFAULTS: PdfCompanySettings = {
   ncc: "0123456789",
   tva: "CI-2018-00123",
   couleurPrimaire: "#0F6E56",
+  conditionsDevis: "Ce devis est valable {validite} jours à compter de sa date d'émission. Tout bon de commande passé au-delà de cette date devra faire l'objet d'un nouveau devis. Le paiement est exigible à 30 jours date de facture. Tout retard de paiement entraînera l'application de pénalités au taux légal en vigueur. Les prix sont exprimés en Francs CFA (FCFA) hors taxes.",
 };
 
 function readLocal(): Partial<PdfCompanySettings> {
@@ -65,6 +66,8 @@ export function usePdfCompanySettings() {
       telephone: dbSettings.telephone || DEFAULTS.telephone,
       email: dbSettings.email || DEFAULTS.email,
       siteWeb: dbSettings.site_web || DEFAULTS.siteWeb,
+      logoUrl: dbSettings.logo_url || DEFAULTS.logoUrl,
+      conditionsDevis: (dbSettings as any).conditions_devis || DEFAULTS.conditionsDevis,
     }),
     ...local,
   };
