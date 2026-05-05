@@ -185,7 +185,7 @@ export default function DevisFormPage() {
     if (!opForm.lieu_embarquement.trim() || !opForm.lieu_livraison.trim()) {
       toast.error("Lieux de récupération et de livraison obligatoires"); return;
     }
-    if (!bonCommandeFile) { toast.error("Le bon de commande est obligatoire"); return; }
+    // Bon de commande optionnel
     const ok = await createOperationFromDevis(devis, {
       lieu_embarquement: opForm.lieu_embarquement.trim(),
       lieu_livraison: opForm.lieu_livraison.trim(),
@@ -730,7 +730,7 @@ export default function DevisFormPage() {
             <Field label="Commentaires">
               <Textarea rows={2} value={opForm.commentaires} onChange={(e) => setOpForm((p) => ({ ...p, commentaires: e.target.value }))} />
             </Field>
-            <Field label="Bon de commande client *">
+            <Field label="Bon de commande client">
               <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" className="hidden"
                 onChange={(e) => setBonCommandeFile(e.target.files?.[0] || null)} />
               {bonCommandeFile ? (
