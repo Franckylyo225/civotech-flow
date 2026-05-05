@@ -2,8 +2,12 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { Devis } from "@/types/devis";
 import type { PdfCompanySettings } from "@/hooks/use-pdf-company-settings";
 
-const formatFCFA = (n: number) =>
-  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + " FCFA";
+const formatFCFA = (n: number) => {
+  const formatted = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 })
+    .format(Math.round(n || 0))
+    .replace(/\u202F|\u00A0/g, " ");
+  return formatted + " FCFA";
+};
 
 const formatDateFr = (iso: string) => {
   try {
@@ -133,14 +137,8 @@ export function DevisPDF({ devis, companySettings, validiteJours = 30, mission, 
           </View>
         </View>
 
-        {/* STATUS BAND */}
-        <View style={s.statusBand}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: cs.couleurPrimaire, marginRight: 6 }} />
-            <Text style={{ fontSize: 10, color: "#085041" }}>{STATUT_LABELS[devis.statut] || devis.statut}</Text>
-          </View>
-          <Text style={{ fontSize: 10, color: "#085041" }}>Établi par : {createdByName} · Commercial</Text>
-        </View>
+        {/* STATUS BAND removed */}
+
 
         {/* BODY */}
         <View style={s.body}>
