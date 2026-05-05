@@ -195,6 +195,22 @@ export default function EntrepriseTab({ canEdit }: Props) {
               ))}
             </div>
           </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              <FileText className="h-4 w-4 inline mr-1.5" /> Conditions générales des devis
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Affichées en bas du PDF du devis. Variables : <code className="font-mono">{"{validite}"}</code> (jours), <code className="font-mono">{"{tva}"}</code> (taux TVA).
+            </p>
+            <Textarea
+              value={form.conditions_devis || ""}
+              onChange={e => set("conditions_devis", e.target.value)}
+              disabled={!canEdit}
+              rows={6}
+              className="text-sm"
+            />
+          </div>
         </CardContent>
       </Card>
 
