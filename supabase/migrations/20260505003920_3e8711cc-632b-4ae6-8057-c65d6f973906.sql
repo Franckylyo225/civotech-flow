@@ -1,0 +1,2 @@
+ALTER TABLE public.company_settings 
+ADD COLUMN IF NOT EXISTS conditions_devis text NOT NULL DEFAULT 'Ce devis est valable {validite} jours à compter de sa date d''émission. Tout bon de commande passé au-delà de cette date devra faire l''objet d''un nouveau devis. Le paiement est exigible à 30 jours date de facture. Tout retard de paiement entraînera l''application de pénalités au taux légal en vigueur. Les prix sont exprimés en Francs CFA (FCFA) hors taxes.';

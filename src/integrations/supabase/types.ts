@@ -307,6 +307,7 @@ export type Database = {
         Row: {
           adresse: string | null
           categories_depenses: Json
+          conditions_devis: string
           conditions_paiement: string | null
           created_at: string
           devise: string
@@ -333,6 +334,7 @@ export type Database = {
         Insert: {
           adresse?: string | null
           categories_depenses?: Json
+          conditions_devis?: string
           conditions_paiement?: string | null
           created_at?: string
           devise?: string
@@ -359,6 +361,7 @@ export type Database = {
         Update: {
           adresse?: string | null
           categories_depenses?: Json
+          conditions_devis?: string
           conditions_paiement?: string | null
           created_at?: string
           devise?: string

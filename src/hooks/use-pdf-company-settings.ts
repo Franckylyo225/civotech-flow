@@ -16,6 +16,7 @@ export interface PdfCompanySettings {
   ncc: string;
   tva: string;
   couleurPrimaire: string;
+  conditionsDevis: string;
 }
 
 const STORAGE_KEY = "civotech_pdf_settings";
