@@ -8,6 +8,7 @@ import {
   type FactureRow, type StatutFacture,
 } from "@/hooks/use-factures-store";
 import { useOperationsStore } from "@/hooks/use-operations-store";
+import { useDevisStore } from "@/hooks/use-devis-store";
 import { useClientsStore } from "@/hooks/use-clients-store";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ interface Props { canManage: boolean; }
 export default function FacturesTab({ canManage }: Props) {
   const { factures, loading, stats, addFacture, updateFacture, deleteFacture } = useFacturesStore();
   const { operations } = useOperationsStore();
+  const { devisList } = useDevisStore();
   const { clients } = useClientsStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutFacture | "ALL" | "ECHUE">("ALL");
