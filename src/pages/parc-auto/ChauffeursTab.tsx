@@ -17,23 +17,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format, differenceInDays, differenceInYears, subYears } from "date-fns";
+import { format, differenceInDays, differenceInYears } from "date-fns";
 
-// Approximation date_embauche depuis experience_annees (champ DB)
-const dateEmbaucheFrom = (years: number, fallback: string): Date => {
-  if (years > 0) return subYears(new Date(), years);
-  return new Date(fallback);
-};
-
-const yearsFromDate = (iso: string): number => {
-  if (!iso) return 0;
-  return Math.max(0, differenceInYears(new Date(), new Date(iso)));
+// Expérience totale = expérience à l'embauche (stockée dans experience_annees)
+// + années écoulées depuis l'ajout du chauffeur (created_at = date d'embauche).
+const totalExperience = (experienceEmbauche: number, createdAt: string): number => {
+  const base = Math.max(0, experienceEmbauche || 0);
+  if (!createdAt) return base;
+  const since = Math.max(0, differenceInYears(new Date(), new Date(createdAt)));
+  return base + since;
 };
 
 const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", numero_permis: "",
   type_permis: "C", date_expiration_permis: "",
-  date_embauche: new Date().toISOString().slice(0, 10),
+  experience_embauche: 0,
   disponible: true,
   camion_assigne_id: "",
 };
