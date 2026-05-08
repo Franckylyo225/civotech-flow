@@ -12,6 +12,11 @@ export interface CamionRow {
   capacite_tonnes: number;
   annee: number;
   km_actuel: number;
+  km_max: number;
+  date_assurance: string | null;
+  date_visite_tech: string | null;
+  date_vignette: string | null;
+  date_ajout: string;
   statut: StatutCamion;
   created_at: string;
   updated_at: string;
@@ -30,6 +35,11 @@ export const STATUT_CAMION_CONFIG: Record<StatutCamion, { label: string; color: 
   EN_MAINTENANCE: { label: "Maintenance", color: "text-warning", bgColor: "bg-warning/10" },
 };
 
+const FIELDS = [
+  "immatriculation","marque","modele","type_vehicule","capacite_tonnes","annee",
+  "km_actuel","km_max","date_assurance","date_visite_tech","date_vignette","date_ajout","statut",
+] as const;
+
 export function useParcAutoStore() {
   const [camions, setCamions] = useState<CamionRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +47,7 @@ export function useParcAutoStore() {
   const fetchCamions = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase.from("camions").select("*").order("immatriculation");
-    setCamions((data || []) as CamionRow[]);
+    setCamions((data || []) as any);
     setLoading(false);
   }, []);
 
@@ -50,31 +60,20 @@ export function useParcAutoStore() {
     enMaintenance: camions.filter(c => c.statut === "EN_MAINTENANCE").length,
   };
 
-  const addCamion = useCallback(async (camion: Omit<CamionRow, "id" | "created_at" | "updated_at" | "statut">) => {
-    const { error } = await supabase.from("camions").insert({
-      immatriculation: camion.immatriculation,
-      marque: camion.marque,
-      modele: camion.modele,
-      type_vehicule: camion.type_vehicule,
-      capacite_tonnes: camion.capacite_tonnes,
-      annee: camion.annee,
-      km_actuel: camion.km_actuel,
-    });
+  const buildPayload = (input: Partial<CamionRow>) => {
+    const out: any = {};
+    FIELDS.forEach(f => { if (input[f] !== undefined) out[f] = (input as any)[f]; });
+    return out;
+  };
+
+  const addCamion = useCallback(async (camion: Partial<CamionRow>) => {
+    const { error } = await supabase.from("camions").insert(buildPayload(camion));
     if (error) throw error;
     await fetchCamions();
   }, [fetchCamions]);
 
-  const updateCamion = useCallback(async (id: string, updates: Partial<Omit<CamionRow, "id" | "created_at" | "updated_at">>) => {
-    const dbUpdates: any = {};
-    if (updates.immatriculation !== undefined) dbUpdates.immatriculation = updates.immatriculation;
-    if (updates.marque !== undefined) dbUpdates.marque = updates.marque;
-    if (updates.modele !== undefined) dbUpdates.modele = updates.modele;
-    if (updates.type_vehicule !== undefined) dbUpdates.type_vehicule = updates.type_vehicule;
-    if (updates.capacite_tonnes !== undefined) dbUpdates.capacite_tonnes = updates.capacite_tonnes;
-    if (updates.annee !== undefined) dbUpdates.annee = updates.annee;
-    if (updates.km_actuel !== undefined) dbUpdates.km_actuel = updates.km_actuel;
-    if (updates.statut !== undefined) dbUpdates.statut = updates.statut;
-    const { error } = await supabase.from("camions").update(dbUpdates).eq("id", id);
+  const updateCamion = useCallback(async (id: string, updates: Partial<CamionRow>) => {
+    const { error } = await supabase.from("camions").update(buildPayload(updates)).eq("id", id);
     if (error) throw error;
     await fetchCamions();
   }, [fetchCamions]);
