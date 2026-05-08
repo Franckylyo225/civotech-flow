@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  Plus, Search, Pencil, Trash2, Building2, Phone, Mail, MapPin, ToggleLeft, ToggleRight,
+  Plus, Search, Pencil, Trash2, Building2, Phone, Mail, ToggleLeft, ToggleRight,
+  Eye, TrendingUp, ShoppingBag,
 } from "lucide-react";
 import {
   useFournisseursStore,
@@ -8,6 +9,7 @@ import {
   type FournisseurRow,
   type CategorieFournisseur,
 } from "@/hooks/use-fournisseurs-store";
+import { useDemandesAchatStore } from "@/hooks/use-demandes-achat-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import FournisseurDetailDrawer from "./FournisseurDetailDrawer";
+
+const fmt = (n: number) => `${(n || 0).toLocaleString("fr-FR")} FCFA`;
 
 const EMPTY_FORM = {
   nom: "",
@@ -34,12 +40,42 @@ interface Props { canManage: boolean; }
 
 export default function FournisseursTab({ canManage }: Props) {
   const { fournisseurs, loading, addFournisseur, updateFournisseur, deleteFournisseur } = useFournisseursStore();
+  const { demandes } = useDemandesAchatStore();
   const [search, setSearch] = useState("");
   const [filterCategorie, setFilterCategorie] = useState<CategorieFournisseur | "ALL">("ALL");
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+
+  // Index par fournisseur
+  const fournisseurStats = useMemo(() => {
+    const m = new Map<string, { nbCommandes: number; volumeTotal: number; derniereCommande: Date | null; enCours: number }>();
+    demandes.forEach(d => {
+      if (!d.fournisseur_id) return;
+      const cur = m.get(d.fournisseur_id) || { nbCommandes: 0, volumeTotal: 0, derniereCommande: null, enCours: 0 };
+      cur.nbCommandes += 1;
+      const dt = new Date(d.created_at);
+      if (!cur.derniereCommande || dt > cur.derniereCommande) cur.derniereCommande = dt;
+      if (d.statut === "PAYEE") cur.volumeTotal += d.montant_reel || 0;
+      else if (d.statut !== "REFUSEE_DG" && d.statut !== "CLOTUREE") cur.enCours += 1;
+      m.set(d.fournisseur_id, cur);
+    });
+    return m;
+  }, [demandes]);
+
+  const kpis = useMemo(() => {
+    const volumeTotal = demandes.filter(d => d.statut === "PAYEE").reduce((s, d) => s + (d.montant_reel || 0), 0);
+    const commandesEnCours = demandes.filter(d => d.fournisseur_id && d.statut !== "PAYEE" && d.statut !== "REFUSEE_DG" && d.statut !== "CLOTUREE").length;
+    return {
+      total: fournisseurs.length,
+      actifs: fournisseurs.filter(f => f.actif).length,
+      inactifs: fournisseurs.filter(f => !f.actif).length,
+      volumeTotal,
+      commandesEnCours,
+    };
+  }, [fournisseurs, demandes]);
 
   const filtered = fournisseurs.filter(f => {
     const matchSearch =
@@ -92,25 +128,23 @@ export default function FournisseursTab({ canManage }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 sm:gap-4">
-        {[
-          { value: fournisseurs.length, label: "Total", icon: Building2 },
-          { value: fournisseurs.filter(f => f.actif).length, label: "Actifs", icon: ToggleRight },
-          { value: fournisseurs.filter(f => !f.actif).length, label: "Inactifs", icon: ToggleLeft },
-        ].map((s, i) => (
-          <Card key={i} className="border border-border shadow-none">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <s.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* KPIs — 5 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <Kpi icon={Building2} value={kpis.total} label="Total" color="primary" />
+        <Kpi icon={ToggleRight} value={kpis.actifs} label="Actifs" color="success" />
+        <Kpi icon={ToggleLeft} value={kpis.inactifs} label="Inactifs" color="muted-foreground" />
+        <Card className="border border-border shadow-none">
+          <CardContent className="p-4 flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 shrink-0">
+              <TrendingUp className="h-5 w-5 text-success" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-base sm:text-lg font-bold truncate" style={{ color: "#0F6E56" }}>{fmt(kpis.volumeTotal)}</p>
+              <p className="text-xs text-muted-foreground">Volume total</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Kpi icon={ShoppingBag} value={kpis.commandesEnCours} label="Commandes en cours" color="warning" />
       </div>
 
       {/* Filters */}
@@ -140,55 +174,72 @@ export default function FournisseursTab({ canManage }: Props) {
       {/* Table */}
       <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table className="min-w-[700px]">
+          <Table className="min-w-[1000px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Nom</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Téléphone</TableHead>
-                <TableHead>Email</TableHead>
                 <TableHead>Catégorie</TableHead>
+                <TableHead>Volume commandé</TableHead>
+                <TableHead>Dernière commande</TableHead>
                 <TableHead>Statut</TableHead>
-                {canManage && <TableHead className="text-right">Actions</TableHead>}
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pagination.paginated.map(f => {
                 const catCfg = CATEGORIE_FOURNISSEUR_CONFIG[f.categorie];
+                const fs = fournisseurStats.get(f.id);
+                const nb = fs?.nbCommandes || 0;
+                const vol = fs?.volumeTotal || 0;
                 return (
-                  <TableRow key={f.id} className={cn(!f.actif && "opacity-50")}>
-                    <TableCell className="font-medium">{f.nom}</TableCell>
+                  <TableRow key={f.id} className={cn(!f.actif && "opacity-60")}>
+                    <TableCell>
+                      <p className="font-medium text-foreground">{f.nom}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {nb > 0 ? `${nb} commande${nb > 1 ? "s" : ""}${vol > 0 ? ` · ${fmt(vol)}` : ""}` : "Aucune commande"}
+                      </p>
+                    </TableCell>
                     <TableCell className="text-sm">{f.contact || "—"}</TableCell>
                     <TableCell className="text-sm">
                       {f.telephone ? <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5 text-muted-foreground" />{f.telephone}</span> : "—"}
                     </TableCell>
-                    <TableCell className="text-sm">
-                      {f.email ? <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5 text-muted-foreground" />{f.email}</span> : "—"}
-                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("border-0 text-xs font-medium", catCfg.bgColor, catCfg.color)}>{catCfg.label}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {vol > 0 ? <span className="font-semibold text-success">{fmt(vol)}</span> : <span className="text-muted-foreground">0 FCFA</span>}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {fs?.derniereCommande ? format(fs.derniereCommande, "dd/MM/yyyy") : <span className="text-muted-foreground">Jamais</span>}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("border-0 text-xs font-medium", f.actif ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
                         {f.actif ? "Actif" : "Inactif"}
                       </Badge>
                     </TableCell>
-                    {canManage && (
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActif(f)} title={f.actif ? "Désactiver" : "Activer"}>
-                            {f.actif ? <ToggleRight className="h-3.5 w-3.5 text-success" /> : <ToggleLeft className="h-3.5 w-3.5 text-muted-foreground" />}
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(f)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(f.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                        </div>
-                      </TableCell>
-                    )}
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDetailId(f.id)} title="Détail">
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        {canManage && (
+                          <>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActif(f)} title={f.actif ? "Désactiver" : "Activer"}>
+                              {f.actif ? <ToggleRight className="h-3.5 w-3.5 text-success" /> : <ToggleLeft className="h-3.5 w-3.5 text-muted-foreground" />}
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(f)}><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(f.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={canManage ? 7 : 6} className="text-center py-8 text-muted-foreground">Aucun fournisseur trouvé</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucun fournisseur trouvé</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -265,6 +316,33 @@ export default function FournisseursTab({ canManage }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Detail drawer */}
+      <FournisseurDetailDrawer
+        fournisseur={fournisseurs.find(f => f.id === detailId) || null}
+        demandes={demandes}
+        open={!!detailId}
+        onClose={() => setDetailId(null)}
+      />
     </div>
+  );
+}
+
+function Kpi({ icon: Icon, value, label, color }: { icon: any; value: number | string; label: string; color: string }) {
+  const isToken = ["primary", "success", "warning", "info", "destructive"].includes(color);
+  const bg = isToken ? `bg-${color}/10` : "bg-muted";
+  const fg = isToken ? `text-${color}` : `text-${color}`;
+  return (
+    <Card className="border border-border shadow-none">
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+          <Icon className={cn("h-5 w-5", fg)} />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

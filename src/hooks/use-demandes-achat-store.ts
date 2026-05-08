@@ -9,10 +9,12 @@ export interface DemandeAchatRow {
   id: string;
   reference: string;
   maintenance_id: string | null;
+  fournisseur_id: string | null;
   designation: string;
   description: string;
   quantite: number;
   montant_estime: number;
+  montant_reel: number | null;
   urgence: string;
   statut: StatutDemandeAchat;
   commentaire_dg: string | null;
@@ -74,11 +76,14 @@ export function useDemandesAchatStore() {
     await fetchDemandes();
   }, [fetchDemandes]);
 
+  const ACTIVE_NON_FINAL: StatutDemandeAchat[] = ["DEVIS_EN_COURS", "VALIDEE_DG", "DECAISSEMENT"];
   const stats = {
     total: demandes.length,
-    enCours: demandes.filter(d => !["CLOTUREE", "REFUSEE_DG"].includes(d.statut)).length,
+    enCours: demandes.filter(d => ACTIVE_NON_FINAL.includes(d.statut)).length,
     attenteValidation: demandes.filter(d => d.statut === "SOUMISE_DG").length,
-    montantTotal: demandes.reduce((s, d) => s + d.montant_estime, 0),
+    payees: demandes.filter(d => d.statut === "PAYEE").length,
+    montantPaye: demandes.filter(d => d.statut === "PAYEE").reduce((s, d) => s + (d.montant_reel || d.montant_estime || 0), 0),
+    montantEnCours: demandes.filter(d => ACTIVE_NON_FINAL.includes(d.statut) || d.statut === "SOUMISE_DG" || d.statut === "SOUMISE").reduce((s, d) => s + (d.montant_estime || 0), 0),
   };
 
   return { demandes, loading, stats, addDemande, updateDemande, deleteDemande, refetch: fetchDemandes };
