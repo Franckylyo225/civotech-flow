@@ -401,7 +401,16 @@ export default function ChauffeursTab({ canManage }: Props) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} /></div>
-              <div className="space-y-2"><Label>Date d'embauche *</Label><Input type="date" value={form.date_embauche} onChange={e => setForm(f => ({ ...f, date_embauche: e.target.value }))} /></div>
+              <div className="space-y-2">
+                <Label>Expérience à l'embauche (années) *</Label>
+                <Input type="number" min={0} step={1} value={form.experience_embauche}
+                  onChange={e => setForm(f => ({ ...f, experience_embauche: parseInt(e.target.value) || 0 }))} />
+                <p className="text-[10px] text-muted-foreground">
+                  {editingId
+                    ? `Total actuel : ${totalExperience(form.experience_embauche, chauffeurs.find(c => c.id === editingId)?.created_at || new Date().toISOString())} an(s) — incrémenté chaque année.`
+                    : "Sera incrémenté automatiquement chaque année après l'embauche."}
+                </p>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>N° Permis</Label><Input value={form.numero_permis} onChange={e => setForm(f => ({ ...f, numero_permis: e.target.value }))} /></div>
