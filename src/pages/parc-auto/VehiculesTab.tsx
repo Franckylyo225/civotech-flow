@@ -1,11 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { differenceInDays, format } from "date-fns";
 import {
-  Truck, Plus, Search, Pencil, Trash2, CheckCircle2,
-  Wrench, Navigation, Package, Calendar, Hash, Gauge,
+  Truck, Plus, Search, Pencil, Eye,
+  Wrench, Navigation, Package, CheckCircle2, FileWarning,
 } from "lucide-react";
 import { useParcAutoStore, STATUT_CAMION_CONFIG, type CamionRow, type StatutCamion } from "@/hooks/use-parc-auto-store";
 import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
 import VehiculeDetailDialog from "./VehiculeDetailDialog";
+import { DocChip } from "@/components/parc-auto/DocChip";
+import { pctVieUtile, vieUtileColor, vehiculeHasExpiringDoc, vehiculeHasExpiredDoc } from "@/lib/vehicule-docs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,30 +23,51 @@ import { DataTablePagination, usePagination } from "@/components/ui/data-table-p
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+const today = () => new Date().toISOString().slice(0, 10);
 const EMPTY_FORM = {
   immatriculation: "", marque: "", modele: "", type_vehicule: "Porteur",
-  capacite_tonnes: 0, annee: new Date().getFullYear(), km_actuel: 0,
+  capacite_tonnes: 0, annee: new Date().getFullYear(),
+  km_actuel: 0, km_max: 300000,
+  date_assurance: "", date_visite_tech: "", date_vignette: "",
+  date_ajout: today(),
 };
 
 interface Props { canManage: boolean; }
 
+const formatKm = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " km";
+
 export default function VehiculesTab({ canManage }: Props) {
-  const { camions, loading, stats, addCamion, updateCamion, deleteCamion } = useParcAutoStore();
-  const { addMaintenance } = useMaintenancesStore();
+  const navigate = useNavigate();
+  const { camions, loading, stats, addCamion, updateCamion } = useParcAutoStore();
+  const { maintenances, addMaintenance } = useMaintenancesStore();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutCamion | "ALL">("ALL");
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [detailCamion, setDetailCamion] = useState<CamionRow | null>(null);
   const [maintCamion, setMaintCamion] = useState<CamionRow | null>(null);
   const [maintForm, setMaintForm] = useState({
     type: "CORRECTIVE" as "PREVENTIVE" | "CORRECTIVE" | "REMPLACEMENT",
     description: "",
     pieces_changees: "",
-    date_prevue: new Date().toISOString().slice(0, 10),
+    date_prevue: today(),
     cout_estime: 0,
+  });
+
+  const now = new Date();
+
+  const docsExpirantCount = camions.filter(c => vehiculeHasExpiringDoc(c, now)).length;
+
+  const overdueByCamion = new Map<string, number>();
+  maintenances.forEach(m => {
+    if (m.statut === "TERMINEE" || m.statut === "ANNULEE") return;
+    const d = differenceInDays(new Date(m.date_prevue), now);
+    if (d < 0) {
+      const prev = overdueByCamion.get(m.camion_id) ?? 0;
+      const dd = Math.abs(d);
+      if (dd > prev) overdueByCamion.set(m.camion_id, dd);
+    }
   });
 
   const filtered = camions.filter(c => {
@@ -61,9 +86,14 @@ export default function VehiculesTab({ canManage }: Props) {
     setEditingId(c.id);
     setForm({
       immatriculation: c.immatriculation, marque: c.marque, modele: c.modele,
-      type_vehicule: (c as any).type_vehicule || "Porteur",
+      type_vehicule: c.type_vehicule || "Porteur",
       capacite_tonnes: c.capacite_tonnes, annee: c.annee,
-      km_actuel: (c as any).km_actuel || 0,
+      km_actuel: c.km_actuel || 0,
+      km_max: c.km_max || 300000,
+      date_assurance: c.date_assurance || "",
+      date_visite_tech: c.date_visite_tech || "",
+      date_vignette: c.date_vignette || "",
+      date_ajout: c.date_ajout || today(),
     });
     setShowDialog(true);
   };
@@ -73,25 +103,26 @@ export default function VehiculesTab({ canManage }: Props) {
       toast.error("Remplissez tous les champs obligatoires"); return;
     }
     try {
+      const payload: any = {
+        ...form,
+        date_assurance: form.date_assurance || null,
+        date_visite_tech: form.date_visite_tech || null,
+        date_vignette: form.date_vignette || null,
+      };
       if (editingId) {
-        await updateCamion(editingId, form);
+        await updateCamion(editingId, payload);
         toast.success("Véhicule mis à jour");
       } else {
-        await addCamion(form);
+        await addCamion(payload);
         toast.success("Véhicule ajouté au parc");
       }
       setShowDialog(false);
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
-  const handleDelete = async (id: string) => {
-    try { await deleteCamion(id); toast.success("Véhicule supprimé"); setDeleteConfirm(null); }
-    catch (err: any) { toast.error(err.message || "Erreur"); }
-  };
-
   const openMaintDialog = (camion: CamionRow) => {
     setMaintCamion(camion);
-    setMaintForm({ type: "CORRECTIVE", description: "", pieces_changees: "", date_prevue: new Date().toISOString().slice(0, 10), cout_estime: 0 });
+    setMaintForm({ type: "CORRECTIVE", description: "", pieces_changees: "", date_prevue: today(), cout_estime: 0 });
   };
 
   const handleSendToMaint = async () => {
@@ -108,7 +139,7 @@ export default function VehiculesTab({ canManage }: Props) {
         date_debut: null,
         date_fin: null,
         statut: "PLANIFIEE",
-        km_declenchement: (maintCamion as any).km_actuel || null,
+        km_declenchement: maintCamion.km_actuel || null,
       });
       toast.success(`${maintCamion.immatriculation} envoyé en maintenance`);
       setMaintCamion(null);
@@ -117,24 +148,31 @@ export default function VehiculesTab({ canManage }: Props) {
 
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
+  const kpis = [
+    { icon: Truck, value: stats.total, label: "Total véhicules", valueClass: "text-foreground", iconBg: "bg-primary/10", iconColor: "text-primary" },
+    { icon: CheckCircle2, value: stats.disponible, label: "Disponibles", valueClass: "text-success", iconBg: "bg-success/10", iconColor: "text-success" },
+    { icon: Navigation, value: stats.enMission, label: "En mission", valueClass: "text-info", iconBg: "bg-info/10", iconColor: "text-info" },
+    { icon: Wrench, value: stats.enMaintenance, label: "En maintenance", valueClass: "text-warning", iconBg: "bg-warning/10", iconColor: "text-warning" },
+    { icon: FileWarning, value: docsExpirantCount, label: "Docs expirant", sub: "dans 30 jours",
+      valueClass: docsExpirantCount > 0 ? "text-destructive" : "text-muted-foreground",
+      iconBg: docsExpirantCount > 0 ? "bg-destructive/10" : "bg-muted",
+      iconColor: docsExpirantCount > 0 ? "text-destructive" : "text-muted-foreground" },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {[
-          { icon: Truck, value: stats.total, label: "Total véhicules", color: "primary" },
-          { icon: CheckCircle2, value: stats.disponible, label: "Disponibles", color: "success" },
-          { icon: Navigation, value: stats.enMission, label: "En mission", color: "info" },
-          { icon: Wrench, value: stats.enMaintenance, label: "En maintenance", color: "warning" },
-        ].map((s, i) => (
+      {/* KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {kpis.map((s, i) => (
           <Card key={i} className="border border-border shadow-none">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-${s.color}/10`}>
-                <s.icon className={`h-5 w-5 text-${s.color}`} />
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", s.iconBg)}>
+                <s.icon className={cn("h-5 w-5", s.iconColor)} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className={cn("text-2xl font-bold", s.valueClass)}>{s.value}</p>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
+                {s.sub && <p className="text-[10px] text-muted-foreground">{s.sub}</p>}
               </div>
             </CardContent>
           </Card>
@@ -151,7 +189,7 @@ export default function VehiculesTab({ canManage }: Props) {
             </div>
             <div className="flex items-center gap-2">
               <Select value={filterStatut} onValueChange={v => setFilterStatut(v as any)}>
-                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue placeholder="Tous" /></SelectTrigger>
+                <SelectTrigger className="flex-1 sm:w-[160px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tous les statuts</SelectItem>
                   <SelectItem value="DISPONIBLE">Disponible</SelectItem>
@@ -168,14 +206,15 @@ export default function VehiculesTab({ canManage }: Props) {
       {/* Table */}
       <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table className="min-w-[700px]">
+          <Table className="min-w-[900px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Immatriculation</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Marque / Modèle</TableHead>
                 <TableHead>Capacité</TableHead>
-                <TableHead>Km</TableHead>
+                <TableHead className="min-w-[140px]">Km</TableHead>
+                <TableHead>Documents</TableHead>
                 <TableHead>Statut</TableHead>
                 {canManage && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
@@ -183,34 +222,80 @@ export default function VehiculesTab({ canManage }: Props) {
             <TableBody>
               {pagination.paginated.map(camion => {
                 const cfg = STATUT_CAMION_CONFIG[camion.statut];
+                const km = camion.km_actuel || 0;
+                const kmMax = camion.km_max || 300000;
+                const pct = pctVieUtile(km, kmMax);
+                const colors = vieUtileColor(pct);
+                const overdueDays = overdueByCamion.get(camion.id);
+                const hasExpired = vehiculeHasExpiredDoc(camion, now);
+                const rowStyle = hasExpired
+                  ? { background: "#FEF2F2" }
+                  : overdueDays
+                  ? { background: "#FFFBEB" }
+                  : undefined;
                 return (
-                  <TableRow key={camion.id} className="cursor-pointer" onClick={() => setDetailCamion(camion)}>
+                  <TableRow
+                    key={camion.id}
+                    className="cursor-pointer"
+                    style={rowStyle}
+                    onClick={() => navigate(`/parc/${camion.id}`)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
                           <Truck className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <span className="font-medium text-foreground">{camion.immatriculation}</span>
+                        <div>
+                          <p className="font-medium text-foreground">{camion.immatriculation}</p>
+                          {overdueDays ? (
+                            <p className="text-[10px] text-warning font-medium">{overdueDays}j de retard</p>
+                          ) : camion.date_ajout ? (
+                            <p className="text-[10px] text-muted-foreground">Ajouté {format(new Date(camion.date_ajout), "dd/MM/yyyy")}</p>
+                          ) : null}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{(camion as any).type_vehicule || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{camion.type_vehicule || "—"}</TableCell>
                     <TableCell>
                       <p className="text-sm font-medium text-foreground">{camion.marque}</p>
                       <p className="text-xs text-muted-foreground">{camion.modele}</p>
                     </TableCell>
                     <TableCell><div className="flex items-center gap-1 text-sm"><Package className="h-3.5 w-3.5 text-muted-foreground" />{camion.capacite_tonnes}T</div></TableCell>
-                    <TableCell><div className="flex items-center gap-1 text-sm text-muted-foreground"><Gauge className="h-3.5 w-3.5" />{((camion as any).km_actuel || 0).toLocaleString()} km</div></TableCell>
+                    <TableCell>
+                      <div className="space-y-1 min-w-[120px]">
+                        <p className="text-sm text-foreground">{formatKm(km)}</p>
+                        <div className="h-1 w-full overflow-hidden rounded-sm bg-muted">
+                          <div className={cn("h-full transition-all", colors.bar)} style={{ width: `${pct}%` }} />
+                        </div>
+                        <p className={cn("text-[10px] font-medium", colors.text)}>{pct}% vie utile</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <DocChip label="Assur." date={camion.date_assurance} />
+                        <DocChip label="VT" date={camion.date_visite_tech} />
+                        <DocChip label="Vign." date={camion.date_vignette} />
+                      </div>
+                    </TableCell>
                     <TableCell><Badge variant="outline" className={cn("border-0 text-xs font-medium", cfg.bgColor, cfg.color)}>{cfg.label}</Badge></TableCell>
                     {canManage && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          {camion.statut !== "EN_MAINTENANCE" && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" title="Envoyer en maintenance" onClick={(e) => { e.stopPropagation(); openMaintDialog(camion); }}>
-                              <Wrench className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openEdit(camion); }}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(camion.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-[26px] w-[26px]" title="Voir la fiche" onClick={(e) => { e.stopPropagation(); navigate(`/parc/${camion.id}`); }}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost" size="icon"
+                            className="h-[26px] w-[26px]"
+                            style={{ color: "#0F6E56" }}
+                            title="Demander une maintenance"
+                            onClick={(e) => { e.stopPropagation(); openMaintDialog(camion); }}
+                          >
+                            <Wrench className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-[26px] w-[26px]" title="Modifier" onClick={(e) => { e.stopPropagation(); openEdit(camion); }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </TableCell>
                     )}
@@ -218,7 +303,7 @@ export default function VehiculesTab({ canManage }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={canManage ? 7 : 6} className="text-center py-8 text-muted-foreground">Aucun véhicule trouvé</TableCell></TableRow>
+                <TableRow><TableCell colSpan={canManage ? 8 : 7} className="text-center py-8 text-muted-foreground">Aucun véhicule trouvé</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -238,7 +323,7 @@ export default function VehiculesTab({ canManage }: Props) {
 
       {/* Add/Edit dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editingId ? "Modifier le véhicule" : "Ajouter un véhicule"}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -265,24 +350,21 @@ export default function VehiculesTab({ canManage }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>Capacité (T)</Label><Input type="number" value={form.capacite_tonnes} onChange={e => setForm(f => ({ ...f, capacite_tonnes: Number(e.target.value) }))} /></div>
               <div className="space-y-2"><Label>Année</Label><Input type="number" value={form.annee} onChange={e => setForm(f => ({ ...f, annee: Number(e.target.value) }))} /></div>
-              <div className="space-y-2"><Label>Km actuel</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>
+              <div className="space-y-2"><Label>Date d'ajout</Label><Input type="date" value={form.date_ajout} onChange={e => setForm(f => ({ ...f, date_ajout: e.target.value }))} /></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Kilométrage actuel *</Label><Input type="number" value={form.km_actuel} onChange={e => setForm(f => ({ ...f, km_actuel: Number(e.target.value) }))} /></div>
+              <div className="space-y-2"><Label>Kilométrage max (vie utile)</Label><Input type="number" value={form.km_max} onChange={e => setForm(f => ({ ...f, km_max: Number(e.target.value) }))} /></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2"><Label>Expiration assurance *</Label><Input type="date" value={form.date_assurance} onChange={e => setForm(f => ({ ...f, date_assurance: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Expiration visite tech *</Label><Input type="date" value={form.date_visite_tech} onChange={e => setForm(f => ({ ...f, date_visite_tech: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Expiration vignette *</Label><Input type="date" value={form.date_vignette} onChange={e => setForm(f => ({ ...f, date_vignette: e.target.value }))} /></div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Annuler</Button>
             <Button onClick={handleSave}>{editingId ? "Enregistrer" : "Ajouter"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete confirmation */}
-      <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Confirmer la suppression</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Annuler</Button>
-            <Button variant="destructive" onClick={() => deleteConfirm && handleDelete(deleteConfirm)}>Supprimer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -302,7 +384,7 @@ export default function VehiculesTab({ canManage }: Props) {
             <div className="space-y-4">
               <div className="rounded-lg border border-border p-3 bg-muted/30">
                 <p className="text-sm font-medium text-foreground">{maintCamion.immatriculation}</p>
-                <p className="text-xs text-muted-foreground">{maintCamion.marque} {maintCamion.modele} · {((maintCamion as any).km_actuel || 0).toLocaleString()} km</p>
+                <p className="text-xs text-muted-foreground">{maintCamion.marque} {maintCamion.modele} · {(maintCamion.km_actuel || 0).toLocaleString()} km</p>
               </div>
               <div className="space-y-2">
                 <Label>Type de maintenance</Label>
