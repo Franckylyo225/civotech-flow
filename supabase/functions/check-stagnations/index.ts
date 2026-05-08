@@ -8,7 +8,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DEVIS_FINAL = ["VALIDE", "REFUSE", "ARCHIVE", "EXPIRE"];
+// Statuts terminaux selon les enums réels de la base
+const DEVIS_FINAL = ["VALIDE_CLIENT", "REFUSE_CLIENT", "REFUSE_DG", "ARCHIVE"];
 const DA_FINAL = ["PAYEE", "CLOTUREE", "REFUSEE_DG"];
 
 function daysBetween(a: Date, b: Date) {
