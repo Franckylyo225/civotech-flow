@@ -492,11 +492,11 @@ function CreateDialog({
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => handle(false)} disabled={submitting || !designation.trim() || montant <= 0}>
-            Enregistrer brouillon
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Annuler
           </Button>
           <Button onClick={() => handle(true)} disabled={submitting || !designation.trim() || montant <= 0}>
-            <Send className="mr-2 h-4 w-4" /> Soumettre au DG
+            <Send className="mr-2 h-4 w-4" /> Envoyer au DG pour approbation
           </Button>
         </DialogFooter>
       </DialogContent>
