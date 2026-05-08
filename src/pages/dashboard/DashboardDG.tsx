@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  AlertTriangle, ArrowRight, ArrowUpRight, ArrowDownRight,
+  AlertTriangle, ArrowRight,
   FileText, ShoppingCart, Receipt, ClipboardCheck, Truck,
-  Wallet, CheckCircle2, Calendar, Clock, MapPin,
+  CheckCircle2, Calendar,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
