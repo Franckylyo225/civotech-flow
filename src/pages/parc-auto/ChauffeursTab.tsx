@@ -17,23 +17,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format, differenceInDays, differenceInYears, subYears } from "date-fns";
+import { format, differenceInDays, differenceInYears } from "date-fns";
 
-// Approximation date_embauche depuis experience_annees (champ DB)
-const dateEmbaucheFrom = (years: number, fallback: string): Date => {
-  if (years > 0) return subYears(new Date(), years);
-  return new Date(fallback);
-};
-
-const yearsFromDate = (iso: string): number => {
-  if (!iso) return 0;
-  return Math.max(0, differenceInYears(new Date(), new Date(iso)));
+// Expérience totale = expérience à l'embauche (stockée dans experience_annees)
+// + années écoulées depuis l'ajout du chauffeur (created_at = date d'embauche).
+const totalExperience = (experienceEmbauche: number, createdAt: string): number => {
+  const base = Math.max(0, experienceEmbauche || 0);
+  if (!createdAt) return base;
+  const since = Math.max(0, differenceInYears(new Date(), new Date(createdAt)));
+  return base + since;
 };
 
 const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", numero_permis: "",
   type_permis: "C", date_expiration_permis: "",
-  date_embauche: new Date().toISOString().slice(0, 10),
+  experience_embauche: 0,
   disponible: true,
   camion_assigne_id: "",
 };
@@ -109,7 +107,7 @@ export default function ChauffeursTab({ canManage }: Props) {
       numero_permis: c.numero_permis || "",
       type_permis: c.type_permis || "C",
       date_expiration_permis: c.date_expiration_permis || "",
-      date_embauche: dateEmbaucheFrom(c.experience_annees, c.created_at).toISOString().slice(0, 10),
+      experience_embauche: c.experience_annees || 0,
       disponible: c.disponible,
       camion_assigne_id: c.camion_assigne_id || "",
     });
@@ -118,7 +116,7 @@ export default function ChauffeursTab({ canManage }: Props) {
 
   const handleSave = async () => {
     if (!form.nom || !form.prenom) { toast.error("Nom et prénom obligatoires"); return; }
-    if (!form.date_embauche) { toast.error("Date d'embauche obligatoire"); return; }
+    if (form.experience_embauche < 0) { toast.error("Expérience invalide"); return; }
     if (!form.date_expiration_permis) { toast.error("Date d'expiration du permis obligatoire"); return; }
     // Vérification conflit côté frontend
     if (form.camion_assigne_id) {
@@ -129,10 +127,10 @@ export default function ChauffeursTab({ canManage }: Props) {
       }
     }
     try {
-      const { date_embauche, ...rest } = form;
+      const { experience_embauche, ...rest } = form;
       const payload: any = {
         ...rest,
-        experience_annees: yearsFromDate(date_embauche),
+        experience_annees: Math.max(0, Math.floor(experience_embauche || 0)),
       };
       if (!payload.camion_assigne_id) payload.camion_assigne_id = null;
       if (!payload.date_expiration_permis) payload.date_expiration_permis = null;
@@ -181,9 +179,7 @@ export default function ChauffeursTab({ canManage }: Props) {
   };
 
   const renderExperience = (c: ChauffeurRow) => {
-    const date = dateEmbaucheFrom(c.experience_annees, c.created_at);
-    const years = differenceInYears(new Date(), date);
-    if (!c.experience_annees && !c.created_at) return "—";
+    const years = totalExperience(c.experience_annees, c.created_at);
     if (years < 1) return "< 1 an";
     return `${years} an${years > 1 ? "s" : ""}`;
   };
@@ -296,7 +292,7 @@ export default function ChauffeursTab({ canManage }: Props) {
                 const cfg = STATUT_CHAUFFEUR_CONFIG[c.statut];
                 const camion = getCamion(c.camion_assigne_id);
                 const inConflict = conflictChauffeurIds.has(c.id);
-                const dateEmb = dateEmbaucheFrom(c.experience_annees, c.created_at);
+                const dateEmb = new Date(c.created_at);
                 return (
                   <TableRow
                     key={c.id}
@@ -405,7 +401,16 @@ export default function ChauffeursTab({ canManage }: Props) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} /></div>
-              <div className="space-y-2"><Label>Date d'embauche *</Label><Input type="date" value={form.date_embauche} onChange={e => setForm(f => ({ ...f, date_embauche: e.target.value }))} /></div>
+              <div className="space-y-2">
+                <Label>Expérience à l'embauche (années) *</Label>
+                <Input type="number" min={0} step={1} value={form.experience_embauche}
+                  onChange={e => setForm(f => ({ ...f, experience_embauche: parseInt(e.target.value) || 0 }))} />
+                <p className="text-[10px] text-muted-foreground">
+                  {editingId
+                    ? `Total actuel : ${totalExperience(form.experience_embauche, chauffeurs.find(c => c.id === editingId)?.created_at || new Date().toISOString())} an(s) — incrémenté chaque année.`
+                    : "Sera incrémenté automatiquement chaque année après l'embauche."}
+                </p>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2"><Label>N° Permis</Label><Input value={form.numero_permis} onChange={e => setForm(f => ({ ...f, numero_permis: e.target.value }))} /></div>
