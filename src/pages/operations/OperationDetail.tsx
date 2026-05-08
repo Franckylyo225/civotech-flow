@@ -608,34 +608,52 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           <DialogHeader>
             <DialogTitle>Affecter un camion et chauffeur</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Camion</Label>
-              <Select value={selectedCamion} onValueChange={setSelectedCamion}>
-                <SelectTrigger><SelectValue placeholder="Choisir un camion..." /></SelectTrigger>
-                <SelectContent>
-                  {camions.filter((c) => c.statut === "DISPONIBLE").map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Chauffeur</Label>
-              <Select value={selectedChauffeur} onValueChange={setSelectedChauffeur}>
-                <SelectTrigger><SelectValue placeholder="Choisir un chauffeur..." /></SelectTrigger>
-                <SelectContent>
-                  {chauffeurs.filter((c) => c.statut === "DISPONIBLE").map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.prenom} {c.nom} — {c.numeroPermis}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {(() => {
+            const camionsDispo = camions.filter((c) => c.statut === "DISPONIBLE");
+            const chauffeursDispo = chauffeurs.filter((c) => c.statut === "DISPONIBLE");
+            return (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Camion</Label>
+                  {camionsDispo.length === 0 ? (
+                    <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
+                      Aucun camion disponible actuellement. Tous les véhicules sont en mission ou en maintenance.
+                    </div>
+                  ) : (
+                    <Select value={selectedCamion} onValueChange={setSelectedCamion}>
+                      <SelectTrigger><SelectValue placeholder="Choisir un camion..." /></SelectTrigger>
+                      <SelectContent>
+                        {camionsDispo.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Chauffeur</Label>
+                  {chauffeursDispo.length === 0 ? (
+                    <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
+                      Aucun chauffeur disponible actuellement. Tous les chauffeurs sont en mission ou indisponibles sur la période sélectionnée.
+                    </div>
+                  ) : (
+                    <Select value={selectedChauffeur} onValueChange={setSelectedChauffeur}>
+                      <SelectTrigger><SelectValue placeholder="Choisir un chauffeur..." /></SelectTrigger>
+                      <SelectContent>
+                        {chauffeursDispo.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.prenom} {c.nom} — {c.numeroPermis}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAffectDialog(false)}>Annuler</Button>
             <Button onClick={handleAffecter}>Confirmer</Button>
