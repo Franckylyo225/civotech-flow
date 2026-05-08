@@ -156,10 +156,10 @@ export default function ApprobationsPage() {
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Total en attente", value: counts.total, icon: Clock, color: "text-warning" },
+          { label: "Total en attente", value: counts.total + supplierInvoices.length, icon: Clock, color: "text-warning" },
           { label: "Devis", value: counts.devis, icon: FileText, color: "text-primary" },
           { label: "Demandes d'achat", value: counts.demandes, icon: ShoppingCart, color: "text-warning" },
-          { label: "Décaissements", value: counts.decaissements, icon: Wallet, color: "text-info" },
+          { label: "Factures fourn. (mois)", value: supplierInvoices.length, icon: Receipt, color: "text-info" },
         ].map(s => (
           <Card key={s.label} className="border border-border shadow-none">
             <CardContent className="p-5">
