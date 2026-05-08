@@ -610,7 +610,12 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           </DialogHeader>
           {(() => {
             const camionsDispo = camions.filter((c) => c.statut === "DISPONIBLE");
-            const chauffeursDispo = chauffeurs.filter((c) => c.statut === "DISPONIBLE");
+            const statutLabel: Record<string, string> = {
+              DISPONIBLE: "Disponible",
+              EN_MISSION: "En mission",
+              EN_REPOS: "En repos",
+              INDISPONIBLE: "Indisponible",
+            };
             return (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -634,17 +639,17 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 </div>
                 <div className="space-y-2">
                   <Label>Chauffeur</Label>
-                  {chauffeursDispo.length === 0 ? (
+                  {chauffeurs.length === 0 ? (
                     <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
-                      Aucun chauffeur disponible actuellement. Tous les chauffeurs sont en mission ou indisponibles sur la période sélectionnée.
+                      Aucun chauffeur enregistré.
                     </div>
                   ) : (
                     <Select value={selectedChauffeur} onValueChange={setSelectedChauffeur}>
                       <SelectTrigger><SelectValue placeholder="Choisir un chauffeur..." /></SelectTrigger>
                       <SelectContent>
-                        {chauffeursDispo.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.prenom} {c.nom} — {c.numeroPermis}
+                        {chauffeurs.map((c) => (
+                          <SelectItem key={c.id} value={c.id} disabled={c.statut !== "DISPONIBLE"}>
+                            {c.prenom} {c.nom} — {c.numeroPermis} ({statutLabel[c.statut] || c.statut})
                           </SelectItem>
                         ))}
                       </SelectContent>
