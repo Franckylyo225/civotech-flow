@@ -1,92 +1,64 @@
-import { AlertTriangle, Clock, CreditCard } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { useMaintenancesStore } from "@/hooks/use-maintenances-store";
-import { useChauffeursStore } from "@/hooks/use-chauffeurs-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { differenceInDays, format } from "date-fns";
+import { getDocStatus } from "@/lib/vehicule-docs";
 
 export default function ParcAlerts() {
   const { maintenances } = useMaintenancesStore();
-  const { chauffeurs } = useChauffeursStore();
   const { camions } = useParcAutoStore();
-
   const now = new Date();
 
-  // Maintenances en retard: planifiées ou en cours avec date_prevue dépassée
   const overdueMaintenances = maintenances.filter(m => {
     if (m.statut === "TERMINEE" || m.statut === "ANNULEE") return false;
     return new Date(m.date_prevue) < now;
   });
 
-  // Permis expirant dans 30 jours ou déjà expirés
-  const expiringPermis = chauffeurs
-    .filter(c => {
-      if (!c.date_expiration_permis) return false;
-      const days = differenceInDays(new Date(c.date_expiration_permis), now);
-      return days <= 30;
-    })
-    .map(c => ({
-      ...c,
-      daysLeft: differenceInDays(new Date(c.date_expiration_permis!), now),
-    }));
+  const expiringDocs: { camion: string; type: string; days: number }[] = [];
+  camions.forEach(c => {
+    [
+      { type: "Assurance", date: c.date_assurance },
+      { type: "Visite tech.", date: c.date_visite_tech },
+      { type: "Vignette", date: c.date_vignette },
+    ].forEach(d => {
+      const s = getDocStatus(d.date, now);
+      if (s.status === "warning" || s.status === "expired") {
+        expiringDocs.push({ camion: c.immatriculation, type: d.type, days: s.days ?? 0 });
+      }
+    });
+  });
 
-  const getCamionLabel = (id: string) => {
-    const c = camions.find(v => v.id === id);
-    return c ? c.immatriculation : "—";
-  };
+  if (overdueMaintenances.length === 0 && expiringDocs.length === 0) return null;
 
-  if (overdueMaintenances.length === 0 && expiringPermis.length === 0) return null;
+  const getCamionLabel = (id: string) => camions.find(v => v.id === id)?.immatriculation || "—";
+
+  const maintDetail = overdueMaintenances.slice(0, 2).map(m =>
+    `${getCamionLabel(m.camion_id)} (${Math.abs(differenceInDays(new Date(m.date_prevue), now))}j)`
+  ).join(", ") + (overdueMaintenances.length > 2 ? ` +${overdueMaintenances.length - 2}` : "");
+
+  const docDetail = expiringDocs.slice(0, 2).map(d =>
+    `${d.camion} ${d.type} ${d.days < 0 ? `exp.` : `${d.days}j`}`
+  ).join(", ") + (expiringDocs.length > 2 ? ` +${expiringDocs.length - 2}` : "");
 
   return (
-    <div className="space-y-3">
-      {overdueMaintenances.length > 0 && (
-        <Alert className="border-warning/50 bg-warning/5">
-          <Clock className="h-4 w-4 text-warning" />
-          <AlertTitle className="text-warning font-semibold">
-            {overdueMaintenances.length} maintenance{overdueMaintenances.length > 1 ? "s" : ""} en retard
-          </AlertTitle>
-          <AlertDescription className="text-sm text-muted-foreground mt-1">
-            <ul className="list-disc pl-4 space-y-0.5">
-              {overdueMaintenances.slice(0, 5).map(m => (
-                <li key={m.id}>
-                  <span className="font-medium text-foreground">{getCamionLabel(m.camion_id)}</span>
-                  {" — "}{m.description.slice(0, 50)}
-                  {" · Prévue le "}{format(new Date(m.date_prevue), "dd/MM/yyyy")}
-                  {" ("}{Math.abs(differenceInDays(new Date(m.date_prevue), now))}j de retard)
-                </li>
-              ))}
-              {overdueMaintenances.length > 5 && (
-                <li className="text-muted-foreground">… et {overdueMaintenances.length - 5} autre(s)</li>
-              )}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {expiringPermis.length > 0 && (
-        <Alert className="border-destructive/50 bg-destructive/5">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <AlertTitle className="text-destructive font-semibold">
-            {expiringPermis.length} permis de conduire à surveiller
-          </AlertTitle>
-          <AlertDescription className="text-sm text-muted-foreground mt-1">
-            <ul className="list-disc pl-4 space-y-0.5">
-              {expiringPermis.slice(0, 5).map(c => (
-                <li key={c.id}>
-                  <span className="font-medium text-foreground">{c.prenom} {c.nom}</span>
-                  {c.daysLeft < 0
-                    ? <span className="text-destructive font-medium"> — Expiré depuis {Math.abs(c.daysLeft)}j</span>
-                    : <span className="text-warning font-medium"> — Expire dans {c.daysLeft}j ({format(new Date(c.date_expiration_permis!), "dd/MM/yyyy")})</span>
-                  }
-                </li>
-              ))}
-              {expiringPermis.length > 5 && (
-                <li className="text-muted-foreground">… et {expiringPermis.length - 5} autre(s)</li>
-              )}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
+    <div
+      className="flex items-start gap-3 rounded-md border p-3 text-sm"
+      style={{ background: "#FCEBEB", borderColor: "#F09595" }}
+    >
+      <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" style={{ color: "#791F1F" }} />
+      <div className="text-[13px] leading-snug" style={{ color: "#791F1F" }}>
+        {overdueMaintenances.length > 0 && (
+          <span>
+            <strong>{overdueMaintenances.length} maintenance{overdueMaintenances.length > 1 ? "s" : ""} en retard</strong> · {maintDetail}
+          </span>
+        )}
+        {overdueMaintenances.length > 0 && expiringDocs.length > 0 && <span className="mx-2">·</span>}
+        {expiringDocs.length > 0 && (
+          <span>
+            <strong>{expiringDocs.length} document{expiringDocs.length > 1 ? "s" : ""} expirant</strong> · {docDetail}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
