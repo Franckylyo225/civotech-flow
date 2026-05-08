@@ -13,6 +13,7 @@ import DevisModule from "@/pages/devis/DevisModule";
 import OperationsModule from "@/pages/operations/OperationsModule";
 import AdministrationVentesModule from "@/pages/administration-ventes/AdministrationVentesModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
+import VehiculeDetailPage from "@/pages/parc-auto/VehiculeDetailPage";
 import ClientsModule from "@/pages/clients/ClientsModule";
 import AchatsModule from "@/pages/achats/AchatsModule";
 import FinanceModule from "@/pages/finance/FinanceModule";
