@@ -91,9 +91,14 @@ export type Database = {
           annee: number
           capacite_tonnes: number
           created_at: string
+          date_ajout: string
+          date_assurance: string | null
+          date_vignette: string | null
+          date_visite_tech: string | null
           id: string
           immatriculation: string
           km_actuel: number
+          km_max: number
           marque: string
           modele: string
           statut: Database["public"]["Enums"]["statut_camion"]
@@ -104,9 +109,14 @@ export type Database = {
           annee?: number
           capacite_tonnes?: number
           created_at?: string
+          date_ajout?: string
+          date_assurance?: string | null
+          date_vignette?: string | null
+          date_visite_tech?: string | null
           id?: string
           immatriculation: string
           km_actuel?: number
+          km_max?: number
           marque: string
           modele: string
           statut?: Database["public"]["Enums"]["statut_camion"]
@@ -117,9 +127,14 @@ export type Database = {
           annee?: number
           capacite_tonnes?: number
           created_at?: string
+          date_ajout?: string
+          date_assurance?: string | null
+          date_vignette?: string | null
+          date_visite_tech?: string | null
           id?: string
           immatriculation?: string
           km_actuel?: number
+          km_max?: number
           marque?: string
           modele?: string
           statut?: Database["public"]["Enums"]["statut_camion"]
@@ -1403,6 +1418,7 @@ export type Database = {
           devis_reference: string | null
           duree_estimee_heures: number | null
           id: string
+          km_parcourus: number | null
           lieu_embarquement: string
           lieu_livraison: string
           montant_devis: number
@@ -1431,6 +1447,7 @@ export type Database = {
           devis_reference?: string | null
           duree_estimee_heures?: number | null
           id?: string
+          km_parcourus?: number | null
           lieu_embarquement?: string
           lieu_livraison?: string
           montant_devis?: number
@@ -1459,6 +1476,7 @@ export type Database = {
           devis_reference?: string | null
           duree_estimee_heures?: number | null
           id?: string
+          km_parcourus?: number | null
           lieu_embarquement?: string
           lieu_livraison?: string
           montant_devis?: number
