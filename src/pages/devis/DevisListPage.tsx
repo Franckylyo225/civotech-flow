@@ -246,7 +246,7 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
       {/* Section 1 — En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-medium text-foreground">Gestion des devis</h1>
+          <h1 className="text-xl font-bold text-foreground">Gestion des devis</h1>
           <p className="text-[13px] text-muted-foreground">
             {totalCount} devis · {formatFCFA(totalCA)} de valeur totale en pipeline
           </p>

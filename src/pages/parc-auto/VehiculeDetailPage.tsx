@@ -144,7 +144,7 @@ export default function VehiculeDetailPage() {
         <Button variant="outline" size="sm" onClick={() => navigate("/parc-auto")}><ArrowLeft className="mr-1.5 h-4 w-4" />Parc auto</Button>
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10"><Truck className="h-4 w-4 text-primary" /></div>
-          <h1 className="text-lg font-semibold text-foreground">{camion.immatriculation}</h1>
+          <h1 className="text-xl font-bold text-foreground">{camion.immatriculation}</h1>
           <span className="text-sm text-muted-foreground">· {camion.marque} {camion.modele}</span>
         </div>
       </div>

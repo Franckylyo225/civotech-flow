@@ -176,7 +176,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-lg sm:text-xl font-bold text-foreground">N° {op.reference}</h1>
+            <h1 className="text-xl font-bold text-foreground">N° {op.reference}</h1>
             <Badge variant="outline" className={cn("border-0 text-xs font-medium", config.bgColor, config.color)}>
               {config.label}
             </Badge>

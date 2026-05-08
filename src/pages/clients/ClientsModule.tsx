@@ -183,7 +183,7 @@ export default function ClientsModule() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion des Clients</h1>
+          <h1 className="text-xl font-bold text-foreground">Gestion des Clients</h1>
           <p className="text-sm text-muted-foreground">{clients.length} client(s) enregistré(s)</p>
         </div>
         {canManage && (
@@ -201,7 +201,7 @@ export default function ClientsModule() {
               <Building2 className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{clients.length}</p>
+              <p className="text-xl font-bold text-foreground">{clients.length}</p>
               <p className="text-xs text-muted-foreground">Total clients</p>
             </div>
           </CardContent>
@@ -212,7 +212,7 @@ export default function ClientsModule() {
               <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{formatFCFA(caTotal)}</p>
+              <p className="text-xl font-bold text-foreground">{formatFCFA(caTotal)}</p>
               <p className="text-xs text-muted-foreground">CA total réalisé</p>
             </div>
           </CardContent>
@@ -223,7 +223,7 @@ export default function ClientsModule() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{formatFCFA(impayesTotal)}</p>
+              <p className="text-xl font-bold text-foreground">{formatFCFA(impayesTotal)}</p>
               <p className="text-xs text-muted-foreground">Impayés total</p>
             </div>
           </CardContent>
@@ -234,7 +234,7 @@ export default function ClientsModule() {
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{clients.length > 0 ? formatFCFA(Math.round(caTotal / clients.length)) : "0 FCFA"}</p>
+              <p className="text-xl font-bold text-foreground">{clients.length > 0 ? formatFCFA(Math.round(caTotal / clients.length)) : "0 FCFA"}</p>
               <p className="text-xs text-muted-foreground">CA moyen / client</p>
             </div>
           </CardContent>

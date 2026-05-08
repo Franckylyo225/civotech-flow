@@ -100,7 +100,7 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-xl font-bold text-foreground">Notifications</h1>
           <p className="text-sm text-muted-foreground">
             {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}` : "Aucune notification non lue"}
           </p>

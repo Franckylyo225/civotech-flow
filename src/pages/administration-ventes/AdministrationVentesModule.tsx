@@ -200,7 +200,7 @@ export default function AdministrationVentesModule() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Administration des Ventes</h1>
+        <h1 className="text-xl font-bold text-foreground">Administration des Ventes</h1>
         <p className="text-sm text-muted-foreground">Consolidation, facturation et bilan des opérations</p>
       </div>
 

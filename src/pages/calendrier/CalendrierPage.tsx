@@ -147,7 +147,7 @@ export default function CalendrierPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Calendrier DG</h1>
+          <h1 className="text-xl font-bold text-foreground">Calendrier DG</h1>
           <p className="text-sm text-muted-foreground">Agenda de la Direction Générale</p>
         </div>
         <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ export default function CalendrierPage() {
               <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              <CardTitle className="text-lg capitalize">
+              <CardTitle className="text-base font-semibold capitalize">
                 {format(currentMonth, "MMMM yyyy", { locale: fr })}
               </CardTitle>
               <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
