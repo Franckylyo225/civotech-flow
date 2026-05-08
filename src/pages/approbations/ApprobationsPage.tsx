@@ -205,7 +205,93 @@ export default function ApprobationsPage() {
           <TabsTrigger value="devis">Devis ({counts.devis})</TabsTrigger>
           <TabsTrigger value="demande_achat">Achats ({counts.demandes})</TabsTrigger>
           <TabsTrigger value="decaissement">Décaissements ({counts.decaissements})</TabsTrigger>
+          <TabsTrigger value="facture_fournisseur">
+            Factures fourn. ({supplierInvoices.length})
+          </TabsTrigger>
         </TabsList>
+
+        {tab === "facture_fournisseur" && (
+          <TabsContent value="facture_fournisseur" className="mt-4 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Factures à régler ce mois-ci ({format(new Date(), "MM/yyyy")}). Approuvez celles à payer.
+            </p>
+            {ffLoading ? (
+              <Card className="border border-border shadow-none">
+                <CardContent className="py-12 text-center text-muted-foreground">Chargement...</CardContent>
+              </Card>
+            ) : supplierInvoices.length === 0 ? (
+              <Card className="border border-border shadow-none">
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <CheckCircle2 className="mx-auto h-10 w-10 text-success/40 mb-3" />
+                  <p className="font-medium">Aucune facture fournisseur à régler ce mois-ci</p>
+                </CardContent>
+              </Card>
+            ) : (
+              supplierInvoices
+                .filter(inv =>
+                  search === "" ||
+                  inv.reference.toLowerCase().includes(search.toLowerCase()) ||
+                  (inv.supplier_nom || "").toLowerCase().includes(search.toLowerCase())
+                )
+                .map(inv => {
+                  const dueDate = inv.due_date ? new Date(inv.due_date) : null;
+                  const isOverdue = dueDate && dueDate < new Date();
+                  return (
+                    <Card key={inv.id} className="border border-border shadow-none hover:bg-muted/30 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          <div className="rounded-lg p-2.5 mt-0.5 bg-info/10">
+                            <Receipt className="h-5 w-5 text-info" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-mono text-muted-foreground">{inv.reference}</span>
+                              <Badge variant="outline" className="border-0 text-[10px] font-medium bg-info/10 text-info">
+                                Facture fournisseur
+                              </Badge>
+                              {isOverdue && (
+                                <Badge variant="outline" className="border-0 bg-destructive/10 text-destructive text-[10px]">
+                                  En retard
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm font-medium text-foreground mt-1 truncate">
+                              {inv.supplier_nom}
+                              {inv.description ? ` · ${inv.description}` : ""}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <p className="text-sm font-semibold text-primary">{formatFCFA(Number(inv.amount))}</p>
+                              <span className="text-xs text-muted-foreground">
+                                Échéance : {dueDate ? format(dueDate, "dd/MM/yyyy") : "—"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Button
+                              variant="ghost" size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={() => navigate(`/factures-fournisseurs?id=${inv.id}`)}
+                              title="Voir le détail"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="h-8 gap-1"
+                              onClick={() => handleApproveSupplierInvoice(inv)}
+                              disabled={actionLoading === inv.id}
+                            >
+                              <CheckCircle2 className="h-4 w-4" /> Approuver
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+            )}
+          </TabsContent>
+        )}
 
         <TabsContent value={tab} className="mt-4 space-y-3">
           {loading ? (
