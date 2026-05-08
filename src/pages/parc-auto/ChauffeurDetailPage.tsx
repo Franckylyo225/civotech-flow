@@ -46,8 +46,9 @@ export default function ChauffeurDetailPage() {
     </div>
   );
 
-  const dateEmb = chauffeur.experience_annees > 0 ? subYears(new Date(), chauffeur.experience_annees) : new Date(chauffeur.created_at);
-  const years = differenceInYears(new Date(), dateEmb);
+  const dateEmb = new Date(chauffeur.created_at);
+  const yearsSinceEmb = Math.max(0, differenceInYears(new Date(), dateEmb));
+  const years = (chauffeur.experience_annees || 0) + yearsSinceEmb;
   const expLabel = years < 1 ? "< 1 an" : `${years} an${years > 1 ? "s" : ""}`;
 
   const monthStart = startOfMonth(new Date());
