@@ -329,7 +329,7 @@ export default function DashboardDG() {
           <>
             <KpiCard
               icon="💰" label="CA du mois"
-              value={<span className="text-base sm:text-lg">{formatFCFACompact(k.caMoisFCFA).replace(" FCFA", "")}</span>}
+              value={<span className="text-sm sm:text-base whitespace-nowrap">{formatFCFA(k.caMoisFCFA).replace(" FCFA", "")}</span>}
               sub={
                 <span>
                   FCFA · {evol === null ? <span className="text-muted-foreground">Nouveau</span>
