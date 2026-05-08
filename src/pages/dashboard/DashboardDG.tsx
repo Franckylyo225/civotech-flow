@@ -356,7 +356,7 @@ export default function DashboardDG() {
             />
             <KpiCard
               icon="💸" label="Factures impayées"
-              value={<span className="text-base">{formatFCFACompact(k.facturesImpayeesFCFA).replace(" FCFA", "")}</span>}
+              value={<span className="text-sm sm:text-base whitespace-nowrap">{formatFCFA(k.facturesImpayeesFCFA).replace(" FCFA", "")}</span>}
               valueColor={k.facturesImpayeesFCFA > 0 ? "#A32D2D" : undefined}
               sub={`${k.nbClientsDebiteurs} client${k.nbClientsDebiteurs > 1 ? "s" : ""} débiteur${k.nbClientsDebiteurs > 1 ? "s" : ""}`}
               onClick={() => navigate("/finance")}
