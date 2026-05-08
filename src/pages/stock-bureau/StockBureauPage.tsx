@@ -492,7 +492,7 @@ function CreateDialog({
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} disabled={submitting}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Annuler
           </Button>
           <Button onClick={() => handle(true)} disabled={submitting || !designation.trim() || montant <= 0}>
