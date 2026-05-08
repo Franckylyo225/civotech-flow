@@ -107,7 +107,7 @@ export default function ChauffeursTab({ canManage }: Props) {
       numero_permis: c.numero_permis || "",
       type_permis: c.type_permis || "C",
       date_expiration_permis: c.date_expiration_permis || "",
-      date_embauche: dateEmbaucheFrom(c.experience_annees, c.created_at).toISOString().slice(0, 10),
+      experience_embauche: c.experience_annees || 0,
       disponible: c.disponible,
       camion_assigne_id: c.camion_assigne_id || "",
     });
@@ -116,7 +116,7 @@ export default function ChauffeursTab({ canManage }: Props) {
 
   const handleSave = async () => {
     if (!form.nom || !form.prenom) { toast.error("Nom et prénom obligatoires"); return; }
-    if (!form.date_embauche) { toast.error("Date d'embauche obligatoire"); return; }
+    if (form.experience_embauche < 0) { toast.error("Expérience invalide"); return; }
     if (!form.date_expiration_permis) { toast.error("Date d'expiration du permis obligatoire"); return; }
     // Vérification conflit côté frontend
     if (form.camion_assigne_id) {
@@ -127,10 +127,10 @@ export default function ChauffeursTab({ canManage }: Props) {
       }
     }
     try {
-      const { date_embauche, ...rest } = form;
+      const { experience_embauche, ...rest } = form;
       const payload: any = {
         ...rest,
-        experience_annees: yearsFromDate(date_embauche),
+        experience_annees: Math.max(0, Math.floor(experience_embauche || 0)),
       };
       if (!payload.camion_assigne_id) payload.camion_assigne_id = null;
       if (!payload.date_expiration_permis) payload.date_expiration_permis = null;
