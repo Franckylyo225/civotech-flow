@@ -23,6 +23,7 @@ function mapChauffeur(row: any): Chauffeur {
     telephone: row.telephone || "",
     numeroPermis: row.numero_permis || "",
     disponible: row.disponible,
+    statut: row.statut,
   };
 }
 
