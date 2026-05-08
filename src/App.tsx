@@ -14,6 +14,7 @@ import OperationsModule from "@/pages/operations/OperationsModule";
 import AdministrationVentesModule from "@/pages/administration-ventes/AdministrationVentesModule";
 import ParcAutoModule from "@/pages/parc-auto/ParcAutoModule";
 import VehiculeDetailPage from "@/pages/parc-auto/VehiculeDetailPage";
+import ChauffeurDetailPage from "@/pages/parc-auto/ChauffeurDetailPage";
 import ClientsModule from "@/pages/clients/ClientsModule";
 import AchatsModule from "@/pages/achats/AchatsModule";
 import FinanceModule from "@/pages/finance/FinanceModule";
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Route path="/calendrier" element={<CalendrierPage />} />
         <Route path="/clients" element={<ClientsModule />} />
         <Route path="/chauffeurs" element={<Navigate to="/parc-auto" replace />} />
+        <Route path="/chauffeurs/:id" element={<ChauffeurDetailPage />} />
         <Route path="/fournisseurs" element={<Navigate to="/achats" replace />} />
         <Route path="/paiements" element={<Navigate to="/factures" replace />} />
         <Route path="/utilisateurs" element={<Navigate to="/parametres" replace />} />
