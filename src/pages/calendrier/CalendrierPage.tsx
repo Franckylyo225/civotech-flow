@@ -185,7 +185,7 @@ export default function CalendrierPage() {
               <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              <CardTitle className="text-lg capitalize">
+              <CardTitle className="text-base font-semibold capitalize">
                 {format(currentMonth, "MMMM yyyy", { locale: fr })}
               </CardTitle>
               <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
