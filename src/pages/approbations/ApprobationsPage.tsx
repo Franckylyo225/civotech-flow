@@ -293,7 +293,7 @@ export default function ApprobationsPage() {
           </TabsContent>
         )}
 
-        <TabsContent value={tab} className="mt-4 space-y-3">
+        {tab !== "facture_fournisseur" && <TabsContent value={tab} className="mt-4 space-y-3">
           {loading ? (
             <Card className="border border-border shadow-none">
               <CardContent className="py-12 text-center text-muted-foreground">Chargement...</CardContent>
