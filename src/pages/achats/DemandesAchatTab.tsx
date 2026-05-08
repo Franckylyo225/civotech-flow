@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  Plus, Search, ShoppingCart, Clock, CheckCircle2, AlertTriangle,
-  Eye, Pencil, Trash2, Send, Wrench,
+  Plus, Search, ShoppingCart, Clock, CheckCircle2, AlertTriangle, AlertCircle,
+  Eye, Pencil, Trash2, Send, Wrench, Store,
 } from "lucide-react";
 import {
   useDemandesAchatStore, STATUT_DA_CONFIG, URGENCE_OPTIONS,
   type DemandeAchatRow, type StatutDemandeAchat,
 } from "@/hooks/use-demandes-achat-store";
 import { useMaintenancesStore, TYPE_MAINTENANCE_CONFIG } from "@/hooks/use-maintenances-store";
+import { useFournisseursStore, CATEGORIE_FOURNISSEUR_CONFIG } from "@/hooks/use-fournisseurs-store";
 import { useParcAutoStore } from "@/hooks/use-parc-auto-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,11 +22,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTablePagination, usePagination } from "@/components/ui/data-table-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import DemandeAchatDetailDialog from "./DemandeAchatDetailDialog";
+
+const fmt = (n: number) => `${(n || 0).toLocaleString("fr-FR")} FCFA`;
 
 const EMPTY_FORM = {
   maintenance_id: "" as string | null,
+  fournisseur_id: "" as string | null,
   designation: "",
   description: "",
   quantite: 1,
@@ -41,12 +45,15 @@ interface Props {
 export default function DemandesAchatTab({ canManage, isDG }: Props) {
   const { demandes, loading, stats, addDemande, updateDemande, deleteDemande } = useDemandesAchatStore();
   const { maintenances } = useMaintenancesStore();
+  const { fournisseurs } = useFournisseursStore();
   const { camions } = useParcAutoStore();
   const getCamionImmat = (id: string) => camions.find(c => c.id === id)?.immatriculation || "—";
+  const getFournisseur = (id: string | null) => id ? fournisseurs.find(f => f.id === id) || null : null;
+  const getMaintenance = (id: string | null) => id ? maintenances.find(m => m.id === id) || null : null;
 
-  // Maintenances actives sans DA liée
   const maintenanceIdsWithDA = new Set(demandes.filter(d => d.maintenance_id).map(d => d.maintenance_id));
   const pendingMaintenances = maintenances.filter(m => (m.statut === "PLANIFIEE" || m.statut === "EN_COURS") && !maintenanceIdsWithDA.has(m.id));
+
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<StatutDemandeAchat | "ALL">("ALL");
   const [showForm, setShowForm] = useState(false);
@@ -54,6 +61,11 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  // Mini-modal saisie montant réel
+  const [closeModal, setCloseModal] = useState<{ id: string; montant: number; fournisseur_id: string } | null>(null);
+  // Mini-modal association fournisseur seul
+  const [assocModal, setAssocModal] = useState<{ id: string; fournisseur_id: string } | null>(null);
 
   const filtered = demandes.filter(d => {
     const matchSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
@@ -69,6 +81,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     setEditingId(d.id);
     setForm({
       maintenance_id: d.maintenance_id || "",
+      fournisseur_id: d.fournisseur_id || "",
       designation: d.designation,
       description: d.description,
       quantite: d.quantite,
@@ -83,6 +96,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     try {
       const payload: any = { ...form };
       if (!payload.maintenance_id) payload.maintenance_id = null;
+      if (!payload.fournisseur_id) payload.fournisseur_id = null;
       if (editingId) {
         await updateDemande(editingId, payload);
         toast.success("Demande mise à jour");
@@ -106,6 +120,28 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     } catch (err: any) { toast.error(err.message || "Erreur"); }
   };
 
+  const handleSaveCloseAmount = async () => {
+    if (!closeModal) return;
+    if (closeModal.montant <= 0) { toast.error("Montant réel invalide"); return; }
+    try {
+      await updateDemande(closeModal.id, {
+        montant_reel: closeModal.montant,
+        fournisseur_id: closeModal.fournisseur_id || null,
+      } as any);
+      toast.success("Montant réel enregistré");
+      setCloseModal(null);
+    } catch (e: any) { toast.error(e.message || "Erreur"); }
+  };
+
+  const handleAssocFournisseur = async () => {
+    if (!assocModal?.fournisseur_id) { toast.error("Sélectionnez un fournisseur"); return; }
+    try {
+      await updateDemande(assocModal.id, { fournisseur_id: assocModal.fournisseur_id } as any);
+      toast.success("Fournisseur associé");
+      setAssocModal(null);
+    } catch (e: any) { toast.error(e.message || "Erreur"); }
+  };
+
   const urgenceColor = (u: string) => {
     switch (u) {
       case "CRITIQUE": return "text-destructive bg-destructive/10";
@@ -115,30 +151,37 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
     }
   };
 
+  const isLate = (d: DemandeAchatRow) => {
+    if (d.statut === "PAYEE" || d.statut === "CLOTUREE" || d.statut === "REFUSEE_DG") return false;
+    return differenceInDays(new Date(), new Date(d.created_at)) > 30;
+  };
+
+  const daysSinceUpdate = (d: DemandeAchatRow) => differenceInDays(new Date(), new Date(d.updated_at));
+
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {[
-          { icon: ShoppingCart, value: stats.total, label: "Total", color: "primary" },
-          { icon: Clock, value: stats.enCours, label: "En cours", color: "info" },
-          { icon: AlertTriangle, value: stats.attenteValidation, label: "Attente DG", color: "warning" },
-          { icon: CheckCircle2, value: `${stats.montantTotal.toLocaleString()} F`, label: "Montant estimé", color: "success" },
-        ].map((s, i) => (
-          <Card key={i} className="border border-border shadow-none">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", `bg-${s.color}/10`)}>
-                <s.icon className={cn("h-5 w-5", `text-${s.color}`)} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* KPIs — 5 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <KpiCard icon={ShoppingCart} value={stats.total} label="Total" color="primary" />
+        <KpiCard icon={Clock} value={stats.enCours} label="En cours" color="info" />
+        <KpiCard icon={AlertTriangle} value={stats.attenteValidation} label="Attente DG" color="warning" />
+        <KpiCard icon={CheckCircle2} value={stats.payees} label="Payées" valueStyle={{ color: "#0F6E56" }} color="success" />
+        <Card className="border border-border shadow-none col-span-2 lg:col-span-1">
+          <CardContent className="p-4 flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-base sm:text-lg font-bold text-foreground truncate" style={{ color: "#0F6E56" }}>{fmt(stats.montantPaye)}</p>
+              <p className="text-xs text-muted-foreground">Montant total engagé</p>
+              {stats.montantEnCours > 0 && (
+                <p className="text-[10px] mt-0.5" style={{ color: "#BA7517" }}>+ {fmt(stats.montantEnCours)} en cours</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Alerte maintenances en attente de DA */}
@@ -162,6 +205,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
                     setEditingId(null);
                     setForm({
                       maintenance_id: m.id,
+                      fournisseur_id: "",
                       designation: `Pièces maintenance — ${m.description.slice(0, 50)}`,
                       description: `Maintenance ${TYPE_MAINTENANCE_CONFIG[m.type].label} pour ${getCamionImmat(m.camion_id)}.${m.pieces_changees ? ` Pièces : ${m.pieces_changees}` : ""}`,
                       quantite: 1,
@@ -207,13 +251,14 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
       {/* Table */}
       <Card className="border border-border shadow-none overflow-x-auto">
         <CardContent className="p-0">
-          <Table className="min-w-[700px]">
+          <Table className="min-w-[900px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Référence</TableHead>
                 <TableHead>Désignation</TableHead>
+                <TableHead>Fournisseur</TableHead>
                 <TableHead>Urgence</TableHead>
-                <TableHead>Montant estimé</TableHead>
+                <TableHead>Montant</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -222,20 +267,81 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
             <TableBody>
               {pagination.paginated.map(d => {
                 const statutCfg = STATUT_DA_CONFIG[d.statut];
+                const fourn = getFournisseur(d.fournisseur_id);
+                const maint = getMaintenance(d.maintenance_id);
+                const late = isLate(d);
+                const needsCloseAmount = d.statut === "PAYEE" && (!d.montant_reel || d.montant_reel === 0);
+                const stale = d.statut === "DEVIS_EN_COURS" && daysSinceUpdate(d) > 7;
                 return (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} style={late ? { backgroundColor: "#FFFBEB" } : undefined}>
                     <TableCell className="font-mono text-sm font-medium">{d.reference}</TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate">{d.designation}</TableCell>
+                    <TableCell className="text-sm max-w-[220px]">
+                      <p className="font-medium text-foreground truncate">{d.designation}</p>
+                      {maint && (
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          Lié à maintenance {getCamionImmat(maint.camion_id)}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {fourn ? (
+                        <div>
+                          <p className="text-xs font-medium text-foreground truncate max-w-[140px]">{fourn.nom}</p>
+                          <p className="text-[10px] text-muted-foreground">{CATEGORIE_FOURNISSEUR_CONFIG[fourn.categorie]?.label}</p>
+                        </div>
+                      ) : d.statut === "PAYEE" ? (
+                        <span className="text-xs text-muted-foreground">— non renseigné</span>
+                      ) : canManage ? (
+                        <button
+                          onClick={() => setAssocModal({ id: d.id, fournisseur_id: "" })}
+                          className="flex items-center gap-1 text-xs hover:underline"
+                          style={{ color: "#BA7517" }}
+                        >
+                          <Store className="h-3 w-3" />— Associer
+                        </button>
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("border-0 text-xs font-medium", urgenceColor(d.urgence))}>
                         {URGENCE_OPTIONS.find(u => u.value === d.urgence)?.label || d.urgence}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm font-medium">{d.montant_estime.toLocaleString()} F</TableCell>
+                    <TableCell className="text-sm">
+                      {needsCloseAmount ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex items-center gap-1 text-xs text-destructive">
+                            <AlertCircle className="h-3.5 w-3.5" />non saisi
+                          </span>
+                          {canManage && (
+                            <Button size="sm" className="h-6 px-2 text-[10px]"
+                              onClick={() => setCloseModal({ id: d.id, montant: d.montant_estime || 0, fournisseur_id: d.fournisseur_id || "" })}>
+                              Saisir
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          {d.montant_reel ? (
+                            <p className="text-xs font-semibold text-success">{fmt(d.montant_reel)}</p>
+                          ) : null}
+                          {d.montant_estime > 0 && (
+                            <p className="text-[10px] text-muted-foreground">
+                              {d.montant_reel ? "estimé" : ""} {!d.montant_reel ? fmt(d.montant_estime) : `: ${fmt(d.montant_estime)}`}
+                            </p>
+                          )}
+                          {!d.montant_reel && !d.montant_estime && <span className="text-xs text-muted-foreground">—</span>}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={cn("border-0 text-xs font-medium", statutCfg.bgColor, statutCfg.color)}>
-                        {statutCfg.label}
-                      </Badge>
+                      <div className="flex flex-col gap-0.5">
+                        <Badge variant="outline" className={cn("border-0 text-xs font-medium w-fit", statutCfg.bgColor, statutCfg.color)}>
+                          {statutCfg.label}
+                        </Badge>
+                        {stale && (
+                          <span className="text-[10px]" style={{ color: "#BA7517" }}>· {daysSinceUpdate(d)}j</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{format(new Date(d.created_at), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-right">
@@ -243,13 +349,26 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDetailId(d.id)} title="Détail">
                           <Eye className="h-3.5 w-3.5" />
                         </Button>
+                        {canManage && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Modifier"
+                            onClick={() => {
+                              if (needsCloseAmount) setCloseModal({ id: d.id, montant: d.montant_estime || 0, fournisseur_id: d.fournisseur_id || "" });
+                              else if (d.statut === "DEVIS_EN_COURS" && !d.fournisseur_id) setAssocModal({ id: d.id, fournisseur_id: "" });
+                              else openEdit(d);
+                            }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        {canManage && !d.fournisseur_id && d.statut !== "PAYEE" && d.statut !== "REFUSEE_DG" && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Associer un fournisseur"
+                            onClick={() => setAssocModal({ id: d.id, fournisseur_id: "" })}>
+                            <Store className="h-3.5 w-3.5" style={{ color: "#BA7517" }} />
+                          </Button>
+                        )}
                         {canManage && d.statut === "BROUILLON" && (
                           <>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleSoumettre(d)} title="Soumettre">
                               <Send className="h-3.5 w-3.5 text-info" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(d)}>
-                              <Pencil className="h-3.5 w-3.5" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(d.id)}>
                               <Trash2 className="h-3.5 w-3.5" />
@@ -262,7 +381,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucune demande d'achat</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune demande d'achat</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -284,7 +403,7 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingId ? "Modifier la demande" : "Nouvelle demande d'achat"}</DialogTitle></DialogHeader>
-          <div className="grid gap-4">
+          <div className="grid gap-4 max-h-[60vh] overflow-y-auto pr-1">
             <div className="space-y-2">
               <Label>Désignation *</Label>
               <Input value={form.designation} onChange={e => setForm(f => ({ ...f, designation: e.target.value }))} placeholder="Ex: Plaquettes de frein pour camion A" />
@@ -313,13 +432,25 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
               </div>
             </div>
             <div className="space-y-2">
+              <Label>Fournisseur (optionnel)</Label>
+              <Select value={form.fournisseur_id || "NONE"} onValueChange={v => setForm(f => ({ ...f, fournisseur_id: v === "NONE" ? "" : v }))}>
+                <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">Aucun</SelectItem>
+                  {fournisseurs.filter(f => f.actif).map(f => (
+                    <SelectItem key={f.id} value={f.id}>{f.nom} — {CATEGORIE_FOURNISSEUR_CONFIG[f.categorie]?.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Maintenance liée (optionnel)</Label>
               <Select value={form.maintenance_id || "NONE"} onValueChange={v => setForm(f => ({ ...f, maintenance_id: v === "NONE" ? null : v }))}>
                 <SelectTrigger><SelectValue placeholder="Aucune" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE">Aucune</SelectItem>
                   {maintenances.filter(m => m.statut !== "TERMINEE" && m.statut !== "ANNULEE" && !demandes.some(d => d.maintenance_id === m.id && d.id !== editingId)).map(m => (
-                    <SelectItem key={m.id} value={m.id}>{m.description.slice(0, 50)}</SelectItem>
+                    <SelectItem key={m.id} value={m.id}>{getCamionImmat(m.camion_id)} — {m.description.slice(0, 40)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -328,6 +459,60 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
             <Button onClick={handleSave}>{editingId ? "Enregistrer" : "Créer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mini-modal — saisie montant réel */}
+      <Dialog open={!!closeModal} onOpenChange={() => setCloseModal(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Saisir le montant réel</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Montant réel payé (FCFA) *</Label>
+              <Input type="number" min={0} value={closeModal?.montant || 0}
+                onChange={e => setCloseModal(s => s ? { ...s, montant: Number(e.target.value) } : s)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Fournisseur</Label>
+              <Select value={closeModal?.fournisseur_id || "NONE"}
+                onValueChange={v => setCloseModal(s => s ? { ...s, fournisseur_id: v === "NONE" ? "" : v } : s)}>
+                <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">— Aucun —</SelectItem>
+                  {fournisseurs.filter(f => f.actif).map(f => (
+                    <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCloseModal(null)}>Annuler</Button>
+            <Button onClick={handleSaveCloseAmount}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mini-modal — association fournisseur */}
+      <Dialog open={!!assocModal} onOpenChange={() => setAssocModal(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Associer un fournisseur</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <Label>Fournisseur *</Label>
+            <Select value={assocModal?.fournisseur_id || ""}
+              onValueChange={v => setAssocModal(s => s ? { ...s, fournisseur_id: v } : s)}>
+              <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+              <SelectContent>
+                {fournisseurs.filter(f => f.actif).map(f => (
+                  <SelectItem key={f.id} value={f.id}>{f.nom} — {CATEGORIE_FOURNISSEUR_CONFIG[f.categorie]?.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssocModal(null)}>Annuler</Button>
+            <Button onClick={handleAssocFournisseur}>Associer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -356,5 +541,21 @@ export default function DemandesAchatTab({ canManage, isDG }: Props) {
         />
       )}
     </div>
+  );
+}
+
+function KpiCard({ icon: Icon, value, label, color, valueStyle }: { icon: any; value: number | string; label: string; color: string; valueStyle?: React.CSSProperties }) {
+  return (
+    <Card className="border border-border shadow-none">
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", `bg-${color}/10`)}>
+          <Icon className={cn("h-5 w-5", `text-${color}`)} />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-foreground" style={valueStyle}>{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
