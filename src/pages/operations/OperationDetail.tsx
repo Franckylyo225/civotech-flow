@@ -627,7 +627,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
               <Select value={selectedChauffeur} onValueChange={setSelectedChauffeur}>
                 <SelectTrigger><SelectValue placeholder="Choisir un chauffeur..." /></SelectTrigger>
                 <SelectContent>
-                  {chauffeurs.filter((c) => c.statut ? c.statut === "DISPONIBLE" : c.disponible).map((c) => (
+                  {chauffeurs.filter((c) => c.statut === "DISPONIBLE").map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.prenom} {c.nom} — {c.numeroPermis}
                     </SelectItem>
