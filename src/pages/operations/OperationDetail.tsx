@@ -649,7 +649,10 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                       <SelectContent>
                         {chauffeurs.map((c) => (
                           <SelectItem key={c.id} value={c.id} disabled={c.statut !== "DISPONIBLE"}>
-                            {c.prenom} {c.nom} — {c.numeroPermis} ({statutLabel[c.statut] || c.statut})
+                            {c.prenom} {c.nom} — {c.numeroPermis}
+                            {c.statut !== "DISPONIBLE" && (
+                              <span className="text-muted-foreground"> ({statutLabel[c.statut] || c.statut})</span>
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
