@@ -140,10 +140,6 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   };
 
   const handleTerminer = () => {
-    if (!op.bonLivraisonUrl) {
-      toast.error("Veuillez uploader le bon de livraison avant de terminer la mission");
-      return;
-    }
     onUpdateStatut(op.id, "TERMINEE");
     toast.success("Mission terminée");
   };
