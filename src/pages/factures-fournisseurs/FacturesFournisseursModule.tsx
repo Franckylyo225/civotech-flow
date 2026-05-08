@@ -145,7 +145,7 @@ export default function FacturesFournisseursModule() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Factures Fournisseurs</h1>
+          <h1 className="text-xl font-bold text-foreground">Factures Fournisseurs</h1>
           <p className="text-muted-foreground">Réception, traitement, validation DG et paiement.</p>
         </div>
         {isAssistante && (

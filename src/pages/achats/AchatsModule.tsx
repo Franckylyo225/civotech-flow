@@ -12,7 +12,7 @@ export default function AchatsModule() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Achats & Fournisseurs</h1>
+        <h1 className="text-xl font-bold text-foreground">Achats & Fournisseurs</h1>
         <p className="text-muted-foreground">Gérez les demandes d'achat, devis fournisseurs et le référentiel.</p>
       </div>
 

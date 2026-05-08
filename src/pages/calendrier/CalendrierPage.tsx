@@ -147,7 +147,7 @@ export default function CalendrierPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Calendrier DG</h1>
+          <h1 className="text-xl font-bold text-foreground">Calendrier DG</h1>
           <p className="text-sm text-muted-foreground">Agenda de la Direction Générale</p>
         </div>
         <div className="flex items-center gap-2">

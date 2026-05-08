@@ -15,7 +15,7 @@ export default function FinanceModule() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Finance & Comptabilité</h1>
+        <h1 className="text-xl font-bold text-foreground">Finance & Comptabilité</h1>
         <p className="text-muted-foreground">Gérez la trésorerie, les factures et décaissements.</p>
       </div>
 

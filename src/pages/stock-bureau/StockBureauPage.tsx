@@ -114,7 +114,7 @@ export default function StockBureauPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Stock Bureau</h1>
+          <h1 className="text-xl font-bold text-foreground">Stock Bureau</h1>
           <p className="text-sm text-muted-foreground">
             Demandes d'approvisionnement bureautique et petites dépenses
           </p>

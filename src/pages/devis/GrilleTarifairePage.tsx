@@ -133,7 +133,7 @@ export default function GrilleTarifairePage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-[18px] font-medium text-foreground">Grille tarifaire</h1>
+          <h1 className="text-xl font-bold text-foreground">Grille tarifaire</h1>
           <p className="text-[13px] text-muted-foreground mt-1">
             Tarifs par zone, tonnage et type de transport · dernière mise à jour {new Date().toLocaleDateString("fr-FR")}
           </p>

@@ -26,7 +26,7 @@ export default function AnnoncesPage() {
         <div className="flex items-center gap-3">
           <Megaphone className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Annonces</h1>
+            <h1 className="text-xl font-bold text-foreground">Annonces</h1>
             <p className="text-sm text-muted-foreground">
               Communication interne de l'entreprise
             </p>
