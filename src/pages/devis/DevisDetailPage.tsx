@@ -170,7 +170,10 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 <Button variant="outline" className="w-full" onClick={() => setShowEditDialog(true)}>
                   <Pencil className="mr-2 h-4 w-4" /> Modifier le devis
                 </Button>
-                <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
+                <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("APPROUVE_DG", "Devis validé")}>
+                  <CheckCircle2 className="mr-2 h-4 w-4" /> Valider le devis
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis soumis au DG")}>
                   <Send className="mr-2 h-4 w-4" /> Soumettre au DG
                 </Button>
               </div>
@@ -182,7 +185,10 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                 <Button variant="outline" className="w-full" onClick={() => setShowEditDialog(true)}>
                   <Pencil className="mr-2 h-4 w-4" /> Modifier et corriger
                 </Button>
-                <Button className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis corrigé et resoumis au DG")}>
+                <Button className="w-full bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleAction("APPROUVE_DG", "Devis validé")}>
+                  <CheckCircle2 className="mr-2 h-4 w-4" /> Valider le devis
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => handleAction("SOUMIS_DG", "Devis corrigé et resoumis au DG")}>
                   <Send className="mr-2 h-4 w-4" /> Resoumettre au DG
                 </Button>
               </div>
