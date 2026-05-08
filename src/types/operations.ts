@@ -20,6 +20,7 @@ export interface Chauffeur {
   telephone: string;
   numeroPermis: string;
   disponible: boolean;
+  statut?: string;
 }
 
 export type StatutDepense = "EN_ATTENTE" | "APPROUVE" | "PAYE" | "REJETE";
