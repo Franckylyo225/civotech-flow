@@ -47,7 +47,55 @@ export default function ApprobationsPage() {
   const [refusDialog, setRefusDialog] = useState<ApprobationItem | null>(null);
   const [commentaireRefus, setCommentaireRefus] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [supplierInvoices, setSupplierInvoices] = useState<SupplierInvoiceRow[]>([]);
+  const [ffLoading, setFfLoading] = useState(true);
   const navigate = useNavigate();
+
+  async function fetchSupplierInvoices() {
+    setFfLoading(true);
+    const now = new Date();
+    const debutMois = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const finMois = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+
+    const { data } = await supabase
+      .from("supplier_invoices")
+      .select("id, reference, amount, due_date, invoice_date, status, description, supplier_id")
+      .in("status", FF_PENDING_STATUSES)
+      .or(`due_date.gte.${debutMois},due_date.is.null`)
+      .order("due_date", { ascending: true, nullsFirst: false });
+
+    const rows = (data || []).filter((f: any) =>
+      !f.due_date || (f.due_date >= debutMois && f.due_date <= finMois)
+    );
+
+    const supplierIds = [...new Set(rows.map((r: any) => r.supplier_id))];
+    let supplierMap: Record<string, string> = {};
+    if (supplierIds.length > 0) {
+      const { data: sups } = await supabase.from("fournisseurs").select("id, nom").in("id", supplierIds as any);
+      (sups || []).forEach((s: any) => { supplierMap[s.id] = s.nom; });
+    }
+
+    setSupplierInvoices(rows.map((r: any) => ({ ...r, supplier_nom: supplierMap[r.supplier_id] || "—" })));
+    setFfLoading(false);
+  }
+
+  useEffect(() => { fetchSupplierInvoices(); }, []);
+
+  async function handleApproveSupplierInvoice(inv: SupplierInvoiceRow) {
+    setActionLoading(inv.id);
+    try {
+      const { error } = await supabase
+        .from("supplier_invoices")
+        .update({ status: "approved_for_payment" } as any)
+        .eq("id", inv.id);
+      if (error) throw error;
+      toast.success(`Facture ${inv.reference} approuvée pour paiement`);
+      setSupplierInvoices(prev => prev.filter(x => x.id !== inv.id));
+    } catch (e: any) {
+      toast.error("Erreur : " + (e?.message || "approbation"));
+    }
+    setActionLoading(null);
+  }
 
   const filtered = items.filter(item => {
     const matchSearch = search === "" ||
