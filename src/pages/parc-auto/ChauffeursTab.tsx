@@ -292,7 +292,7 @@ export default function ChauffeursTab({ canManage }: Props) {
                 const cfg = STATUT_CHAUFFEUR_CONFIG[c.statut];
                 const camion = getCamion(c.camion_assigne_id);
                 const inConflict = conflictChauffeurIds.has(c.id);
-                const dateEmb = dateEmbaucheFrom(c.experience_annees, c.created_at);
+                const dateEmb = new Date(c.created_at);
                 return (
                   <TableRow
                     key={c.id}
