@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApprobationsStore, type ApprobationItem } from "@/hooks/use-approbations-store";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,17 +13,32 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   CheckCircle2, XCircle, FileText, ShoppingCart, Wallet, Search,
-  RefreshCw, Clock, ArrowRight, Eye,
+  RefreshCw, Clock, Eye, Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { formatFCFA } from "@/utils/format";
 
 const TYPE_CONFIG = {
   devis: { label: "Devis", icon: FileText, color: "text-primary", bg: "bg-primary/10" },
   demande_achat: { label: "Demande d'achat", icon: ShoppingCart, color: "text-warning", bg: "bg-warning/10" },
   decaissement: { label: "Décaissement", icon: Wallet, color: "text-info", bg: "bg-info/10" },
 };
+
+interface SupplierInvoiceRow {
+  id: string;
+  reference: string;
+  amount: number;
+  due_date: string | null;
+  invoice_date: string;
+  status: string;
+  description: string | null;
+  supplier_id: string;
+  supplier_nom?: string;
+}
+
+const FF_PENDING_STATUSES = ["received", "processing", "pending_DG"];
 
 export default function ApprobationsPage() {
   const { items, loading, counts, refetch } = useApprobationsStore();
