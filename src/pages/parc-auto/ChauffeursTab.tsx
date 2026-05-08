@@ -179,9 +179,7 @@ export default function ChauffeursTab({ canManage }: Props) {
   };
 
   const renderExperience = (c: ChauffeurRow) => {
-    const date = dateEmbaucheFrom(c.experience_annees, c.created_at);
-    const years = differenceInYears(new Date(), date);
-    if (!c.experience_annees && !c.created_at) return "—";
+    const years = totalExperience(c.experience_annees, c.created_at);
     if (years < 1) return "< 1 an";
     return `${years} an${years > 1 ? "s" : ""}`;
   };
