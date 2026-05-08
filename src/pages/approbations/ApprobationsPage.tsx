@@ -375,7 +375,7 @@ export default function ApprobationsPage() {
               );
             })
           )}
-        </TabsContent>
+        </TabsContent>}
       </Tabs>
 
       {/* Refus dialog */}
