@@ -522,9 +522,14 @@ export default function DevisListPage({ devisList, onSelectDevis, onNewDevis, on
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-52">
                             {canSubmit && onQuickAction && (
-                              <DropdownMenuItem onClick={() => onQuickAction(d.id, "SOUMIS_DG")}>
-                                <Send className="mr-2 h-3.5 w-3.5" /> Soumettre au DG
-                              </DropdownMenuItem>
+                              <>
+                                <DropdownMenuItem onClick={() => onQuickAction(d.id, "APPROUVE_DG")}>
+                                  <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Valider directement
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => onQuickAction(d.id, "SOUMIS_DG")}>
+                                  <Send className="mr-2 h-3.5 w-3.5" /> Soumettre au DG
+                                </DropdownMenuItem>
+                              </>
                             )}
                             {canMarkValide && onQuickAction && (
                               <DropdownMenuItem onClick={() => onQuickAction(d.id, "VALIDE_CLIENT")}>
