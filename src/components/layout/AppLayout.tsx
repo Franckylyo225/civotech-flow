@@ -3,9 +3,11 @@ import { Outlet } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useStagnationsChecker } from "@/hooks/use-stagnations-checker";
 
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  useStagnationsChecker();
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
