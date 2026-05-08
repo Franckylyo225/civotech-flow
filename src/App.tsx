@@ -58,6 +58,7 @@ function AppRoutes() {
         <Route path="/factures" element={<FinanceModule />} />
         <Route path="/achats" element={<AchatsModule />} />
         <Route path="/parc-auto" element={<ParcAutoModule />} />
+        <Route path="/parc/:id" element={<VehiculeDetailPage />} />
         <Route path="/maintenance" element={<Navigate to="/parc-auto" replace />} />
         <Route path="/calendrier" element={<CalendrierPage />} />
         <Route path="/clients" element={<ClientsModule />} />
