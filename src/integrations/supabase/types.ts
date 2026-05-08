@@ -624,9 +624,11 @@ export type Database = {
           created_by: string | null
           description: string
           designation: string
+          fournisseur_id: string | null
           id: string
           maintenance_id: string | null
           montant_estime: number
+          montant_reel: number | null
           quantite: number
           reference: string
           statut: Database["public"]["Enums"]["statut_demande_achat"]
@@ -639,9 +641,11 @@ export type Database = {
           created_by?: string | null
           description?: string
           designation?: string
+          fournisseur_id?: string | null
           id?: string
           maintenance_id?: string | null
           montant_estime?: number
+          montant_reel?: number | null
           quantite?: number
           reference: string
           statut?: Database["public"]["Enums"]["statut_demande_achat"]
@@ -654,9 +658,11 @@ export type Database = {
           created_by?: string | null
           description?: string
           designation?: string
+          fournisseur_id?: string | null
           id?: string
           maintenance_id?: string | null
           montant_estime?: number
+          montant_reel?: number | null
           quantite?: number
           reference?: string
           statut?: Database["public"]["Enums"]["statut_demande_achat"]
@@ -664,6 +670,13 @@ export type Database = {
           urgence?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "demandes_achat_fournisseur_id_fkey"
+            columns: ["fournisseur_id"]
+            isOneToOne: false
+            referencedRelation: "fournisseurs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "demandes_achat_maintenance_id_fkey"
             columns: ["maintenance_id"]

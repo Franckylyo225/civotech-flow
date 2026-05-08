@@ -9,10 +9,12 @@ export interface DemandeAchatRow {
   id: string;
   reference: string;
   maintenance_id: string | null;
+  fournisseur_id: string | null;
   designation: string;
   description: string;
   quantite: number;
   montant_estime: number;
+  montant_reel: number | null;
   urgence: string;
   statut: StatutDemandeAchat;
   commentaire_dg: string | null;
