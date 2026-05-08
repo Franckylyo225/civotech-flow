@@ -60,7 +60,7 @@ export default function ApprobationsPage() {
     const { data } = await supabase
       .from("supplier_invoices")
       .select("id, reference, amount, due_date, invoice_date, status, description, supplier_id")
-      .in("status", FF_PENDING_STATUSES)
+      .in("status", FF_PENDING_STATUSES as any)
       .or(`due_date.gte.${debutMois},due_date.is.null`)
       .order("due_date", { ascending: true, nullsFirst: false });
 
