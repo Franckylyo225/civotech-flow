@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { seedDatabase } from "@/lib/seed";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,14 +41,14 @@ const TESTIMONIALS = [
 
 
 export default function LoginPage() {
-  const { login, signup } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
+  const [demoEnabled, setDemoEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -79,27 +79,14 @@ export default function LoginPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // Fetch platform settings to know whether to show demo accounts
   useEffect(() => {
     let cancelled = false;
-    async function init() {
-      setSeeding(true);
-      try {
-        await seedDatabase();
-        for (const acc of TEST_ACCOUNTS) {
-          try {
-            await signup(acc.email, "admin123", acc.nom, acc.prenom, acc.role as any);
-          } catch {
-            // Account already exists
-          }
-        }
-      } catch (e) {
-        console.log("Seed/setup error:", e);
-      }
-      if (!cancelled) setSeeding(false);
-    }
-    init();
+    supabase.from("platform_settings").select("demo_mode_enabled").limit(1).maybeSingle().then(({ data }) => {
+      if (!cancelled) setDemoEnabled(!!data?.demo_mode_enabled);
+    });
     return () => { cancelled = true; };
-  }, [signup]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,40 +208,42 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full h-12 rounded-lg text-base font-semibold tracking-wide uppercase gap-2 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              disabled={loading || seeding}
+              disabled={loading}
             >
-              {loading ? "Connexion..." : seeding ? "Initialisation..." : (
+              {loading ? "Connexion..." : (
                 <>Se connecter <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" /></>
               )}
             </Button>
           </form>
 
-          {/* Quick login */}
-          <div
-            className={`mt-8 rounded-xl border border-border bg-muted/30 p-5 transition-all duration-600 delay-[550ms] ease-out ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            <p className="text-xs font-medium text-muted-foreground mb-3">Connexion rapide (démo) :</p>
-            <div className="grid grid-cols-3 gap-2">
-              {TEST_ACCOUNTS.map((acc, i) => (
-                <button
-                  key={acc.email}
-                  onClick={() => handleQuickLogin(acc.email)}
-                  disabled={loading || seeding}
-                  style={{ transitionDelay: mounted ? `${600 + i * 50}ms` : "0ms" }}
-                  className={`text-xs px-3 py-2 rounded-lg border border-border bg-background hover:border-primary hover:text-primary hover:shadow-md hover:shadow-primary/5 text-foreground font-medium transition-all duration-300 disabled:opacity-50 hover:scale-105 active:scale-95 ${
-                    mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                  }`}
-                >
-                  {acc.label}
-                </button>
-              ))}
+          {/* Quick login (only when demo mode is enabled by Super Admin) */}
+          {demoEnabled && (
+            <div
+              className={`mt-8 rounded-xl border border-border bg-muted/30 p-5 transition-all duration-600 delay-[550ms] ease-out ${
+                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+            >
+              <p className="text-xs font-medium text-muted-foreground mb-3">Connexion rapide (démo) :</p>
+              <div className="grid grid-cols-3 gap-2">
+                {TEST_ACCOUNTS.map((acc, i) => (
+                  <button
+                    key={acc.email}
+                    onClick={() => handleQuickLogin(acc.email)}
+                    disabled={loading}
+                    style={{ transitionDelay: mounted ? `${600 + i * 50}ms` : "0ms" }}
+                    className={`text-xs px-3 py-2 rounded-lg border border-border bg-background hover:border-primary hover:text-primary hover:shadow-md hover:shadow-primary/5 text-foreground font-medium transition-all duration-300 disabled:opacity-50 hover:scale-105 active:scale-95 ${
+                      mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    }`}
+                  >
+                    {acc.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Mot de passe : <span className="font-mono font-semibold text-foreground">admin123</span>
+              </p>
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Mot de passe : <span className="font-mono font-semibold text-foreground">admin123</span>
-            </p>
-          </div>
+          )}
         </div>
       </div>
 
