@@ -18,10 +18,12 @@ import {
   ClipboardList,
   FileSignature,
   Briefcase,
+  ShieldCheck,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 
-export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN_VENTES" | "ADMIN";
+export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN_VENTES" | "ADMIN" | "SUPER_ADMIN";
 
 export interface NavItem {
   label: string;

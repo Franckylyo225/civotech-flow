@@ -1532,6 +1532,33 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          demo_mode_enabled: boolean
+          id: string
+          maintenance_message: string
+          maintenance_mode: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          demo_mode_enabled?: boolean
+          id?: string
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          demo_mode_enabled?: boolean
+          id?: string
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2184,6 +2211,7 @@ export type Database = {
         | "MAINTENANCE"
         | "ADMIN"
         | "ADMIN_VENTES"
+        | "SUPER_ADMIN"
       categorie_charge:
         | "LOYER"
         | "SALAIRES"
@@ -2405,6 +2433,7 @@ export const Constants = {
         "MAINTENANCE",
         "ADMIN",
         "ADMIN_VENTES",
+        "SUPER_ADMIN",
       ],
       categorie_charge: [
         "LOYER",
