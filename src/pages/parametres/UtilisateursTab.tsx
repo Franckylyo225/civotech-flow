@@ -21,9 +21,10 @@ interface UserInfo {
   role: string | null;
 }
 
-const ROLES = ["DG", "COMMERCIAL", "LOGISTIQUE", "FINANCE", "ACHATS", "ASSISTANTE", "MAINTENANCE", "ADMIN"] as const;
+const ROLES = ["SUPER_ADMIN", "DG", "COMMERCIAL", "LOGISTIQUE", "FINANCE", "ACHATS", "ASSISTANTE", "MAINTENANCE", "ADMIN_VENTES", "ADMIN"] as const;
 
 const ROLE_COLORS: Record<string, string> = {
+  SUPER_ADMIN: "bg-[hsl(263_70%_50%)]/10 text-[hsl(263_70%_50%)]",
   DG: "bg-primary/10 text-primary",
   COMMERCIAL: "bg-info/10 text-info",
   LOGISTIQUE: "bg-warning/10 text-warning",
@@ -31,6 +32,7 @@ const ROLE_COLORS: Record<string, string> = {
   ACHATS: "bg-accent/50 text-accent-foreground",
   ASSISTANTE: "bg-muted text-muted-foreground",
   MAINTENANCE: "bg-warning/10 text-warning",
+  ADMIN_VENTES: "bg-info/10 text-info",
   ADMIN: "bg-destructive/10 text-destructive",
 };
 
