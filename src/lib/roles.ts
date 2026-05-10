@@ -18,10 +18,12 @@ import {
   ClipboardList,
   FileSignature,
   Briefcase,
+  ShieldCheck,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 
-export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN_VENTES" | "ADMIN";
+export type UserRole = "DG" | "COMMERCIAL" | "LOGISTIQUE" | "FINANCE" | "ACHATS" | "ASSISTANTE" | "MAINTENANCE" | "ADMIN_VENTES" | "ADMIN" | "SUPER_ADMIN";
 
 export interface NavItem {
   label: string;
@@ -40,6 +42,7 @@ export const roleLabels: Record<UserRole, string> = {
   MAINTENANCE: "Maintenance",
   ADMIN_VENTES: "Administration des Ventes",
   ADMIN: "Administrateur",
+  SUPER_ADMIN: "Super Administrateur",
 };
 
 export const roleNavItems: Record<UserRole, NavItem[]> = {
@@ -129,6 +132,16 @@ export const roleNavItems: Record<UserRole, NavItem[]> = {
     { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Rapports", path: "/rapports", icon: BarChart3, category: "GÉNÉRAL" },
     { label: "Paramètres", path: "/parametres", icon: Settings, category: "GÉNÉRAL" },
+    { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
+  ],
+  SUPER_ADMIN: [
+    { label: "Tableau de bord", path: "/dashboard", icon: LayoutDashboard },
+    { label: "Utilisateurs", path: "/super-admin/utilisateurs", icon: Users, category: "ADMINISTRATION" },
+    { label: "Rôles & Permissions", path: "/super-admin/roles", icon: ShieldCheck, category: "ADMINISTRATION" },
+    { label: "Journal d'activité", path: "/super-admin/logs", icon: Activity, category: "ADMINISTRATION" },
+    { label: "Paramètres plateforme", path: "/super-admin/plateforme", icon: Settings, category: "ADMINISTRATION" },
+    { label: "Entreprise", path: "/parametres", icon: Briefcase, category: "ADMINISTRATION" },
+    { label: "Annonces", path: "/annonces", icon: Megaphone, category: "GÉNÉRAL" },
     { label: "Centre d'aide", path: "/aide", icon: HelpCircle, category: "GÉNÉRAL" },
   ],
 };

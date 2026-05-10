@@ -5,12 +5,15 @@ import DashboardLogistique from "./dashboard/DashboardLogistique";
 import DashboardFinance from "./dashboard/DashboardFinance";
 import DashboardAchats from "./dashboard/DashboardAchats";
 import DashboardAssistante from "./dashboard/DashboardAssistante";
+import DashboardSuperAdmin from "./dashboard/DashboardSuperAdmin";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   if (!user) return null;
 
   switch (user.role) {
+    case "SUPER_ADMIN":
+      return <DashboardSuperAdmin />;
     case "COMMERCIAL":
       return <DashboardCommercial />;
     case "LOGISTIQUE":
@@ -26,8 +29,8 @@ export default function DashboardPage() {
     case "ADMIN_VENTES":
       return <DashboardCommercial />;
     default:
-      // DG, ADMIN, and others
       return <DashboardDG />;
   }
 }
+
 

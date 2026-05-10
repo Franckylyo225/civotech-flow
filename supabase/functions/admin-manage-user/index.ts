@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     // Check caller role
     const { data: callerRole } = await adminClient.from("user_roles").select("role").eq("user_id", caller.id).single();
-    if (!callerRole || !["DG", "ADMIN"].includes(callerRole.role)) {
+    if (!callerRole || !["DG", "ADMIN", "SUPER_ADMIN"].includes(callerRole.role)) {
       return new Response(JSON.stringify({ error: "Accès refusé" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 

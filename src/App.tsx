@@ -27,6 +27,10 @@ import CentreAidePage from "@/pages/aide/CentreAidePage";
 import AnnoncesPage from "@/pages/annonces/AnnoncesPage";
 import FacturesFournisseursModule from "@/pages/factures-fournisseurs/FacturesFournisseursModule";
 import StockBureauPage from "@/pages/stock-bureau/StockBureauPage";
+import SuperAdminUtilisateursPage from "@/pages/super-admin/UtilisateursPage";
+import SuperAdminRolesPage from "@/pages/super-admin/RolesPage";
+import SuperAdminLogsPage from "@/pages/super-admin/LogsPage";
+import SuperAdminPlateformePage from "@/pages/super-admin/PlateformePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +79,10 @@ function AppRoutes() {
         <Route path="/annonces" element={<AnnoncesPage />} />
         <Route path="/factures-fournisseurs" element={<FacturesFournisseursModule />} />
         <Route path="/stock-bureau" element={<StockBureauPage />} />
+        <Route path="/super-admin/utilisateurs" element={<SuperAdminUtilisateursPage />} />
+        <Route path="/super-admin/roles" element={<SuperAdminRolesPage />} />
+        <Route path="/super-admin/logs" element={<SuperAdminLogsPage />} />
+        <Route path="/super-admin/plateforme" element={<SuperAdminPlateformePage />} />
         <Route path="/aide" element={<CentreAidePage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
