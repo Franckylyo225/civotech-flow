@@ -14,9 +14,21 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { email, password, nom, prenom } = await req.json();
+    let email = Deno.env.get("SUPER_ADMIN_EMAIL") || "";
+    let password = Deno.env.get("SUPER_ADMIN_PASSWORD") || "";
+    let nom = Deno.env.get("SUPER_ADMIN_NOM") || "";
+    let prenom = Deno.env.get("SUPER_ADMIN_PRENOM") || "";
+
+    try {
+      const body = await req.json();
+      if (body?.email) email = body.email;
+      if (body?.password) password = body.password;
+      if (body?.nom) nom = body.nom;
+      if (body?.prenom) prenom = body.prenom;
+    } catch {/* no body */}
+
     if (!email || !password || !nom || !prenom) {
-      return new Response(JSON.stringify({ error: "email, password, nom, prenom requis" }), {
+      return new Response(JSON.stringify({ error: "Identifiants Super Admin manquants (env ou body)" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
