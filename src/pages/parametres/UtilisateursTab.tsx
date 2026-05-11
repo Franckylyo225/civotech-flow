@@ -442,6 +442,47 @@ export default function UtilisateursTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog: Delete User */}
+      <AlertDialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeleteConfirmText(""); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Supprimer l'utilisateur
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Cette action est <span className="font-semibold text-destructive">irréversible</span>. Le compte de{" "}
+                  <span className="font-medium text-foreground">{selectedUser?.prenom} {selectedUser?.nom}</span> sera définitivement supprimé,
+                  ainsi que son profil et son rôle.
+                </p>
+                <div className="space-y-1.5">
+                  <Label className="text-foreground">
+                    Pour confirmer, saisissez : <span className="font-mono font-semibold">{selectedUser?.prenom} {selectedUser?.nom}</span>
+                  </Label>
+                  <Input
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder={`${selectedUser?.prenom ?? ""} ${selectedUser?.nom ?? ""}`.trim()}
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={actionLoading || deleteConfirmText.trim() !== `${selectedUser?.prenom ?? ""} ${selectedUser?.nom ?? ""}`.trim()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {actionLoading ? "Suppression..." : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
