@@ -37,6 +37,31 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function UtilisateursTab() {
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
+  const generatePassword = (length = 14) => {
+    const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lower = "abcdefghijkmnpqrstuvwxyz";
+    const digits = "23456789";
+    const symbols = "!@#$%&*?";
+    const all = upper + lower + digits + symbols;
+    const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+    let pwd = pick(upper) + pick(lower) + pick(digits) + pick(symbols);
+    for (let i = pwd.length; i < length; i++) pwd += pick(all);
+    return pwd.split("").sort(() => Math.random() - 0.5).join("");
+  };
+
+  const copyToClipboard = async (value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success("Mot de passe copié");
+    } catch {
+      toast.error("Impossible de copier");
+    }
+  };
+
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
