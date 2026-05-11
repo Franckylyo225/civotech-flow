@@ -183,6 +183,28 @@ export default function UtilisateursTab() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+    const expected = `${selectedUser.prenom} ${selectedUser.nom}`.trim();
+    if (deleteConfirmText.trim() !== expected) {
+      toast.error("Le nom saisi ne correspond pas");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await callAdminFn({ action: "delete", user_id: selectedUser.user_id });
+      toast.success("Utilisateur supprimé");
+      setDeleteOpen(false);
+      setDeleteConfirmText("");
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de la suppression");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
   return (
