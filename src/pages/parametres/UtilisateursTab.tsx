@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2 } from "lucide-react";
+import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2, RefreshCw, Copy, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,31 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function UtilisateursTab() {
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
+  const generatePassword = (length = 14) => {
+    const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lower = "abcdefghijkmnpqrstuvwxyz";
+    const digits = "23456789";
+    const symbols = "!@#$%&*?";
+    const all = upper + lower + digits + symbols;
+    const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+    let pwd = pick(upper) + pick(lower) + pick(digits) + pick(symbols);
+    for (let i = pwd.length; i < length; i++) pwd += pick(all);
+    return pwd.split("").sort(() => Math.random() - 0.5).join("");
+  };
+
+  const copyToClipboard = async (value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success("Mot de passe copié");
+    } catch {
+      toast.error("Impossible de copier");
+    }
+  };
+
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -286,7 +311,27 @@ export default function UtilisateursTab() {
             </div>
             <div className="space-y-1.5">
               <Label>Mot de passe</Label>
-              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 caractères" />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="Min. 6 caractères"
+                    className="pr-10"
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowNewPassword(v => !v)}>
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button type="button" variant="outline" size="icon" title="Générer un mot de passe" onClick={() => { setNewPassword(generatePassword()); setShowNewPassword(true); }}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button type="button" variant="outline" size="icon" title="Copier" onClick={() => copyToClipboard(newPassword)} disabled={!newPassword}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Cliquez sur l'icône ⟳ pour générer un mot de passe sécurisé.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Rôle</Label>
@@ -345,7 +390,20 @@ export default function UtilisateursTab() {
           </p>
           <div className="space-y-1.5">
             <Label>Nouveau mot de passe</Label>
-            <Input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Min. 6 caractères" />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Input type={showResetPassword ? "text" : "password"} value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Min. 6 caractères" className="pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowResetPassword(v => !v)}>
+                  {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <Button type="button" variant="outline" size="icon" title="Générer un mot de passe" onClick={() => { setNewPwd(generatePassword()); setShowResetPassword(true); }}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button type="button" variant="outline" size="icon" title="Copier" onClick={() => copyToClipboard(newPwd)} disabled={!newPwd}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetPwdOpen(false)}>Annuler</Button>
