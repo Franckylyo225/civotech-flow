@@ -127,6 +127,35 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "delete") {
+      const { user_id } = body;
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id requis" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (user_id === caller.id) {
+        return new Response(JSON.stringify({ error: "Vous ne pouvez pas supprimer votre propre compte" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // Prevent deleting the last SUPER_ADMIN
+      const { data: targetRole } = await adminClient.from("user_roles").select("role").eq("user_id", user_id).single();
+      if (targetRole?.role === "SUPER_ADMIN") {
+        const { count } = await adminClient.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "SUPER_ADMIN");
+        if ((count || 0) <= 1) {
+          return new Response(JSON.stringify({ error: "Impossible de supprimer le dernier Super Admin" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+      }
+
+      // Cleanup public tables (FKs to auth.users may not cascade)
+      await adminClient.from("user_roles").delete().eq("user_id", user_id);
+      await adminClient.from("profiles").delete().eq("user_id", user_id);
+
+      const { error } = await adminClient.auth.admin.deleteUser(user_id);
+      if (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Action inconnue" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
