@@ -300,6 +300,10 @@ export default function UtilisateursTab() {
                         <DropdownMenuItem className="gap-2 cursor-pointer text-success focus:text-success" onClick={() => handleEnable(u)}>
                           <CheckCircle2 className="h-4 w-4" /> Réactiver
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive" onClick={() => { setSelectedUser(u); setDeleteConfirmText(""); setDeleteOpen(true); }}>
+                          <Trash2 className="h-4 w-4" /> Supprimer
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
