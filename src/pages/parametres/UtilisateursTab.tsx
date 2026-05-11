@@ -69,6 +69,8 @@ export default function UtilisateursTab() {
   const [createOpen, setCreateOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [resetPwdOpen, setResetPwdOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
