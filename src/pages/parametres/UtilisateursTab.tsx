@@ -390,7 +390,20 @@ export default function UtilisateursTab() {
           </p>
           <div className="space-y-1.5">
             <Label>Nouveau mot de passe</Label>
-            <Input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Min. 6 caractères" />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Input type={showResetPassword ? "text" : "password"} value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="Min. 6 caractères" className="pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowResetPassword(v => !v)}>
+                  {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <Button type="button" variant="outline" size="icon" title="Générer un mot de passe" onClick={() => { setNewPwd(generatePassword()); setShowResetPassword(true); }}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button type="button" variant="outline" size="icon" title="Copier" onClick={() => copyToClipboard(newPwd)} disabled={!newPwd}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetPwdOpen(false)}>Annuler</Button>
