@@ -311,7 +311,27 @@ export default function UtilisateursTab() {
             </div>
             <div className="space-y-1.5">
               <Label>Mot de passe</Label>
-              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 caractères" />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="Min. 6 caractères"
+                    className="pr-10"
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowNewPassword(v => !v)}>
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button type="button" variant="outline" size="icon" title="Générer un mot de passe" onClick={() => { setNewPassword(generatePassword()); setShowNewPassword(true); }}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button type="button" variant="outline" size="icon" title="Copier" onClick={() => copyToClipboard(newPassword)} disabled={!newPassword}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Cliquez sur l'icône ⟳ pour générer un mot de passe sécurisé.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Rôle</Label>
