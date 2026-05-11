@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2, RefreshCw, Copy, Eye, EyeOff } from "lucide-react";
+import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2, RefreshCw, Copy, Eye, EyeOff, Trash2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -68,6 +69,8 @@ export default function UtilisateursTab() {
   const [createOpen, setCreateOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [resetPwdOpen, setResetPwdOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -180,6 +183,28 @@ export default function UtilisateursTab() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+    const expected = `${selectedUser.prenom} ${selectedUser.nom}`.trim();
+    if (deleteConfirmText.trim() !== expected) {
+      toast.error("Le nom saisi ne correspond pas");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await callAdminFn({ action: "delete", user_id: selectedUser.user_id });
+      toast.success("Utilisateur supprimé");
+      setDeleteOpen(false);
+      setDeleteConfirmText("");
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de la suppression");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-40 text-muted-foreground">Chargement...</div>;
 
   return (
@@ -274,6 +299,10 @@ export default function UtilisateursTab() {
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2 cursor-pointer text-success focus:text-success" onClick={() => handleEnable(u)}>
                           <CheckCircle2 className="h-4 w-4" /> Réactiver
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive" onClick={() => { setSelectedUser(u); setDeleteConfirmText(""); setDeleteOpen(true); }}>
+                          <Trash2 className="h-4 w-4" /> Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -413,6 +442,47 @@ export default function UtilisateursTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog: Delete User */}
+      <AlertDialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeleteConfirmText(""); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Supprimer l'utilisateur
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Cette action est <span className="font-semibold text-destructive">irréversible</span>. Le compte de{" "}
+                  <span className="font-medium text-foreground">{selectedUser?.prenom} {selectedUser?.nom}</span> sera définitivement supprimé,
+                  ainsi que son profil et son rôle.
+                </p>
+                <div className="space-y-1.5">
+                  <Label className="text-foreground">
+                    Pour confirmer, saisissez : <span className="font-mono font-semibold">{selectedUser?.prenom} {selectedUser?.nom}</span>
+                  </Label>
+                  <Input
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder={`${selectedUser?.prenom ?? ""} ${selectedUser?.nom ?? ""}`.trim()}
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={actionLoading || deleteConfirmText.trim() !== `${selectedUser?.prenom ?? ""} ${selectedUser?.nom ?? ""}`.trim()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {actionLoading ? "Suppression..." : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
