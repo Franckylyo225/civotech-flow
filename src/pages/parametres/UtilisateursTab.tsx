@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2 } from "lucide-react";
+import { Users, Search, UserPlus, Shield, MoreVertical, KeyRound, Ban, CheckCircle2, RefreshCw, Copy, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
