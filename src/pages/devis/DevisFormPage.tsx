@@ -67,6 +67,7 @@ export default function DevisFormPage() {
   const [opForm, setOpForm] = useState({
     lieu_embarquement: "", lieu_livraison: "", poids_kg: "", nombre_colis: "",
     nature_marchandise: "", precautions: "", commentaires: "",
+    contact_nom: "", contact_telephone: "",
   });
   const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -194,6 +195,8 @@ export default function DevisFormPage() {
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      contact_nom: opForm.contact_nom.trim(),
+      contact_telephone: opForm.contact_telephone.trim(),
       bon_commande_file: bonCommandeFile,
     });
     if (ok) { setShowOpDialog(false); navigate("/operations"); }
