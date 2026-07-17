@@ -610,10 +610,12 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       <Dialog open={showAffectDialog} onOpenChange={setShowAffectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Affecter un camion et chauffeur</DialogTitle>
+            <DialogTitle>Affecter les équipements et le chauffeur</DialogTitle>
           </DialogHeader>
           {(() => {
-            const camionsDispo = camions.filter((c) => c.statut === "DISPONIBLE");
+            const isTracteur = (c: Camion) => (c.typeVehicule || "").toLowerCase() === "tracteur";
+            const tracteursDispo = camions.filter((c) => c.statut === "DISPONIBLE" && isTracteur(c));
+            const equipementsDispo = camions.filter((c) => c.statut === "DISPONIBLE" && !isTracteur(c));
             const statutLabel: Record<string, string> = {
               DISPONIBLE: "Disponible",
               EN_MISSION: "En mission",
@@ -623,18 +625,37 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             return (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Camion</Label>
-                  {camionsDispo.length === 0 ? (
+                  <Label>Tracteur</Label>
+                  {tracteursDispo.length === 0 ? (
                     <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
-                      Aucun camion disponible actuellement. Tous les véhicules sont en mission ou en maintenance.
+                      Aucun tracteur disponible actuellement.
                     </div>
                   ) : (
                     <Select value={selectedCamion} onValueChange={setSelectedCamion}>
-                      <SelectTrigger><SelectValue placeholder="Choisir un camion..." /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Choisir un tracteur..." /></SelectTrigger>
                       <SelectContent>
-                        {camionsDispo.map((c) => (
+                        {tracteursDispo.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Équipement (semi-remorque, citerne, benne…)</Label>
+                  {equipementsDispo.length === 0 ? (
+                    <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
+                      Aucun équipement disponible actuellement.
+                    </div>
+                  ) : (
+                    <Select value={selectedRemorque} onValueChange={setSelectedRemorque}>
+                      <SelectTrigger><SelectValue placeholder="Choisir un équipement..." /></SelectTrigger>
+                      <SelectContent>
+                        {equipementsDispo.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.typeVehicule ? `[${c.typeVehicule}] ` : ""}{c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
                           </SelectItem>
                         ))}
                       </SelectContent>
