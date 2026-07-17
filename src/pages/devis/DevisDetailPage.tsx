@@ -344,6 +344,24 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label>Personne à contacter chez le client</Label>
+                <Input
+                  value={opForm.contact_nom}
+                  onChange={(e) => setOpForm((p) => ({ ...p, contact_nom: e.target.value }))}
+                  placeholder="Ex: M. Kamga Jean"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Téléphone du contact</Label>
+                <Input
+                  value={opForm.contact_telephone}
+                  onChange={(e) => setOpForm((p) => ({ ...p, contact_telephone: e.target.value }))}
+                  placeholder="Ex: +237 6 90 00 00 00"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label>Poids (kg)</Label>
                 <Input
                   type="number"
