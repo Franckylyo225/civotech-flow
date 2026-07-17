@@ -11,6 +11,7 @@ export interface Camion {
   capaciteTonnes: number;
   annee: number;
   statut: "DISPONIBLE" | "EN_MISSION" | "EN_MAINTENANCE";
+  typeVehicule?: string;
 }
 
 export interface Chauffeur {
