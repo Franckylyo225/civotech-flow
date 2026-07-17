@@ -363,21 +363,39 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           {/* Vehicle card */}
           <Card className="border border-border shadow-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-muted-foreground">Véhicule</CardTitle>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Véhicules affectés</CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              {op.camion ? (
-                <div className="space-y-2">
-                  <p className="text-base font-semibold text-foreground">{op.camion.marque} {op.camion.modele}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>Imm: <span className="font-medium text-foreground">{op.camion.immatriculation}</span></span>
-                    <span>Cap: <span className="font-medium text-foreground">{op.camion.capaciteTonnes}T</span></span>
+            <CardContent className="pt-0 space-y-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Tracteur</p>
+                {op.camion ? (
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">{op.camion.marque} {op.camion.modele}</p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>Imm: <span className="font-medium text-foreground">{op.camion.immatriculation}</span></span>
+                      <span>Cap: <span className="font-medium text-foreground">{op.camion.capaciteTonnes}T</span></span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Année : {op.camion.annee}</p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">Non affecté</p>
-              )}
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Non affecté</p>
+                )}
+              </div>
+              <div className="border-t border-border pt-3">
+                <p className="text-xs text-muted-foreground mb-1">Équipement</p>
+                {op.remorque ? (
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {op.remorque.typeVehicule ? `[${op.remorque.typeVehicule}] ` : ""}{op.remorque.marque} {op.remorque.modele}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>Imm: <span className="font-medium text-foreground">{op.remorque.immatriculation}</span></span>
+                      <span>Cap: <span className="font-medium text-foreground">{op.remorque.capaciteTonnes}T</span></span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Non affecté</p>
+                )}
+              </div>
             </CardContent>
           </Card>
 
