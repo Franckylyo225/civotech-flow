@@ -1440,6 +1440,7 @@ export type Database = {
           poids_kg: number | null
           precautions: string | null
           reference: string
+          remorque_id: string | null
           statut: Database["public"]["Enums"]["statut_operation"]
           updated_at: string
         }
@@ -1469,6 +1470,7 @@ export type Database = {
           poids_kg?: number | null
           precautions?: string | null
           reference: string
+          remorque_id?: string | null
           statut?: Database["public"]["Enums"]["statut_operation"]
           updated_at?: string
         }
@@ -1498,6 +1500,7 @@ export type Database = {
           poids_kg?: number | null
           precautions?: string | null
           reference?: string
+          remorque_id?: string | null
           statut?: Database["public"]["Enums"]["statut_operation"]
           updated_at?: string
         }
@@ -1528,6 +1531,13 @@ export type Database = {
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_remorque_id_fkey"
+            columns: ["remorque_id"]
+            isOneToOne: false
+            referencedRelation: "camions"
             referencedColumns: ["id"]
           },
         ]

@@ -29,7 +29,7 @@ interface OperationDetailProps {
   camions: Camion[];
   chauffeurs: Chauffeur[];
   onUpdateStatut: (opId: string, statut: OperationStatut) => void;
-  onAffecter: (opId: string, camionId: string, chauffeurId: string) => void;
+  onAffecter: (opId: string, camionId: string, chauffeurId: string, remorqueId?: string) => void;
   onAddDepense: (opId: string, depense: Omit<LigneDepense, "id" | "operationId">) => void;
   onPlanifier?: (opId: string, lieuEmbarquement: string, dateDepart: string, dateLivraisonEstimee?: string) => void;
   onAddIncident?: (opId: string, incident: { type: TypeIncident; description: string; gravite: GraviteIncident }) => void;
@@ -42,6 +42,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
   const [selectedCamion, setSelectedCamion] = useState("");
+  const [selectedRemorque, setSelectedRemorque] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
   const [uploading, setUploading] = useState(false);
   const [showPlanifDialog, setShowPlanifDialog] = useState(false);
@@ -86,10 +87,17 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const marge = op.montantDevis - totalDepenses;
 
   const handleAffecter = () => {
-    if (!selectedCamion || !selectedChauffeur) { toast.error("Sélectionnez un camion et un chauffeur"); return; }
-    onAffecter(op.id, selectedCamion, selectedChauffeur);
+    if (!selectedCamion || !selectedRemorque || !selectedChauffeur) {
+      toast.error("Sélectionnez un tracteur, un équipement et un chauffeur");
+      return;
+    }
+    if (selectedCamion === selectedRemorque) {
+      toast.error("Le tracteur et l'équipement doivent être différents");
+      return;
+    }
+    onAffecter(op.id, selectedCamion, selectedChauffeur, selectedRemorque);
     setShowAffectDialog(false);
-    toast.success("Camion et chauffeur affectés");
+    toast.success("Affectation enregistrée");
   };
 
   const handleAddDepense = () => {
@@ -355,21 +363,39 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
           {/* Vehicle card */}
           <Card className="border border-border shadow-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-muted-foreground">Véhicule</CardTitle>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Véhicules affectés</CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              {op.camion ? (
-                <div className="space-y-2">
-                  <p className="text-base font-semibold text-foreground">{op.camion.marque} {op.camion.modele}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>Imm: <span className="font-medium text-foreground">{op.camion.immatriculation}</span></span>
-                    <span>Cap: <span className="font-medium text-foreground">{op.camion.capaciteTonnes}T</span></span>
+            <CardContent className="pt-0 space-y-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Tracteur</p>
+                {op.camion ? (
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">{op.camion.marque} {op.camion.modele}</p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>Imm: <span className="font-medium text-foreground">{op.camion.immatriculation}</span></span>
+                      <span>Cap: <span className="font-medium text-foreground">{op.camion.capaciteTonnes}T</span></span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Année : {op.camion.annee}</p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">Non affecté</p>
-              )}
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Non affecté</p>
+                )}
+              </div>
+              <div className="border-t border-border pt-3">
+                <p className="text-xs text-muted-foreground mb-1">Équipement</p>
+                {op.remorque ? (
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {op.remorque.typeVehicule ? `[${op.remorque.typeVehicule}] ` : ""}{op.remorque.marque} {op.remorque.modele}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>Imm: <span className="font-medium text-foreground">{op.remorque.immatriculation}</span></span>
+                      <span>Cap: <span className="font-medium text-foreground">{op.remorque.capaciteTonnes}T</span></span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Non affecté</p>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -602,10 +628,12 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       <Dialog open={showAffectDialog} onOpenChange={setShowAffectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Affecter un camion et chauffeur</DialogTitle>
+            <DialogTitle>Affecter les équipements et le chauffeur</DialogTitle>
           </DialogHeader>
           {(() => {
-            const camionsDispo = camions.filter((c) => c.statut === "DISPONIBLE");
+            const isTracteur = (c: Camion) => (c.typeVehicule || "").toLowerCase() === "tracteur";
+            const tracteursDispo = camions.filter((c) => c.statut === "DISPONIBLE" && isTracteur(c));
+            const equipementsDispo = camions.filter((c) => c.statut === "DISPONIBLE" && !isTracteur(c));
             const statutLabel: Record<string, string> = {
               DISPONIBLE: "Disponible",
               EN_MISSION: "En mission",
@@ -615,18 +643,37 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             return (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Camion</Label>
-                  {camionsDispo.length === 0 ? (
+                  <Label>Tracteur</Label>
+                  {tracteursDispo.length === 0 ? (
                     <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
-                      Aucun camion disponible actuellement. Tous les véhicules sont en mission ou en maintenance.
+                      Aucun tracteur disponible actuellement.
                     </div>
                   ) : (
                     <Select value={selectedCamion} onValueChange={setSelectedCamion}>
-                      <SelectTrigger><SelectValue placeholder="Choisir un camion..." /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Choisir un tracteur..." /></SelectTrigger>
                       <SelectContent>
-                        {camionsDispo.map((c) => (
+                        {tracteursDispo.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Équipement (semi-remorque, citerne, benne…)</Label>
+                  {equipementsDispo.length === 0 ? (
+                    <div className="rounded-md border border-warning/30 bg-warning/10 p-3 text-sm text-warning-foreground">
+                      Aucun équipement disponible actuellement.
+                    </div>
+                  ) : (
+                    <Select value={selectedRemorque} onValueChange={setSelectedRemorque}>
+                      <SelectTrigger><SelectValue placeholder="Choisir un équipement..." /></SelectTrigger>
+                      <SelectContent>
+                        {equipementsDispo.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.typeVehicule ? `[${c.typeVehicule}] ` : ""}{c.marque} {c.modele} — {c.immatriculation} ({c.capaciteTonnes}T)
                           </SelectItem>
                         ))}
                       </SelectContent>
