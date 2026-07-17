@@ -28,6 +28,8 @@ interface DevisDetailPageProps {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    contact_nom?: string;
+    contact_telephone?: string;
     bon_commande_file?: File | null;
   }) => Promise<boolean>;
   onBack: () => void;
@@ -51,6 +53,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
     nature_marchandise: "",
     precautions: "",
     commentaires: "",
+    contact_nom: "",
+    contact_telephone: "",
   });
 
   const role = user?.role;
@@ -91,6 +95,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      contact_nom: opForm.contact_nom.trim(),
+      contact_telephone: opForm.contact_telephone.trim(),
       bon_commande_file: bonCommandeFile,
     });
     setCreatingOp(false);
