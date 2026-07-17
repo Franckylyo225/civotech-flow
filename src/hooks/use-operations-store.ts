@@ -12,6 +12,7 @@ function mapCamion(row: any): Camion {
     capaciteTonnes: Number(row.capacite_tonnes),
     annee: row.annee,
     statut: row.statut,
+    typeVehicule: row.type_vehicule || undefined,
   };
 }
 
