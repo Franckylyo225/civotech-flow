@@ -87,10 +87,17 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const marge = op.montantDevis - totalDepenses;
 
   const handleAffecter = () => {
-    if (!selectedCamion || !selectedChauffeur) { toast.error("Sélectionnez un camion et un chauffeur"); return; }
-    onAffecter(op.id, selectedCamion, selectedChauffeur);
+    if (!selectedCamion || !selectedRemorque || !selectedChauffeur) {
+      toast.error("Sélectionnez un tracteur, un équipement et un chauffeur");
+      return;
+    }
+    if (selectedCamion === selectedRemorque) {
+      toast.error("Le tracteur et l'équipement doivent être différents");
+      return;
+    }
+    onAffecter(op.id, selectedCamion, selectedChauffeur, selectedRemorque);
     setShowAffectDialog(false);
-    toast.success("Camion et chauffeur affectés");
+    toast.success("Affectation enregistrée");
   };
 
   const handleAddDepense = () => {
