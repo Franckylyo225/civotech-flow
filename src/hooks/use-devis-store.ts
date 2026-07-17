@@ -192,6 +192,8 @@ export function useDevisStore() {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    contact_nom?: string;
+    contact_telephone?: string;
     bon_commande_file?: File | null;
   }) => {
     const { data: session } = await supabase.auth.getSession();
@@ -230,6 +232,8 @@ export function useDevisStore() {
       nature_marchandise: extras?.nature_marchandise || "",
       precautions: extras?.precautions || "",
       commentaires: extras?.commentaires || "",
+      contact_nom: extras?.contact_nom || null,
+      contact_telephone: extras?.contact_telephone || null,
       bon_commande_url: bonCommandeUrl,
       statut: "DEMANDE" as any,
       created_by: userId || null,

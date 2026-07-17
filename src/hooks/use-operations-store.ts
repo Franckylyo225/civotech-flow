@@ -34,6 +34,8 @@ function mapOperation(row: any, camions: Camion[], chauffeurs: Chauffeur[], time
     reference: row.reference,
     devisReference: row.devis_reference || undefined,
     clientNom: row.client_nom,
+    contactNom: row.contact_nom || undefined,
+    contactTelephone: row.contact_telephone || undefined,
     camionId: row.camion_id || undefined,
     camion: row.camion_id ? camions.find(c => c.id === row.camion_id) : undefined,
     remorqueId: row.remorque_id || undefined,

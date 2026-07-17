@@ -186,6 +186,11 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">Client : {op.clientNom}</p>
+          {(op.contactNom || op.contactTelephone) && (
+            <p className="text-sm text-muted-foreground">
+              Contact : {op.contactNom || "—"}{op.contactTelephone ? ` · ${op.contactTelephone}` : ""}
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           {canManage && op.statut === "DEMANDE" && (

@@ -28,6 +28,8 @@ interface DevisDetailPageProps {
     nature_marchandise?: string;
     precautions?: string;
     commentaires?: string;
+    contact_nom?: string;
+    contact_telephone?: string;
     bon_commande_file?: File | null;
   }) => Promise<boolean>;
   onBack: () => void;
@@ -51,6 +53,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
     nature_marchandise: "",
     precautions: "",
     commentaires: "",
+    contact_nom: "",
+    contact_telephone: "",
   });
 
   const role = user?.role;
@@ -91,6 +95,8 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      contact_nom: opForm.contact_nom.trim(),
+      contact_telephone: opForm.contact_telephone.trim(),
       bon_commande_file: bonCommandeFile,
     });
     setCreatingOp(false);
@@ -333,6 +339,24 @@ export default function DevisDetailPage({ devis, onUpdateStatut, onUpdateDevis, 
                   value={opForm.lieu_livraison}
                   onChange={(e) => setOpForm((p) => ({ ...p, lieu_livraison: e.target.value }))}
                   placeholder="Ex: Yaoundé Centre"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Personne à contacter chez le client</Label>
+                <Input
+                  value={opForm.contact_nom}
+                  onChange={(e) => setOpForm((p) => ({ ...p, contact_nom: e.target.value }))}
+                  placeholder="Ex: M. Kamga Jean"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Téléphone du contact</Label>
+                <Input
+                  value={opForm.contact_telephone}
+                  onChange={(e) => setOpForm((p) => ({ ...p, contact_telephone: e.target.value }))}
+                  placeholder="Ex: +237 6 90 00 00 00"
                 />
               </div>
             </div>

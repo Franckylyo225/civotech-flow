@@ -67,6 +67,7 @@ export default function DevisFormPage() {
   const [opForm, setOpForm] = useState({
     lieu_embarquement: "", lieu_livraison: "", poids_kg: "", nombre_colis: "",
     nature_marchandise: "", precautions: "", commentaires: "",
+    contact_nom: "", contact_telephone: "",
   });
   const [bonCommandeFile, setBonCommandeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -194,6 +195,8 @@ export default function DevisFormPage() {
       nature_marchandise: opForm.nature_marchandise.trim(),
       precautions: opForm.precautions.trim(),
       commentaires: opForm.commentaires.trim(),
+      contact_nom: opForm.contact_nom.trim(),
+      contact_telephone: opForm.contact_telephone.trim(),
       bon_commande_file: bonCommandeFile,
     });
     if (ok) { setShowOpDialog(false); navigate("/operations"); }
@@ -719,6 +722,14 @@ export default function DevisFormPage() {
               </Field>
               <Field label="Nombre de colis">
                 <Input type="number" value={opForm.nombre_colis} onChange={(e) => setOpForm((p) => ({ ...p, nombre_colis: e.target.value }))} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Personne à contacter chez le client">
+                <Input value={opForm.contact_nom} onChange={(e) => setOpForm((p) => ({ ...p, contact_nom: e.target.value }))} placeholder="Ex: M. Kamga Jean" />
+              </Field>
+              <Field label="Téléphone du contact">
+                <Input value={opForm.contact_telephone} onChange={(e) => setOpForm((p) => ({ ...p, contact_telephone: e.target.value }))} placeholder="Ex: +237 6 90 00 00 00" />
               </Field>
             </div>
             <Field label="Nature de la marchandise">
