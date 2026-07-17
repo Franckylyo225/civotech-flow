@@ -42,6 +42,7 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
   const [showAffectDialog, setShowAffectDialog] = useState(false);
   const [showDepenseDialog, setShowDepenseDialog] = useState(false);
   const [selectedCamion, setSelectedCamion] = useState("");
+  const [selectedRemorque, setSelectedRemorque] = useState("");
   const [selectedChauffeur, setSelectedChauffeur] = useState("");
   const [uploading, setUploading] = useState(false);
   const [showPlanifDialog, setShowPlanifDialog] = useState(false);
