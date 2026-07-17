@@ -182,26 +182,29 @@ export function useOperationsStore() {
     await fetchAll();
   }, [fetchAll]);
 
-  const affecterOperation = useCallback(async (opId: string, camionId: string, chauffeurId: string) => {
+  const affecterOperation = useCallback(async (opId: string, camionId: string, chauffeurId: string, remorqueId?: string) => {
     await supabase.from("operations").update({
       camion_id: camionId,
       chauffeur_id: chauffeurId,
-    }).eq("id", opId);
-
-    // Update camion status
-    await supabase.from("camions").update({ statut: "EN_MISSION" as any }).eq("id", camionId);
-    await supabase.from("chauffeurs").update({ disponible: false }).eq("id", chauffeurId);
+      remorque_id: remorqueId || null,
+    } as any).eq("id", opId);
 
     // Timeline
     const cam = camions.find(c => c.id === camionId);
+    const rem = remorqueId ? camions.find(c => c.id === remorqueId) : undefined;
     const ch = chauffeurs.find(c => c.id === chauffeurId);
     const now = new Date();
+    const desc = [
+      cam ? `Tracteur : ${cam.marque} ${cam.modele} — ${cam.immatriculation}` : null,
+      rem ? `Équipement : ${rem.marque} ${rem.modele} — ${rem.immatriculation}` : null,
+      ch ? `Chauffeur : ${ch.prenom} ${ch.nom}` : null,
+    ].filter(Boolean).join(" • ");
     await supabase.from("timeline_events").insert({
       operation_id: opId,
       date: now.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
       heure: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-      titre: "Camion & chauffeur affectés",
-      description: `${cam?.marque} ${cam?.modele} — ${cam?.immatriculation} / ${ch?.prenom} ${ch?.nom}`,
+      titre: "Affectation effectuée",
+      description: desc,
       statut: "done",
     });
 
