@@ -1422,6 +1422,8 @@ export type Database = {
           client_id: string | null
           client_nom: string
           commentaires: string | null
+          contact_nom: string | null
+          contact_telephone: string | null
           created_at: string
           created_by: string | null
           date_depart: string | null
@@ -1452,6 +1454,8 @@ export type Database = {
           client_id?: string | null
           client_nom?: string
           commentaires?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
           created_at?: string
           created_by?: string | null
           date_depart?: string | null
@@ -1482,6 +1486,8 @@ export type Database = {
           client_id?: string | null
           client_nom?: string
           commentaires?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
           created_at?: string
           created_by?: string | null
           date_depart?: string | null

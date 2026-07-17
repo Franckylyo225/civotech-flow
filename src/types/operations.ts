@@ -60,6 +60,8 @@ export interface Operation {
   reference: string;
   devisReference?: string;
   clientNom: string;
+  contactNom?: string;
+  contactTelephone?: string;
   camionId?: string;
   camion?: Camion;
   remorqueId?: string;
