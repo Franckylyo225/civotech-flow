@@ -724,6 +724,14 @@ export default function DevisFormPage() {
                 <Input type="number" value={opForm.nombre_colis} onChange={(e) => setOpForm((p) => ({ ...p, nombre_colis: e.target.value }))} />
               </Field>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Personne à contacter chez le client">
+                <Input value={opForm.contact_nom} onChange={(e) => setOpForm((p) => ({ ...p, contact_nom: e.target.value }))} placeholder="Ex: M. Kamga Jean" />
+              </Field>
+              <Field label="Téléphone du contact">
+                <Input value={opForm.contact_telephone} onChange={(e) => setOpForm((p) => ({ ...p, contact_telephone: e.target.value }))} placeholder="Ex: +237 6 90 00 00 00" />
+              </Field>
+            </div>
             <Field label="Nature de la marchandise">
               <Input value={opForm.nature_marchandise} onChange={(e) => setOpForm((p) => ({ ...p, nature_marchandise: e.target.value }))} />
             </Field>
