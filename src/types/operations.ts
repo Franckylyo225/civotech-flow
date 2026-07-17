@@ -62,6 +62,8 @@ export interface Operation {
   clientNom: string;
   camionId?: string;
   camion?: Camion;
+  remorqueId?: string;
+  remorque?: Camion;
   chauffeurId?: string;
   chauffeur?: Chauffeur;
   lieuEmbarquement: string;
