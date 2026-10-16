@@ -8,6 +8,13 @@
       "when": 1792172703365,
       "tag": "0000_20261016130000_tresorerie_corrections_et_agregats",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792173111357,
+      "tag": "0001_20261016120000_secure_operation_doc_buckets",
+      "breakpoints": true
     }
   ]
 }
