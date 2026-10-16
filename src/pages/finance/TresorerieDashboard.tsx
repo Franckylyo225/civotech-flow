@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Building2, Banknote, TrendingUp, TrendingDown, ArrowRightLeft } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 
 function fmt(v: number) { return v.toLocaleString("fr-FR"); }
@@ -17,7 +17,7 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; icon: typeof T
 
 export default function TresorerieDashboard() {
   const { comptes, loading: loadC, soldeBanque, soldeCaisse, soldeTotal } = useComptesStore();
-  const { transactions, loading: loadT, totalEntrees, totalSorties } = useTransactionsStore();
+  const { transactions, loading: loadT, totalEntrees, totalSorties, fluxMensuels } = useTransactionsStore();
   const loading = loadC || loadT;
 
   const comptesMap: Record<string, string> = {};
@@ -25,35 +25,17 @@ export default function TresorerieDashboard() {
 
   const recent = transactions.slice(0, 10);
 
+  // Les flux mensuels viennent d'un agrégat SQL : ils couvrent tout l'historique,
+  // et non plus seulement les transactions chargées pour l'affichage.
   const chartData = useMemo(() => {
-    const now = new Date();
-    const months: { start: Date; end: Date; label: string }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const m = subMonths(now, i);
-      months.push({
-        start: startOfMonth(m),
-        end: endOfMonth(m),
-        label: format(m, "MMM yyyy", { locale: fr }),
-      });
-    }
-
-    let cumulSolde = soldeTotal;
-    // Compute net movements per month (from newest to oldest) to work backwards
-    const netPerMonth = months.map(m => {
-      let net = 0;
-      transactions.forEach(t => {
-        try {
-          const d = parseISO(t.date_transaction);
-          if (isWithinInterval(d, { start: m.start, end: m.end })) {
-            if (t.type === "ENCAISSEMENT") net += t.montant;
-            else if (t.type === "DECAISSEMENT") net -= t.montant;
-          }
-        } catch {}
-      });
-      return { ...m, net };
+    const netPerMonth = fluxMensuels.map(f => {
+      const d = parseISO(f.mois);
+      const label = isValid(d) ? format(d, "MMM yyyy", { locale: fr }) : f.mois;
+      return { label, net: f.encaissements - f.decaissements };
     });
 
-    // Build chart: work from current month backwards
+    // On remonte depuis le solde actuel pour reconstituer le solde de fin de
+    // chaque mois.
     const result: { mois: string; solde: number }[] = [];
     let runSolde = soldeTotal;
     for (let i = netPerMonth.length - 1; i >= 0; i--) {
@@ -63,7 +45,7 @@ export default function TresorerieDashboard() {
       }
     }
     return result;
-  }, [transactions, soldeTotal]);
+  }, [fluxMensuels, soldeTotal]);
 
   const stats = [
     { label: "Solde total", value: fmt(soldeTotal), unit: "FCFA", icon: Wallet, color: "text-primary", bg: "bg-primary/10" },

@@ -11,6 +11,7 @@ import { useOperationsStore } from "@/hooks/use-operations-store";
 import { useDevisStore } from "@/hooks/use-devis-store";
 import { useClientsStore } from "@/hooks/use-clients-store";
 import { supabase } from "@/integrations/supabase/client";
+import { getOperationDocUrl, docFileName } from "@/lib/operation-docs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +64,12 @@ export default function FacturesTab({ canManage }: Props) {
   const getClientNom = (id: string | null) => id ? clients.find(c => c.id === id)?.nom || "—" : "—";
   const getOpRef = (id: string | null) => id ? operations.find(o => o.id === id)?.reference || "—" : "—";
   const getOpBL = (id: string | null) => id ? operations.find(o => o.id === id)?.bonLivraisonUrl : undefined;
+
+  const handleOpenBL = async (value: string) => {
+    const url = await getOperationDocUrl("bon-livraison", value);
+    if (url) window.open(url, "_blank");
+    else toast.error("Bon de livraison indisponible ou accès non autorisé");
+  };
 
   // Operations that don't have a facture yet and are TERMINEE
   const availableOps = operations.filter(op =>
@@ -218,9 +225,13 @@ export default function FacturesTab({ canManage }: Props) {
                       <span className="text-muted-foreground text-sm ml-2">— {op.clientNom}</span>
                     </div>
                     {op.bonLivraisonUrl ? (
-                      <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-success hover:underline">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenBL(op.bonLivraisonUrl!)}
+                        className="inline-flex items-center gap-1 text-xs text-success hover:underline"
+                      >
                         <Paperclip className="h-3 w-3" />BL joint
-                      </a>
+                      </button>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs text-destructive">
                         <Paperclip className="h-3 w-3" />BL manquant
@@ -325,11 +336,11 @@ export default function FacturesTab({ canManage }: Props) {
                     <TableCell className="font-mono text-xs">{getOpRef(f.operation_id)}</TableCell>
                     <TableCell>
                       {blUrl ? (
-                        <a href={blUrl} target="_blank" rel="noopener noreferrer" title="Voir le bon de livraison">
+                        <button type="button" onClick={() => handleOpenBL(blUrl)} title="Voir le bon de livraison">
                           <Badge variant="outline" className="border-0 text-xs bg-success/10 text-success gap-1 cursor-pointer hover:bg-success/20">
                             <Paperclip className="h-3 w-3" />BL
                           </Badge>
-                        </a>
+                        </button>
                       ) : (
                         <Badge variant="outline" className="border-0 text-xs bg-muted text-muted-foreground">—</Badge>
                       )}
@@ -554,12 +565,10 @@ export default function FacturesTab({ canManage }: Props) {
                         <Paperclip className="h-4 w-4 text-success" />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-foreground">Bon de livraison</p>
-                          <p className="text-xs text-muted-foreground truncate max-w-xs">{blUrl.split("/").pop()}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-xs">{docFileName(blUrl)}</p>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={blUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-3.5 w-3.5 mr-1" />Télécharger
-                          </a>
+                        <Button variant="outline" size="sm" onClick={() => handleOpenBL(blUrl)}>
+                          <Download className="h-3.5 w-3.5 mr-1" />Télécharger
                         </Button>
                       </div>
                     </>
