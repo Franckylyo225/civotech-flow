@@ -413,6 +413,7 @@ export type Database = {
           id: string
           nom: string
           solde: number
+          solde_initial: number
           type: Database["public"]["Enums"]["type_compte"]
           updated_at: string
         }
@@ -423,6 +424,7 @@ export type Database = {
           id?: string
           nom: string
           solde?: number
+          solde_initial?: number
           type: Database["public"]["Enums"]["type_compte"]
           updated_at?: string
         }
@@ -433,6 +435,7 @@ export type Database = {
           id?: string
           nom?: string
           solde?: number
+          solde_initial?: number
           type?: Database["public"]["Enums"]["type_compte"]
           updated_at?: string
         }
@@ -2186,6 +2189,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      appliquer_effet_transaction: {
+        Args: {
+          _compte_destination_id: string
+          _compte_source_id: string
+          _montant: number
+          _sens: number
+          _type: Database["public"]["Enums"]["type_transaction_tresorerie"]
+        }
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -2198,6 +2211,7 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      mouvements_compte: { Args: { _compte_id: string }; Returns: number }
       notify_role: {
         Args: {
           _lien?: string
@@ -2215,6 +2229,22 @@ export type Database = {
       recalculate_chauffeur_statut: {
         Args: { p_chauffeur_id: string }
         Returns: undefined
+      }
+      recalculer_solde_comptes: { Args: never; Returns: number }
+      tresorerie_flux_mensuels: {
+        Args: { _nb_mois?: number }
+        Returns: {
+          decaissements: number
+          encaissements: number
+          mois: string
+        }[]
+      }
+      tresorerie_totaux: {
+        Args: never
+        Returns: {
+          total_entrees: number
+          total_sorties: number
+        }[]
       }
     }
     Enums: {
