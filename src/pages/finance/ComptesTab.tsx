@@ -8,18 +8,26 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Building2, Banknote, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Pencil, Building2, Banknote, ToggleLeft, ToggleRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 function fmt(v: number) { return v.toLocaleString("fr-FR"); }
 
 interface Props { canManage: boolean; }
 
 export default function ComptesTab({ canManage }: Props) {
-  const { comptes, loading, create, update } = useComptesStore();
+  const { comptes, loading, create, update, recalculerSoldes } = useComptesStore();
   const [showCreate, setShowCreate] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
   const [form, setForm] = useState({ nom: "", type: "BANQUE" as TypeCompte, solde: "" });
+
+  const handleRecalculer = async () => {
+    setRecalculating(true);
+    await recalculerSoldes();
+    setRecalculating(false);
+  };
 
   const handleCreate = async () => {
     if (!form.nom) return;
@@ -47,9 +55,21 @@ export default function ComptesTab({ canManage }: Props) {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">Gérez vos comptes bancaires et caisses.</p>
         {canManage && (
-          <Button onClick={() => { setForm({ nom: "", type: "BANQUE", solde: "" }); setShowCreate(true); }} className="gap-1.5">
-            <Plus className="h-4 w-4" />Nouveau compte
-          </Button>
+          <div className="flex items-stretch sm:items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleRecalculer}
+              disabled={recalculating}
+              className="gap-1.5"
+              title="Recalcule les soldes à partir du solde d'ouverture et des mouvements enregistrés"
+            >
+              <RefreshCw className={cn("h-4 w-4", recalculating && "animate-spin")} />
+              Vérifier les soldes
+            </Button>
+            <Button onClick={() => { setForm({ nom: "", type: "BANQUE", solde: "" }); setShowCreate(true); }} className="gap-1.5">
+              <Plus className="h-4 w-4" />Nouveau compte
+            </Button>
+          </div>
         )}
       </div>
 
