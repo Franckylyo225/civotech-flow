@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { getOperationDocUrl, docFileName, type OperationDocBucket } from "@/lib/operation-docs";
 import type { Operation, Camion, Chauffeur, LigneDepense, CategorieDepense, OperationStatut, TypeIncident, GraviteIncident } from "@/types/operations";
 import { OPERATION_STATUT_CONFIG, CATEGORIE_DEPENSE_CONFIG, TYPE_INCIDENT_CONFIG, GRAVITE_CONFIG, STATUT_DEPENSE_CONFIG, formatMontantOp, formatDateOp, formatDateShort } from "@/types/operations";
 import { Badge } from "@/components/ui/badge";
@@ -125,8 +126,8 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
       const filePath = `${op.id}/bl_${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage.from("bon-livraison").upload(filePath, file);
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from("bon-livraison").getPublicUrl(filePath);
-      await supabase.from("operations").update({ bon_livraison_url: urlData.publicUrl }).eq("id", op.id);
+      // Bucket privé : on stocke le chemin, l'URL est signée à la lecture.
+      await supabase.from("operations").update({ bon_livraison_url: filePath }).eq("id", op.id);
       toast.success("Bon de livraison uploadé avec succès");
       // Trigger refetch via parent
       onUpdateStatut(op.id, op.statut);
@@ -135,6 +136,12 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleOpenDoc = async (bucket: OperationDocBucket, value: string) => {
+    const url = await getOperationDocUrl(bucket, value);
+    if (url) window.open(url, "_blank");
+    else toast.error("Document indisponible ou accès non autorisé");
   };
 
   const handleAddIncident = () => {
@@ -518,10 +525,14 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
               <Receipt className="h-5 w-5 text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Bon de commande</p>
-                <p className="text-xs text-muted-foreground truncate max-w-md">{op.bonCommandeUrl.split("/").pop()}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-md">{docFileName(op.bonCommandeUrl)}</p>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <a href={op.bonCommandeUrl} target="_blank" rel="noopener noreferrer">Télécharger</a>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenDoc("bon-commande", op.bonCommandeUrl!)}
+              >
+                Télécharger
               </Button>
             </div>
           </CardContent>
@@ -540,10 +551,14 @@ export default function OperationDetail({ operation: op, camions, chauffeurs, on
                 <CheckCircle2 className="h-5 w-5 text-success" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">BL uploadé</p>
-                  <p className="text-xs text-muted-foreground truncate max-w-md">{op.bonLivraisonUrl.split("/").pop()}</p>
+                  <p className="text-xs text-muted-foreground truncate max-w-md">{docFileName(op.bonLivraisonUrl)}</p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={op.bonLivraisonUrl} target="_blank" rel="noopener noreferrer">Télécharger</a>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenDoc("bon-livraison", op.bonLivraisonUrl!)}
+                >
+                  Télécharger
                 </Button>
               </div>
             ) : (

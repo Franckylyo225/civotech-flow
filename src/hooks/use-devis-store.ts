@@ -199,7 +199,9 @@ export function useDevisStore() {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
 
-    // Upload bon de commande if provided
+    // Upload bon de commande if provided.
+    // Bucket privé : on stocke le chemin, l'URL est signée à la lecture
+    // (voir src/lib/operation-docs.ts).
     let bonCommandeUrl: string | null = null;
     if (extras?.bon_commande_file) {
       const file = extras.bon_commande_file;
@@ -212,10 +214,7 @@ export function useDevisStore() {
         toast.error("Erreur upload bon de commande: " + uploadError.message);
         return false;
       }
-      const { data: urlData } = supabase.storage
-        .from("bon-commande")
-        .getPublicUrl(filePath);
-      bonCommandeUrl = urlData.publicUrl;
+      bonCommandeUrl = filePath;
     }
 
     const { error } = await supabase.from("operations").insert({
