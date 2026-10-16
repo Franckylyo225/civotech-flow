@@ -2199,6 +2199,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      can_read_operation_docs: { Args: { _user_id: string }; Returns: boolean }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
