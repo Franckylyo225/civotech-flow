@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792172703365,
+      "tag": "0000_20261016130000_tresorerie_corrections_et_agregats",
+      "breakpoints": true
+    }
+  ]
+}
