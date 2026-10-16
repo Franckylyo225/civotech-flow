@@ -22,6 +22,13 @@
       "when": 1792179458520,
       "tag": "0002_20261016150000_ferme_acces_helpers_tresorerie",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792179757959,
+      "tag": "0003_20261016160000_ferme_acces_helpers_preexistants",
+      "breakpoints": true
     }
   ]
 }
